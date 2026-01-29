@@ -34,36 +34,51 @@ interface ContractorContact extends User {
     contactPerson?: string; // Optional real contact person
 }
 
-// Initial demo messages
-const initialMessages: Message[] = [
-    {
-        id: 'msg-1',
-        senderId: 'contractor-1',
-        senderName: 'Handwerker Demo',
-        senderRole: 'contractor',
-        recipientId: 'user-client',
-        content: 'Guten Tag! Die Arbeiten beginnen morgen.',
-        createdAt: new Date('2026-01-28T10:30:00'),
-        read: true,
-    },
-];
-
 function ContactsPageContent() {
     const { data: session, status } = useSession();
     const { showToast } = useToast();
-    const [messages, setMessages] = useState<Message[]>(initialMessages);
+    const [messages, setMessages] = useState<Message[]>([]); // Empty initially
     const [projectContractors, setProjectContractors] = useState<ContractorContact[]>([]);
     const [selectedContractor, setSelectedContractor] = useState<ContractorContact | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
+    const [project, setProject] = useState<any | null>(null); // New state for project
 
     const role = session?.user?.role as Role | undefined;
 
     useEffect(() => {
         if (status === 'authenticated' && session.user) {
             fetchContractors();
+            fetchMessages();
+
+            // Polling for new messages (simple real-time alternative)
+            const interval = setInterval(fetchMessages, 5000);
+            return () => clearInterval(interval);
         }
     }, [session, status]);
+
+    const fetchMessages = async () => {
+        try {
+            const res = await fetch('/api/messages');
+            if (res.ok) {
+                const data = await res.json();
+                // Map DB snake_case to app camelCase
+                const mappedMessages: Message[] = data.map((m: any) => ({
+                    id: m.id,
+                    senderId: m.sender_id,
+                    senderName: m.sender_id === session?.user.id ? 'Ich' : 'Partner', // Ideally fetch name
+                    senderRole: 'contractor', // simplified
+                    recipientId: m.recipient_id,
+                    content: m.content,
+                    createdAt: new Date(m.created_at),
+                    read: m.read
+                }));
+                setMessages(mappedMessages);
+            }
+        } catch (error) {
+            console.error('Error fetching messages');
+        }
+    };
 
     const fetchContractors = async () => {
         try {
@@ -72,22 +87,30 @@ function ContactsPageContent() {
             if (!res.ok) throw new Error('Failed to fetch users');
             const allUsers: User[] = await res.json();
 
+            // Fetch projects
+            const projectsRes = await fetch('/api/projects');
+            if (!projectsRes.ok) throw new Error('Failed to fetch projects');
+            const projectsData: any[] = await projectsRes.json();
+
             // Find client's project
             const accessibleProjects = role === 'client' && session?.user.projectIds
-                ? demoProjects.filter(p => session.user.projectIds?.includes(p.id))
+                ? projectsData.filter(p => session.user.projectIds?.includes(p.id))
                 : [];
 
-            const project = accessibleProjects[0];
+            const currentProject = accessibleProjects[0];
 
-            if (!project) {
+            if (!currentProject) {
                 setLoading(false);
+                setProject(null); // Ensure project state is null
                 return;
             }
+
+            setProject(currentProject); // Set the project state
 
             // Map trades to contractors
             const contractors: ContractorContact[] = [];
 
-            project.trades.forEach(trade => {
+            currentProject.trades.forEach((trade: any) => {
                 if (trade.contractorId) {
                     const user = allUsers.find(u => u.id === trade.contractorId);
                     if (user) {
@@ -118,11 +141,6 @@ function ContactsPageContent() {
 
     if (status === 'loading' || !session) return null;
 
-    const accessibleProjects = role === 'client' && session.user.projectIds
-        ? demoProjects.filter(p => session.user.projectIds?.includes(p.id))
-        : [];
-    const project = accessibleProjects[0];
-
     if (!project) {
         return (
             <AppShell currentPage="dashboard">
@@ -150,23 +168,44 @@ function ContactsPageContent() {
         ).length;
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!newMessage.trim() || !selectedContractor) return;
 
-        const message: Message = {
-            id: `msg-${Date.now()}`,
-            senderId: session.user.id,
-            senderName: session.user.name || 'Kunde',
-            senderRole: role!,
-            recipientId: selectedContractor.id,
-            content: newMessage.trim(),
-            createdAt: new Date(),
-            read: false,
-        };
+        try {
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    recipientId: selectedContractor.id,
+                    content: newMessage.trim()
+                })
+            });
 
-        setMessages([...messages, message]);
-        setNewMessage('');
-        showToast('Nachricht gesendet', 'success');
+            if (res.ok) {
+                const savedMsg = await res.json();
+                const message: Message = {
+                    id: savedMsg.id,
+                    senderId: session!.user.id,
+                    senderName: session!.user.name || 'Ich',
+                    senderRole: role!,
+                    recipientId: selectedContractor.id,
+                    content: newMessage.trim(),
+                    createdAt: new Date(),
+                    read: false,
+                };
+
+                setMessages([...messages, message]);
+                setNewMessage('');
+                showToast('Nachricht gesendet', 'success');
+            } else {
+                throw new Error('Failed to send message');
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            showToast('Fehler beim Senden', 'error');
+        }
     };
 
     const markAsRead = (contractorId: string) => {
