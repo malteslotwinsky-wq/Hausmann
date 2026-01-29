@@ -35,15 +35,34 @@ function HomeContent() {
     try {
       const res = await fetch('/api/projects');
       if (res.ok) {
-        const data: Project[] = await res.json();
+        const data: any[] = await res.json();
+
+        // Parse dates
+        const parsedProjects: Project[] = data.map(p => ({
+          ...p,
+          startDate: new Date(p.startDate),
+          targetEndDate: new Date(p.targetEndDate),
+          createdAt: new Date(p.createdAt),
+          updatedAt: new Date(p.updatedAt),
+          trades: p.trades.map((t: any) => ({
+            ...t,
+            tasks: t.tasks.map((task: any) => ({
+              ...task,
+              createdAt: new Date(task.createdAt),
+              updatedAt: new Date(task.updatedAt),
+              // Photos and comments also need parsing if they exist
+            }))
+          }))
+        }));
+
         // Filter projects based on user access
-        let accessibleProjects = data;
+        let accessibleProjects = parsedProjects;
         if (role === 'client' && user?.projectIds) {
-          accessibleProjects = data.filter(p => user.projectIds?.includes(p.id));
+          accessibleProjects = parsedProjects.filter(p => user.projectIds?.includes(p.id));
         } else if (role === 'contractor') {
           // Contractors see projects with their assigned trades
           // For simplicity, show all projects for now, filter tasks later
-          accessibleProjects = data;
+          accessibleProjects = parsedProjects;
         }
         setProjects(accessibleProjects);
 

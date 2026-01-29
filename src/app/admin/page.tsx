@@ -63,7 +63,24 @@ function AdminPageContent() {
             ]);
 
             if (usersRes.ok) setUsers(await usersRes.json());
-            if (projectsRes.ok) setProjects(await projectsRes.json());
+            if (projectsRes.ok) {
+                const projectsData = await projectsRes.json();
+                setProjects(projectsData.map((p: any) => ({
+                    ...p,
+                    startDate: new Date(p.startDate),
+                    targetEndDate: new Date(p.targetEndDate),
+                    createdAt: new Date(p.createdAt),
+                    updatedAt: new Date(p.updatedAt),
+                    trades: p.trades.map((t: any) => ({
+                        ...t,
+                        tasks: t.tasks.map((task: any) => ({
+                            ...task,
+                            createdAt: new Date(task.createdAt),
+                            updatedAt: new Date(task.updatedAt)
+                        }))
+                    }))
+                })));
+            }
         } catch (error) {
             showToast('Fehler beim Laden der Daten', 'error');
         } finally {
