@@ -41,14 +41,39 @@ function AdminPageContent() {
     const { data: session, status } = useSession();
     const { showToast } = useToast();
 
+    // Data States
     const [activeTab, setActiveTab] = useState<'users' | 'projects'>('users');
-    const [users, setUsers] = useState<UserData[]>([]);
-    const [projects, setProjects] = useState<Project[]>(demoProjects);
+    const [users, setUsers] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Initial Data Fetch
+    useEffect(() => {
+        if (session?.user?.role === 'architect') {
+            loadData();
+        }
+    }, [session]);
+
+    const loadData = async () => {
+        try {
+            setLoading(true);
+            const [usersRes, projectsRes] = await Promise.all([
+                fetch('/api/users'),
+                fetch('/api/projects')
+            ]);
+
+            if (usersRes.ok) setUsers(await usersRes.json());
+            if (projectsRes.ok) setProjects(await projectsRes.json());
+        } catch (error) {
+            showToast('Fehler beim Laden der Daten', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
     const [showUserModal, setShowUserModal] = useState(false);
     const [showProjectModal, setShowProjectModal] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [showAddTradeModal, setShowAddTradeModal] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     // New user form state
     const [newUser, setNewUser] = useState({

@@ -16,7 +16,8 @@ function HomeContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [projects, setProjects] = useState<Project[]>(demoProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showProjectList, setShowProjectList] = useState(true);
 
@@ -24,29 +25,42 @@ function HomeContent() {
   const user = session?.user;
   const role = user?.role as Role | undefined;
 
-  // Filter projects based on user access
   useEffect(() => {
-    if (!user) return;
-
-    if (role === 'client' && user.projectIds) {
-      // Clients only see assigned projects
-      const accessibleProjects = demoProjects.filter(p =>
-        user.projectIds?.includes(p.id)
-      );
-      setProjects(accessibleProjects);
-      if (accessibleProjects.length === 1) {
-        setSelectedProject(accessibleProjects[0]);
-        setShowProjectList(false);
-      }
-    } else if (role === 'architect') {
-      // Architects see all
-      setProjects(demoProjects);
-    } else if (role === 'contractor') {
-      // Contractors see projects with their assigned trades
-      // For simplicity, show all but filter tasks later
-      setProjects(demoProjects);
+    if (status === 'authenticated') {
+      fetchProjects();
     }
-  }, [user, role]);
+  }, [status]);
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch('/api/projects');
+      if (res.ok) {
+        const data: Project[] = await res.json();
+        // Filter projects based on user access
+        let accessibleProjects = data;
+        if (role === 'client' && user?.projectIds) {
+          accessibleProjects = data.filter(p => user.projectIds?.includes(p.id));
+        } else if (role === 'contractor') {
+          // Contractors see projects with their assigned trades
+          // For simplicity, show all projects for now, filter tasks later
+          accessibleProjects = data;
+        }
+        setProjects(accessibleProjects);
+
+        // Auto-select if only one project (Logic preserved)
+        if (role === 'client' && accessibleProjects.length === 1) {
+          setSelectedProject(accessibleProjects[0]);
+          setShowProjectList(false);
+        }
+      } else {
+        console.error('Failed to fetch projects:', res.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to load projects', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Loading state
   if (status === 'loading') {
