@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -23,22 +23,20 @@ function TasksPageContent() {
         return null;
     }
 
-    // Clients shouldn't see tasks page - middleware handles redirect
     if (role === 'client') {
         return (
             <AppShell currentPage="tasks">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
                     <span className="text-6xl block mb-4">🔒</span>
-                    <p className="text-gray-500">Diese Seite ist für Kunden nicht verfügbar.</p>
+                    <p className="text-muted-foreground">Diese Seite ist für Kunden nicht verfügbar.</p>
                 </div>
             </AppShell>
         );
     }
 
-    // Gather tasks based on role
+    // Gather tasks
     const allTasks: (Task & { tradeName: string; tradeId: string })[] = [];
     project.trades.forEach(trade => {
-        // Contractors only see their assigned trades
         if (role === 'contractor' && session.user.assignedTradeIds) {
             if (!session.user.assignedTradeIds.includes(trade.id)) return;
         }
@@ -47,12 +45,8 @@ function TasksPageContent() {
         });
     });
 
-    // Filter tasks
-    const filteredTasks = filter === 'all'
-        ? allTasks
-        : allTasks.filter(t => t.status === filter);
+    const filteredTasks = filter === 'all' ? allTasks : allTasks.filter(t => t.status === filter);
 
-    // Stats
     const stats = {
         all: allTasks.length,
         open: allTasks.filter(t => t.status === 'open').length,
@@ -67,9 +61,7 @@ function TasksPageContent() {
             trades: prev.trades.map(trade => ({
                 ...trade,
                 tasks: trade.tasks.map(task =>
-                    task.id === taskId
-                        ? { ...task, status: newStatus, updatedAt: new Date() }
-                        : task
+                    task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
                 ),
             })),
         }));
@@ -77,87 +69,84 @@ function TasksPageContent() {
         setSelectedTask(null);
     };
 
+    const filterConfig = [
+        { id: 'all', label: 'Alle', count: stats.all, color: 'bg-primary text-white' },
+        { id: 'open', label: 'Offen', count: stats.open, color: 'bg-gray-100 text-gray-700' },
+        { id: 'in_progress', label: 'In Arbeit', count: stats.in_progress, color: 'bg-blue-100 text-blue-700' },
+        { id: 'done', label: 'Erledigt', count: stats.done, color: 'bg-green-100 text-green-700' },
+        { id: 'blocked', label: 'Blockiert', count: stats.blocked, color: 'bg-orange-100 text-orange-700' },
+    ];
+
     return (
         <AppShell currentPage="tasks">
-            <div className="max-w-4xl mx-auto p-4">
+            <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">Aufgaben</h1>
-                    <p className="text-gray-500">{project.name}</p>
-                </div>
+                <header className="sticky top-0 z-30 bg-white border-b border-border px-4 py-4">
+                    <h1 className="text-headline text-foreground">Aufgaben</h1>
+                    <p className="text-sm text-muted-foreground">{project.name}</p>
+                </header>
 
-                {/* Filter Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                    {(['all', 'open', 'in_progress', 'done', 'blocked'] as const).map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${filter === f
-                                    ? f === 'blocked'
-                                        ? 'bg-orange-100 text-orange-700'
-                                        : f === 'done'
-                                            ? 'bg-green-100 text-green-700'
-                                            : f === 'in_progress'
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : 'bg-gray-800 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            {f === 'all' ? `Alle (${stats.all})` :
-                                f === 'open' ? `Offen (${stats.open})` :
-                                    f === 'in_progress' ? `In Arbeit (${stats.in_progress})` :
-                                        f === 'done' ? `Erledigt (${stats.done})` :
-                                            `Blockiert (${stats.blocked})`}
-                        </button>
-                    ))}
+                {/* Filter Tabs - Horizontal Scroll */}
+                <div className="sticky top-[73px] z-20 bg-background border-b border-border">
+                    <div className="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
+                        {filterConfig.map(f => (
+                            <button
+                                key={f.id}
+                                onClick={() => setFilter(f.id as any)}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium 
+                                    whitespace-nowrap flex-shrink-0 tap-active transition-all
+                                    ${filter === f.id ? f.color : 'bg-muted text-muted-foreground'}
+                                `}
+                            >
+                                <span>{f.label}</span>
+                                <span className={`
+                                    text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full px-1.5
+                                    ${filter === f.id ? 'bg-white/20' : 'bg-border'}
+                                `}>
+                                    {f.count}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Task List */}
-                {filteredTasks.length === 0 ? (
-                    <Card>
-                        <CardContent className="py-16 text-center">
-                            <span className="text-6xl block mb-4">📋</span>
-                            <p className="text-gray-500">Keine Aufgaben in diesem Filter</p>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="space-y-3">
-                        {filteredTasks.map((task) => (
-                            <Card
+                <div className="p-4 space-y-3">
+                    {filteredTasks.length === 0 ? (
+                        <div className="card-mobile text-center py-12">
+                            <span className="text-5xl block mb-3">📋</span>
+                            <p className="text-muted-foreground">Keine Aufgaben in diesem Filter</p>
+                        </div>
+                    ) : (
+                        filteredTasks.map(task => (
+                            <div
                                 key={task.id}
-                                hover
                                 onClick={() => setSelectedTask(task)}
-                                className="cursor-pointer"
+                                className="card-mobile tap-active"
                             >
-                                <CardContent className="py-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <StatusBadge status={task.status} />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-gray-900 truncate">{task.title}</p>
-                                                <p className="text-sm text-gray-500">{task.tradeName}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-2 ml-4">
-                                            {task.photos.length > 0 && (
-                                                <span className="text-xs text-gray-400">📷 {task.photos.length}</span>
-                                            )}
-                                            {task.comments.length > 0 && (
-                                                <span className="text-xs text-gray-400">💬 {task.comments.length}</span>
-                                            )}
-                                            <span className="text-gray-300">›</span>
-                                        </div>
+                                <div className="flex items-center gap-3">
+                                    <StatusBadge status={task.status} />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-foreground truncate">{task.title}</p>
+                                        <p className="text-sm text-muted-foreground">{task.tradeName}</p>
                                     </div>
-                                    {task.blockedReason && (
-                                        <p className="mt-2 text-sm text-orange-600 bg-orange-50 px-3 py-1 rounded-lg inline-block">
-                                            ⚠ {task.blockedReason}
-                                        </p>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        {task.photos.length > 0 && (
+                                            <span className="text-xs text-muted-foreground">📷 {task.photos.length}</span>
+                                        )}
+                                        <span className="text-muted-foreground">›</span>
+                                    </div>
+                                </div>
+                                {task.blockedReason && (
+                                    <p className="mt-2 text-sm text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg">
+                                        ⚠ {task.blockedReason}
+                                    </p>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
 
                 {/* Task Detail Modal */}
                 {selectedTask && (
