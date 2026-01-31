@@ -83,7 +83,7 @@ export function ContractorDashboard({
                         <div className="space-y-4">
                             <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-accent">
                                 <p className="font-bold text-lg">{myTasks[0].title}</p>
-                                <p className="text-sm text-gray-500 mt-1">Fällig: {formatDate(myTasks[0].dueDate)}</p>
+                                <p className="text-sm text-gray-500 mt-1">Fällig: {myTasks[0].dueDate ? formatDate(myTasks[0].dueDate) : 'Kein Datum'}</p>
                             </div>
 
                             {/* Big Action Buttons */}
@@ -123,7 +123,7 @@ export function ContractorDashboard({
                             <div key={task.id} className="bg-gray-800 p-4 rounded-xl flex items-center justify-between border border-gray-700">
                                 <div>
                                     <p className="font-medium text-white">{task.title}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">{formatDate(task.dueDate)}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">{task.dueDate ? formatDate(task.dueDate) : ''}</p>
                                 </div>
                                 <StatusBadge status={task.status} size="sm" />
                             </div>
