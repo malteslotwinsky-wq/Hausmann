@@ -8,7 +8,7 @@ import { Header } from './Header';
 
 interface AppShellProps {
     children: ReactNode;
-    currentPage?: 'dashboard' | 'tasks' | 'photos' | 'diary' | 'activity';
+    currentPage?: 'dashboard' | 'tasks' | 'photos' | 'diary' | 'activity' | 'contacts' | 'admin';
 }
 
 export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps) {
@@ -17,20 +17,19 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
     if (!session) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background">
+            {/* Desktop Sidebar - Fixed, hidden on mobile */}
+            <aside className="hidden lg:block">
+                <Sidebar currentPage={currentPage} />
+            </aside>
+
+            {/* Header - offset by sidebar width on desktop */}
             <Header />
 
-            <div className="flex">
-                {/* Desktop Sidebar - hidden on mobile */}
-                <aside className="hidden lg:block w-64 fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-gray-200 bg-white">
-                    <Sidebar currentPage={currentPage} />
-                </aside>
-
-                {/* Main Content */}
-                <main className="flex-1 lg:ml-64 pb-20 lg:pb-8">
-                    {children}
-                </main>
-            </div>
+            {/* Main Content - offset by sidebar on desktop */}
+            <main className="lg:ml-56 pt-0 pb-20 lg:pb-8 min-h-screen">
+                {children}
+            </main>
 
             {/* Mobile Bottom Nav - hidden on desktop */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50">

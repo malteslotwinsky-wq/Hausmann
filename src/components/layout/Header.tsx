@@ -14,46 +14,45 @@ export function Header() {
     const role = user.role as Role;
 
     const roleLabels = {
-        client: 'Kunde',
-        architect: 'Architekt',
+        client: 'Bauherr',
+        architect: 'Bauleitung',
         contractor: 'Handwerker',
     };
 
-    const roleColors = {
-        client: 'bg-emerald-100 text-emerald-700',
-        architect: 'bg-blue-100 text-blue-700',
-        contractor: 'bg-amber-100 text-amber-700',
-    };
-
     return (
-        <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                        <span className="text-xl">🏗</span>
-                    </div>
-                    <div className="hidden sm:block">
-                        <h1 className="font-bold text-gray-900">{defaultTheme.name}</h1>
-                    </div>
-                </Link>
-
-                {/* Right Side */}
+        <header className="sticky top-0 z-40 bg-white border-b border-border h-16 ml-56">
+            <div className="h-full px-6 flex items-center justify-between">
+                {/* Left: Page Title Area (can be set dynamically) */}
                 <div className="flex items-center gap-4">
-                    {/* Role Badge */}
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${roleColors[role]}`}>
-                        {roleLabels[role]}
+                    <h2 className="text-lg font-semibold text-primary">Dashboard</h2>
+                    <span className="text-sm text-muted-foreground px-2 py-0.5 bg-gray-100 rounded-md">
+                        ({roleLabels[role]})
                     </span>
+                </div>
 
-                    {/* User Name */}
-                    <span className="hidden sm:block text-sm text-gray-600">
-                        {user.name}
-                    </span>
+                {/* Right: User Actions */}
+                <div className="flex items-center gap-4">
+                    {/* Notification Bell */}
+                    <button className="relative p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-gray-100 transition-colors">
+                        <span className="text-xl">🔔</span>
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+
+                    {/* User Avatar & Name */}
+                    <div className="flex items-center gap-3 pl-4 border-l border-border">
+                        <div className="w-9 h-9 bg-accent rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {user.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div className="hidden sm:block">
+                            <p className="text-sm font-medium text-primary">{user.name}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </div>
+                    </div>
 
                     {/* Logout Button */}
                     <button
                         onClick={() => signOut({ callbackUrl: '/login' })}
-                        className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="text-sm text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                     >
                         Abmelden
                     </button>
