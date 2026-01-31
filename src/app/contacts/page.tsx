@@ -143,10 +143,10 @@ function ContactsPageContent() {
 
     if (!project) {
         return (
-            <AppShell currentPage="dashboard">
+            <AppShell currentPage="contacts">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
                     <span className="text-6xl block mb-4">🏗</span>
-                    <p className="text-gray-500">Kein Projekt verfügbar</p>
+                    <p className="text-muted-foreground">Kein Projekt verfügbar</p>
                 </div>
             </AppShell>
         );
@@ -217,7 +217,7 @@ function ContactsPageContent() {
     };
 
     return (
-        <AppShell currentPage="dashboard">
+        <AppShell currentPage="contacts">
             <div className="max-w-5xl mx-auto p-4">
                 {/* Header */}
                 <div className="mb-6">

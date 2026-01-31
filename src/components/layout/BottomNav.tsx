@@ -13,7 +13,7 @@ export function BottomNav({ currentPage }: BottomNavProps) {
     const role = session?.user?.role as Role | undefined;
 
     const menuItems = [
-        { id: 'dashboard', label: 'Home', icon: HomeIcon, href: '/' },
+        { id: 'dashboard', label: 'Home', icon: HomeIcon, href: '/dashboard' },
         { id: 'tasks', label: 'Aufgaben', icon: TasksIcon, href: '/tasks', hideFor: ['client'] as Role[] },
         { id: 'photos', label: 'Fotos', icon: PhotosIcon, href: '/photos' },
         { id: 'contacts', label: 'Kontakte', icon: ContactsIcon, href: '/contacts', hideFor: ['contractor'] as Role[] },
