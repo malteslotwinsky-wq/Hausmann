@@ -9,6 +9,10 @@ export type Visibility = 'internal' | 'client';
 // Status
 export type TaskStatus = 'open' | 'in_progress' | 'done' | 'blocked';
 export type ProjectStatus = 'active' | 'completed' | 'paused';
+export type TradeStatus = 'pending' | 'active' | 'completed';
+
+// Photo Approval Mode
+export type PhotoApprovalMode = 'manual' | 'auto_milestone' | 'auto_all';
 
 // User
 export interface User {
@@ -16,9 +20,11 @@ export interface User {
   email: string;
   name: string;
   role: Role;
+  phone?: string;
+  company?: string;
   avatarUrl?: string;
-  assignedTradeIds?: string[]; // For contractors
-  projectIds?: string[]; // For clients
+  assignedTradeIds?: string[];
+  projectIds?: string[];
   createdAt: Date;
 }
 
@@ -26,15 +32,34 @@ export interface User {
 export interface Project {
   id: string;
   name: string;
+  projectNumber?: string;
   address: string;
-  clientId: string;
+  clientId?: string;
   clientName?: string;
+  architectId?: string;
+  architectName?: string;
   startDate: Date;
   targetEndDate: Date;
   status: ProjectStatus;
+  // BauLot Settings
+  photoApprovalMode?: PhotoApprovalMode;
+  escalationHours?: number;
+  logoUrl?: string;
+  // Relations
   trades: Trade[];
+  phases?: ProjectPhase[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Project Phase (Meilenstein)
+export interface ProjectPhase {
+  id: string;
+  projectId: string;
+  name: string;
+  order: number;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 // Trade (Gewerk)
@@ -42,9 +67,25 @@ export interface Trade {
   id: string;
   projectId: string;
   name: string;
+  // Contractor info
   contractorId?: string;
   contractorName?: string;
+  companyName?: string;
+  contactPerson?: string;
+  phone?: string;
+  // Details
+  description?: string;
   order: number;
+  status?: TradeStatus;
+  startDate?: Date;
+  endDate?: Date;
+  // Dependencies
+  predecessorTradeId?: string;
+  // Budget
+  budget?: number;
+  // Permissions
+  canCreateSubtasks?: boolean;
+  // Tasks
   tasks: Task[];
 }
 
@@ -119,4 +160,33 @@ export interface ProjectProgress {
   trades: TradeProgress[];
   totalPercentage: number;
   blockedCount: number;
+}
+
+// Form types for creation
+export interface CreateProjectInput {
+  name: string;
+  projectNumber?: string;
+  address: string;
+  clientId?: string;
+  architectId?: string;
+  startDate: string;
+  targetEndDate: string;
+  photoApprovalMode?: PhotoApprovalMode;
+  escalationHours?: number;
+  phases?: string[];
+}
+
+export interface CreateTradeInput {
+  projectId: string;
+  name: string;
+  companyName?: string;
+  contactPerson?: string;
+  phone?: string;
+  description?: string;
+  contractorId?: string;
+  startDate?: string;
+  endDate?: string;
+  predecessorTradeId?: string;
+  budget?: number;
+  canCreateSubtasks?: boolean;
 }
