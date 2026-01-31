@@ -14,6 +14,16 @@ export async function GET() {
         await supabase.from('trades').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('organizations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+        // 1.5 Create Organization
+        const orgId = '00000000-0000-0000-0000-000000000001';
+        await supabase.from('organizations').upsert({
+            id: orgId,
+            name: 'Hausmann Bau',
+            slug: 'hausmann',
+            primary_color: '#1E3A5F'
+        });
 
         // 2. Create Users
         const architectId = uuidv4();
@@ -24,12 +34,12 @@ export async function GET() {
         const contractorAbbruchId = uuidv4();
 
         const users = [
-            { id: architectId, email: 'architekt@buero-schmidt.de', name: 'Thomas Schmidt', role: 'architect', password: hashedPassword },
-            { id: clientId, email: 'mueller@email.de', name: 'Familie Müller', role: 'client', password: hashedPassword },
-            { id: contractorElektroId, email: 'info@elektro-meier.de', name: 'Elektro Meier GmbH', role: 'contractor', password: hashedPassword },
-            { id: contractorSanitaerId, email: 'info@sanitaer-weber.de', name: 'Sanitär Weber', role: 'contractor', password: hashedPassword },
-            { id: contractorTrockenbauId, email: 'info@innenausbau-krause.de', name: 'Innenausbau Krause', role: 'contractor', password: hashedPassword },
-            { id: contractorAbbruchId, email: 'info@bau-koenig.de', name: 'Bau König GmbH', role: 'contractor', password: hashedPassword },
+            { id: architectId, organization_id: orgId, email: 'architekt@buero-schmidt.de', name: 'Thomas Schmidt', role: 'architect', password: hashedPassword },
+            { id: clientId, organization_id: orgId, email: 'mueller@email.de', name: 'Familie Müller', role: 'client', password: hashedPassword },
+            { id: contractorElektroId, organization_id: orgId, email: 'info@elektro-meier.de', name: 'Elektro Meier GmbH', role: 'contractor', password: hashedPassword },
+            { id: contractorSanitaerId, organization_id: orgId, email: 'info@sanitaer-weber.de', name: 'Sanitär Weber', role: 'contractor', password: hashedPassword },
+            { id: contractorTrockenbauId, organization_id: orgId, email: 'info@innenausbau-krause.de', name: 'Innenausbau Krause', role: 'contractor', password: hashedPassword },
+            { id: contractorAbbruchId, organization_id: orgId, email: 'info@bau-koenig.de', name: 'Bau König GmbH', role: 'contractor', password: hashedPassword },
         ];
 
         const { error: usersError } = await supabase.from('users').insert(users);
@@ -39,6 +49,7 @@ export async function GET() {
         const projectId = uuidv4();
         const project = {
             id: projectId,
+            organization_id: orgId,
             name: 'Sanierung Villa Müller',
             address: 'Gartenstraße 15, 80331 München',
             client_id: clientId,

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
+import { CircularProgress } from '@/components/ui/CircularProgress';
 import { calculateProjectProgress, formatDate, getDaysUntil } from '@/lib/utils';
 
 interface ArchitectDashboardProps {
@@ -17,97 +18,96 @@ interface ArchitectDashboardProps {
 export function ArchitectDashboard({ project, onUpdateTaskStatus, onTogglePhotoVisibility }: ArchitectDashboardProps) {
     const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'photos'>('overview');
     const [expandedTrade, setExpandedTrade] = useState<string | null>(project.trades[0]?.id);
-
     const progress = calculateProjectProgress(project);
     const daysRemaining = getDaysUntil(project.targetEndDate);
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto p-4 pb-20">
-                {/* Project Header */}
-                <div className="flex items-start justify-between mb-6">
+        <div className="min-h-screen bg-gray-50/50 p-6 md:p-8 pb-32">
+            <div className="max-w-7xl mx-auto space-y-8">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">{project.name}</h1>
-                        <p className="text-sm text-gray-500">{project.address}</p>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Kunde: {project.clientName}
+                        <h1 className="text-3xl font-bold text-primary tracking-tight">{project.name}</h1>
+                        <p className="text-muted-foreground mt-1 flex items-center gap-2">
+                            <span className="inline-block w-2 h-2 rounded-full bg-accent"></span>
+                            {project.address}
                         </p>
                     </div>
-                    <div className="text-right">
-                        <span className="text-2xl font-bold text-blue-600">{progress.totalPercentage}%</span>
-                        <p className="text-sm text-gray-500">
-                            Ziel: {formatDate(project.targetEndDate)}
-                        </p>
-                        {daysRemaining > 0 ? (
-                            <p className="text-xs text-gray-400">({daysRemaining} Tage)</p>
-                        ) : (
-                            <p className="text-xs text-red-500">(Überfällig)</p>
-                        )}
+                    <div className="flex gap-3">
+                        <Button variant="secondary" icon={<span>📤</span>}>Export</Button>
+                        <Button variant="primary" icon={<span>+</span>}>Neues Projekt</Button>
                     </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                    <Card>
-                        <CardContent className="py-3 text-center">
-                            <span className="text-2xl font-bold text-gray-900">
-                                {project.trades.reduce((sum, t) => sum + t.tasks.length, 0)}
-                            </span>
-                            <p className="text-xs text-gray-500">Aufgaben</p>
+                {/* Key Metrics / Ring Charts */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="col-span-1 md:col-span-2 shadow-sm border-border/60">
+                        <CardHeader>
+                            <h3 className="font-semibold text-primary">Gesamtprojektfortschritt</h3>
+                        </CardHeader>
+                        <CardContent className="flex flex-col md:flex-row items-center justify-around py-8 gap-8">
+                            <div className="flex flex-col items-center gap-4">
+                                <CircularProgress percentage={78} size={160} strokeWidth={12} color="stroke-accent" />
+                                <span className="text-sm font-medium text-muted-foreground">Baufortschritt</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-4">
+                                <CircularProgress percentage={92} size={160} strokeWidth={12} color="stroke-green-500" />
+                                <span className="text-sm font-medium text-muted-foreground">Termintreue</span>
+                            </div>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardContent className="py-3 text-center">
-                            <span className="text-2xl font-bold text-orange-500">
-                                {progress.blockedCount}
-                            </span>
-                            <p className="text-xs text-gray-500">Blockiert</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="py-3 text-center">
-                            <span className="text-2xl font-bold text-green-600">
-                                {progress.trades.filter(t => t.percentage === 100).length}
-                            </span>
-                            <p className="text-xs text-gray-500">Gewerke fertig</p>
+
+                    <Card className="shadow-sm border-border/60">
+                        <CardHeader>
+                            <h3 className="font-semibold text-primary">Baustellenanfragen</h3>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="p-3 rounded-lg bg-orange-50 border border-orange-100 flex items-start gap-3">
+                                <span className="text-orange-500 mt-1">⚠️</span>
+                                <div>
+                                    <p className="text-sm font-medium text-primary">Elektroinstallation 03</p>
+                                    <p className="text-xs text-orange-600 mt-1">Behinderungsanzeige: Nässe</p>
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-green-50 border border-green-100 flex items-start gap-3">
+                                <span className="text-green-500 mt-1">✓</span>
+                                <div>
+                                    <p className="text-sm font-medium text-primary">Baustellensicherheit</p>
+                                    <p className="text-xs text-green-700 mt-1">Abnahme erfolgreich</p>
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-gray-50 border border-gray-100 flex items-start gap-3">
+                                <span className="text-gray-400 mt-1">ℹ</span>
+                                <div>
+                                    <p className="text-sm font-medium text-primary">Neue Pläne: Statik</p>
+                                    <p className="text-xs text-gray-500 mt-1">Gestern hochgeladen</p>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg">
-                    {(['overview', 'tasks', 'photos'] as const).map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === tab
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                        >
-                            {tab === 'overview' ? 'Übersicht' : tab === 'tasks' ? 'Aufgaben' : 'Fotos'}
-                        </button>
-                    ))}
-                </div>
+                {/* Tabs & Content */}
+                <div className="space-y-6">
+                    <div className="flex gap-1 bg-white p-1.5 rounded-xl border border-border inline-flex shadow-sm">
+                        {(['overview', 'tasks', 'photos'] as const).map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === tab
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-muted-foreground hover:text-primary hover:bg-gray-50'
+                                    }`}
+                            >
+                                {tab === 'overview' ? 'Detailliste' : tab === 'tasks' ? 'Aufgabenplanung' : 'Fotodokumentation'}
+                            </button>
+                        ))}
+                    </div>
 
-                {/* Tab Content */}
-                {activeTab === 'overview' && (
-                    <OverviewTab progress={progress} project={project} />
-                )}
-                {activeTab === 'tasks' && (
-                    <TasksTab
-                        project={project}
-                        expandedTrade={expandedTrade}
-                        onExpandTrade={setExpandedTrade}
-                        onUpdateStatus={onUpdateTaskStatus}
-                    />
-                )}
-                {activeTab === 'photos' && (
-                    <PhotosTab
-                        project={project}
-                        onToggleVisibility={onTogglePhotoVisibility}
-                    />
-                )}
+                    {activeTab === 'overview' && <OverviewTab progress={progress} project={project} />}
+                    {activeTab === 'tasks' && <TasksTab project={project} expandedTrade={expandedTrade} onExpandTrade={setExpandedTrade} onUpdateStatus={onUpdateTaskStatus} />}
+                    {activeTab === 'photos' && <PhotosTab project={project} onToggleVisibility={onTogglePhotoVisibility} />}
+                </div>
             </div>
         </div>
     );
@@ -290,8 +290,8 @@ function PhotosTab({
                         <p className="text-xs text-gray-500">{photo.tradeName}</p>
                         <div className="flex items-center justify-between mt-2">
                             <span className={`text-xs px-2 py-0.5 rounded-full ${photo.visibility === 'client'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-gray-100 text-gray-600'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-600'
                                 }`}>
                                 {photo.visibility === 'client' ? 'Kunde sieht' : 'Nur intern'}
                             </span>

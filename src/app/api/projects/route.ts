@@ -15,8 +15,11 @@ export async function GET() {
 
     const { user } = session;
     const role = user.role as Role;
+    const orgId = '00000000-0000-0000-0000-000000000001'; // Default Hausmann Org
 
-    let query = supabase.from('projects').select('*, trades(*, tasks(*))');
+    let query = supabase.from('projects')
+        .select('*, trades(*, tasks(*))')
+        .eq('organization_id', orgId);
 
     // Filter based on role
     if (role === 'client') {

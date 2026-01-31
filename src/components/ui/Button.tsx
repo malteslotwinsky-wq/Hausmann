@@ -17,12 +17,12 @@ export function Button({
     className = '',
     ...props
 }: ButtonProps) {
-    const baseClasses = 'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseClasses = 'inline-flex items-center justify-center gap-2 font-medium rounded-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide text-xs';
 
     const variantClasses = {
-        primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800',
-        secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300',
-        ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200',
+        primary: 'bg-primary text-primary-foreground hover:opacity-90 active:scale-95 border border-transparent shadow-sm',
+        secondary: 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 active:scale-95 border border-transparent',
+        ghost: 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/80',
         danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
     };
 

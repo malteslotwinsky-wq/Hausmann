@@ -61,147 +61,75 @@ export function ContractorDashboard({
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-lg mx-auto p-4 pb-20">
-                {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-xl font-bold text-gray-900">{project.name}</h1>
-                    <p className="text-sm text-gray-500">
-                        {myTrades.map(t => t.name).join(', ')}
-                    </p>
+        <div className="min-h-screen bg-gray-900 text-white pb-20">
+            {/* Dark Mobile Header */}
+            <div className="p-6 bg-gray-900 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Mein Bauprojekt</p>
+                        <h1 className="text-xl font-bold text-white">{project.name}</h1>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-4 space-y-6">
+                {/* Hero Section: Today's Tasks */}
+                <div className="bg-white rounded-2xl p-6 text-gray-900 shadow-xl">
+                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                        Meine Aufgaben - HEUTE
+                    </h2>
+
+                    {myTasks.length > 0 ? (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-accent">
+                                <p className="font-bold text-lg">{myTasks[0].title}</p>
+                                <p className="text-sm text-gray-500 mt-1">Fällig: {formatDate(myTasks[0].dueDate)}</p>
+                            </div>
+
+                            {/* Big Action Buttons */}
+                            <div className="grid grid-cols-2 gap-4 mt-6">
+                                <button
+                                    onClick={() => onUpdateTaskStatus?.(myTasks[0].id, 'in_progress')}
+                                    className="py-6 rounded-xl bg-gray-800 text-white font-bold text-lg hover:bg-gray-700 active:scale-95 transition-all shadow-lg flex flex-col items-center justify-center gap-2"
+                                >
+                                    <span>🚛</span>
+                                    In Anfahrt
+                                </button>
+                                <button
+                                    onClick={() => onUpdateTaskStatus?.(myTasks[0].id, 'done')}
+                                    className="py-6 rounded-xl bg-green-600 text-white font-bold text-lg hover:bg-green-700 active:scale-95 transition-all shadow-lg flex flex-col items-center justify-center gap-2"
+                                >
+                                    <span>✓</span>
+                                    Erledigt
+                                </button>
+                            </div>
+
+                            <button className="w-full py-4 mt-4 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 active:scale-95 transition-all shadow-lg">
+                                ⚠️ Problem melden
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-gray-400">
+                            <p>Keine offenen Aufgaben für heute 🎉</p>
+                        </div>
+                    )}
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                    <Card className={inProgressTasks.length > 0 ? 'border-blue-200 bg-blue-50' : ''}>
-                        <CardContent className="py-3 text-center">
-                            <span className="text-2xl font-bold text-blue-600">{inProgressTasks.length}</span>
-                            <p className="text-xs text-gray-600">In Arbeit</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="py-3 text-center">
-                            <span className="text-2xl font-bold text-gray-600">{openTasks.length}</span>
-                            <p className="text-xs text-gray-500">Offen</p>
-                        </CardContent>
-                    </Card>
-                    <Card className={blockedTasks.length > 0 ? 'border-orange-200 bg-orange-50' : ''}>
-                        <CardContent className="py-3 text-center">
-                            <span className="text-2xl font-bold text-orange-500">{blockedTasks.length}</span>
-                            <p className="text-xs text-gray-600">Blockiert</p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Today's Tasks / In Progress */}
-                {inProgressTasks.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-3">Aktuelle Aufgaben</h2>
-                        <div className="space-y-3">
-                            {inProgressTasks.map((task) => (
-                                <TaskCard
-                                    key={task.id}
-                                    task={task}
-                                    tradeName={task.tradeName}
-                                    onStatusChange={handleStatusChange}
-                                    onAddPhoto={onAddPhoto}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Open Tasks */}
-                {openTasks.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-3">Anstehende Aufgaben</h2>
-                        <div className="space-y-3">
-                            {openTasks.map((task) => (
-                                <TaskCard
-                                    key={task.id}
-                                    task={task}
-                                    tradeName={task.tradeName}
-                                    onStatusChange={handleStatusChange}
-                                    onAddPhoto={onAddPhoto}
-                                    compact
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Blocked Tasks */}
-                {blockedTasks.length > 0 && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <span className="text-orange-500">⚠</span> Blockiert
-                        </h2>
-                        <div className="space-y-3">
-                            {blockedTasks.map((task) => (
-                                <Card key={task.id} className="border-orange-200">
-                                    <CardContent className="py-3">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <span className="font-medium text-gray-900">{task.title}</span>
-                                                <p className="text-sm text-orange-600 mt-1">{task.blockedReason}</p>
-                                            </div>
-                                            <StatusBadge status="blocked" showLabel={false} />
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Report Problem Button */}
-                <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto">
-                    <Button
-                        variant="secondary"
-                        fullWidth
-                        icon={<span>⚠</span>}
-                        onClick={() => setShowProblemModal(true)}
-                    >
-                        Problem melden
-                    </Button>
-                </div>
-
-                {/* Problem Modal */}
-                {showProblemModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <Card className="w-full max-w-md">
-                            <CardContent className="p-6">
-                                <h3 className="text-lg font-semibold mb-4">Problem melden</h3>
-                                <textarea
-                                    value={problemReason}
-                                    onChange={(e) => setProblemReason(e.target.value)}
-                                    placeholder="Was ist das Problem?"
-                                    className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                                <div className="flex gap-3 mt-4">
-                                    <Button
-                                        variant="secondary"
-                                        fullWidth
-                                        onClick={() => {
-                                            setShowProblemModal(false);
-                                            setProblemReason('');
-                                        }}
-                                    >
-                                        Abbrechen
-                                    </Button>
-                                    <Button
-                                        variant="danger"
-                                        fullWidth
-                                        onClick={handleSubmitProblem}
-                                        disabled={!problemReason.trim()}
-                                    >
-                                        Melden
-                                    </Button>
+                {/* Upcoming List */}
+                <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Demnächst</h3>
+                    <div className="space-y-3">
+                        {myTasks.slice(1).map(task => (
+                            <div key={task.id} className="bg-gray-800 p-4 rounded-xl flex items-center justify-between border border-gray-700">
+                                <div>
+                                    <p className="font-medium text-white">{task.title}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">{formatDate(task.dueDate)}</p>
                                 </div>
-                            </CardContent>
-                        </Card>
+                                <StatusBadge status={task.status} size="sm" />
+                            </div>
+                        ))}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
@@ -216,71 +144,6 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, tradeName, onStatusChange, onAddPhoto, compact = false }: TaskCardProps) {
-    const statuses: { status: TaskStatus; label: string }[] = [
-        { status: 'open', label: '○' },
-        { status: 'in_progress', label: '→' },
-        { status: 'done', label: '✓' },
-    ];
-
-    return (
-        <Card>
-            <CardContent className={compact ? 'py-3' : 'py-4'}>
-                <div className="flex items-start justify-between mb-3">
-                    <div>
-                        <span className="font-medium text-gray-900">{task.title}</span>
-                        <p className="text-xs text-gray-500">{tradeName}</p>
-                    </div>
-                    <StatusBadge status={task.status} showLabel={false} />
-                </div>
-
-                {/* Status Buttons */}
-                <div className="flex gap-2 mb-3">
-                    {statuses.map(({ status, label }) => (
-                        <button
-                            key={status}
-                            onClick={() => onStatusChange?.(task.id, status)}
-                            className={`flex-1 py-2.5 rounded-lg text-lg font-medium transition-colors ${task.status === status
-                                    ? status === 'done'
-                                        ? 'bg-green-500 text-white'
-                                        : status === 'in_progress'
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-300 text-gray-700'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex gap-2">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        fullWidth
-                        icon={<span>📷</span>}
-                        onClick={() => onAddPhoto?.(task.id)}
-                    >
-                        Foto
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        fullWidth
-                        icon={<span>💬</span>}
-                    >
-                        Kommentar
-                    </Button>
-                </div>
-
-                {/* Photo count if any */}
-                {task.photos.length > 0 && (
-                    <p className="text-xs text-gray-400 mt-2">
-                        {task.photos.length} Foto{task.photos.length > 1 ? 's' : ''} hochgeladen
-                    </p>
-                )}
-            </CardContent>
-        </Card>
-    );
+    // This component is mostly used in legacy view, but kept for type safety or fallback
+    return null;
 }

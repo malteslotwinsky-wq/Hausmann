@@ -1,15 +1,26 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- 0. Organizations Table (New for SaaS Multi-tenancy)
+CREATE TABLE IF NOT EXISTS public.organizations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL, -- for subdomain or path routing e.g., app.com/hausmann
+    logo_url TEXT,
+    primary_color TEXT DEFAULT '#1E3A5F', -- Customizable branding
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- 1. Users Table (Mirroring NextAuth users for simplicity, or connecting to Supabase Auth)
 -- Note: For this demo, we store users directly to match our existing logic. 
 -- In production, you might sync with auth.users.
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES public.organizations(id), -- Multi-tenancy link
   email TEXT UNIQUE NOT NULL,
   password TEXT, -- In real app, rely on Auth provider. Here we store hashed from NextAuth demo.
   name TEXT,
-  role TEXT CHECK (role IN ('architect', 'contractor', 'client')),
+  role TEXT CHECK (role IN ('architect', 'contractor', 'client', 'admin')), -- added admin for consistency
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   avatar_url TEXT
 );
@@ -17,6 +28,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- 2. Projects Table
 CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id UUID REFERENCES public.organizations(id), -- Multi-tenancy link
   name TEXT NOT NULL,
   address TEXT NOT NULL,
   start_date TIMESTAMP WITH TIME ZONE,
@@ -49,25 +61,33 @@ CREATE TABLE IF NOT EXISTS public.messages (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security (RLS) - Optional for now but recommended
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
--- Simple Policies (Open for Demo, restrict in Production)
-CREATE POLICY "Enable read access for all users" ON public.users FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON public.users FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON public.users FOR UPDATE USING (true);
+-- POLICIES (Simplified for specific demo context, but Structure is ready for SaaS)
+-- In a real SaaS, these would restrict based on auth.uid() -> user.organization_id
 
-CREATE POLICY "Enable read access for all users" ON public.projects FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON public.projects FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON public.projects FOR UPDATE USING (true);
+-- Organizations: users can read their own org
+CREATE POLICY "Enable read for users of org" ON public.organizations FOR SELECT USING (true); -- Placeholder for org check
 
-CREATE POLICY "Enable read access for all users" ON public.trades FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON public.trades FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON public.trades FOR UPDATE USING (true);
+-- Users: users can read users in their org
+CREATE POLICY "Enable read for same org" ON public.users FOR SELECT USING (true); -- Placeholder for org logic
 
-CREATE POLICY "Enable read access for all users" ON public.messages FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON public.messages FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON public.messages FOR UPDATE USING (true);
+-- Projects: users can read projects in their org
+CREATE POLICY "Enable read for same org projects" ON public.projects FOR SELECT USING (true); -- Placeholder
+
+-- Trades: access via project
+CREATE POLICY "Enable read for same org trades" ON public.trades FOR SELECT USING (true); -- Placeholder
+
+-- Messages: access via sender/recipient
+CREATE POLICY "Enable read for own messages" ON public.messages FOR SELECT USING (true); -- Placeholder
+
+-- SEED DATA (Hausmann Construction as default tenant)
+INSERT INTO public.organizations (id, name, slug, primary_color) 
+VALUES ('00000000-0000-0000-0000-000000000001', 'Hausmann Bau', 'hausmann', '#1E3A5F')
+ON CONFLICT DO NOTHING;
+

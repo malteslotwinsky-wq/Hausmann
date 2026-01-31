@@ -1,17 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F5F5F5;
-  --foreground: #171717;
-  --primary: #1E3A5F;
-  --primary-light: #2E5A8F;
-  --accent-green: #2E7D32;
-  --accent-orange: #F57C00;
+  /* BauLot Reference Palette */
+  /* Main Canvas */
+  --background: #F1F5F9;
+  /* Slate 100 - Light Background */
+  --foreground: #0F172A;
+  /* Slate 900 - Dark Text */
+
+  /* Primary Action / Sidebar */
+  --primary: #0F172A;
+  /* Slate 900 - Deep Navy */
+  --primary-light: #1E293B;
+  /* Slate 800 */
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary / Muted */
+  --muted: #F8FAFC;
+  /* Slate 50 */
+  --muted-foreground: #64748B;
+  /* Slate 500 */
+
+  /* Borders & Dividers */
+  --border: #E2E8F0;
+  /* Slate 200 */
+
+  /* Accents */
+  --accent: #F97316;
+  /* Orange 500 - BauLot Orange */
+  --accent-light: #FB923C;
+  /* Orange 400 */
+  --accent-foreground: #FFFFFF;
+
+  /* Status Colors */
+  --success: #10B981;
+  /* Emerald 500 */
+  --error: #EF4444;
+  /* Red 500 */
+
+  /* Radius - Soft but professional */
+  --radius: 0.75rem;
+  /* rounded-xl */
+
+  /* Surface */
+  --surface: #FFFFFF;
+  --surface-highlight: #F8FAFC;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+
+  --color-surface: var(--surface);
+  --color-surface-highlight: var(--surface-highlight);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius) - 1px);
+  --radius-lg: var(--radius);
+
   --font-sans: var(--font-geist);
 }
 
@@ -31,7 +88,8 @@ body {
 }
 
 /* Touch-friendly tap targets */
-button, a {
+button,
+a {
   min-height: 44px;
 }
 

@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Role } from '@/types';
+import { defaultTheme } from '@/lib/branding';
 
 export function Header() {
     const { data: session } = useSession();
@@ -33,7 +34,7 @@ export function Header() {
                         <span className="text-xl">🏗</span>
                     </div>
                     <div className="hidden sm:block">
-                        <h1 className="font-bold text-gray-900">BauProject Timeline</h1>
+                        <h1 className="font-bold text-gray-900">{defaultTheme.name}</h1>
                     </div>
                 </Link>
 
