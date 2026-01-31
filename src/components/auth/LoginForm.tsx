@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { defaultTheme } from '@/lib/branding';
 
 export function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get('callbackUrl') || '/';
+    const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -42,51 +43,24 @@ export function LoginForm() {
         }
     };
 
-    // Quick login buttons for demo
-    const demoLogins = [
-        { email: 'architekt@demo.de', label: 'Architekt', icon: '📐' },
-        { email: 'handwerker@demo.de', label: 'Handwerker', icon: '🔧' },
-        { email: 'kunde@demo.de', label: 'Kunde', icon: '👤' },
-    ];
-
-    const handleDemoLogin = async (demoEmail: string) => {
-        setEmail(demoEmail);
-        setPassword('demo1234');
-        setLoading(true);
-
-        const result = await signIn('credentials', {
-            email: demoEmail,
-            password: 'demo1234',
-            redirect: false,
-        });
-
-        if (result?.ok) {
-            router.push(callbackUrl);
-            router.refresh();
-        } else {
-            setError('Demo-Login fehlgeschlagen');
-            setLoading(false);
-        }
-    };
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 safe-area-top safe-area-bottom">
+            <div className="w-full max-w-md animate-scale-in">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <span className="text-4xl">🏗</span>
+                    <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span className="text-white text-2xl font-bold">B</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">BauProject Timeline</h1>
-                    <p className="text-gray-500 mt-1">Digitales Bautagebuch</p>
+                    <h1 className="text-2xl font-bold text-foreground">{defaultTheme.name}</h1>
+                    <p className="text-muted-foreground mt-1">Digitale Bauleitung</p>
                 </div>
 
                 {/* Login Card */}
-                <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+                <div className="card-mobile p-6 sm:p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-foreground mb-2">
                                 E-Mail
                             </label>
                             <input
@@ -96,13 +70,13 @@ export function LoginForm() {
                                 placeholder="name@firma.de"
                                 required
                                 autoComplete="email"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-base"
+                                className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-base"
                             />
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-foreground mb-2">
                                 Passwort
                             </label>
                             <div className="relative">
@@ -113,12 +87,12 @@ export function LoginForm() {
                                     placeholder="••••••••"
                                     required
                                     autoComplete="current-password"
-                                    className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-base"
+                                    className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-base"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                                 >
                                     {showPassword ? '🙈' : '👁'}
                                 </button>
@@ -134,38 +108,26 @@ export function LoginForm() {
                         )}
 
                         {/* Submit */}
-                        <Button
+                        <button
                             type="submit"
-                            fullWidth
                             disabled={loading}
-                            className="py-3 text-base"
+                            className="w-full btn-mobile btn-mobile-accent tap-active disabled:opacity-50"
                         >
                             {loading ? 'Anmelden...' : 'Anmelden'}
-                        </Button>
+                        </button>
                     </form>
 
-                    {/* Demo Quick Login */}
-                    <div className="mt-6 pt-6 border-t border-gray-100">
-                        <p className="text-xs text-gray-400 text-center mb-4">Demo-Schnellzugang</p>
-                        <div className="grid grid-cols-3 gap-2">
-                            {demoLogins.map(({ email, label, icon }) => (
-                                <button
-                                    key={email}
-                                    onClick={() => handleDemoLogin(email)}
-                                    disabled={loading}
-                                    className="flex flex-col items-center gap-1 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                                >
-                                    <span className="text-2xl">{icon}</span>
-                                    <span className="text-xs text-gray-600">{label}</span>
-                                </button>
-                            ))}
-                        </div>
+                    {/* Forgot Password */}
+                    <div className="mt-4 text-center">
+                        <button className="text-sm text-muted-foreground hover:text-accent tap-active">
+                            Passwort vergessen?
+                        </button>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <p className="text-center text-xs text-gray-400 mt-6">
-                    © 2026 BauProject Timeline · Alle Daten werden DSGVO-konform gespeichert
+                <p className="text-center text-xs text-muted-foreground mt-6">
+                    © 2026 {defaultTheme.name} · DSGVO-konform
                 </p>
             </div>
         </div>
