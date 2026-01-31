@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { Project, Trade, Task, TaskStatus } from '@/types';
-import { Card, CardContent } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/utils';
 
 interface ContractorDashboardProps {
@@ -21,12 +19,11 @@ export function ContractorDashboard({
     contractorId,
     onUpdateTaskStatus,
     onAddPhoto,
-    onAddComment,
     onReportProblem,
 }: ContractorDashboardProps) {
-    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-    const [showProblemModal, setShowProblemModal] = useState(false);
+    const [showProblemSheet, setShowProblemSheet] = useState(false);
     const [problemReason, setProblemReason] = useState('');
+    const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
     // Find trades assigned to this contractor
     const myTrades = project.trades.filter(t => t.contractorId === contractorId);
@@ -34,116 +31,163 @@ export function ContractorDashboard({
         trade.tasks.map(task => ({ ...task, tradeName: trade.name }))
     );
 
-    // Separate by status for quick access
-    const inProgressTasks = myTasks.filter(t => t.status === 'in_progress');
-    const openTasks = myTasks.filter(t => t.status === 'open');
-    const blockedTasks = myTasks.filter(t => t.status === 'blocked');
+    const currentTask = myTasks.find(t => t.status !== 'done') || myTasks[0];
+    const upcomingTasks = myTasks.filter(t => t.id !== currentTask?.id && t.status !== 'done');
 
-    const handleStatusChange = (taskId: string, status: TaskStatus) => {
-        if (status === 'blocked') {
-            const task = myTasks.find(t => t.id === taskId);
-            if (task) {
-                setSelectedTask(task);
-                setShowProblemModal(true);
-            }
-        } else {
-            onUpdateTaskStatus?.(taskId, status);
-        }
+    const handleAction = (action: 'start' | 'done') => {
+        if (!currentTask) return;
+        const newStatus = action === 'start' ? 'in_progress' : 'done';
+        onUpdateTaskStatus?.(currentTask.id, newStatus);
     };
 
-    const handleSubmitProblem = () => {
-        if (selectedTask && problemReason.trim()) {
-            onReportProblem?.(selectedTask.id, problemReason);
-            setShowProblemModal(false);
+    const handleReportProblem = () => {
+        if (activeTaskId && problemReason.trim()) {
+            onReportProblem?.(activeTaskId, problemReason);
+            setShowProblemSheet(false);
             setProblemReason('');
-            setSelectedTask(null);
+            setActiveTaskId(null);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white pb-20">
-            {/* Dark Mobile Header */}
-            <div className="p-6 bg-gray-900 border-b border-gray-800">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Mein Bauprojekt</p>
-                        <h1 className="text-xl font-bold text-white">{project.name}</h1>
-                    </div>
-                </div>
-            </div>
+        <div className="min-h-screen bg-primary text-white safe-area-top">
+            {/* === HEADER === */}
+            <header className="px-5 pt-6 pb-4">
+                <p className="text-caption text-white/50 mb-1">MEIN BAUPROJEKT</p>
+                <h1 className="text-headline text-white">{project.name}</h1>
+            </header>
 
-            <div className="p-4 space-y-6">
-                {/* Hero Section: Today's Tasks */}
-                <div className="bg-white rounded-2xl p-6 text-gray-900 shadow-xl">
-                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                        Meine Aufgaben - HEUTE
-                    </h2>
+            {/* === MAIN CONTENT === */}
+            <main className="px-4 pb-32 space-y-6 animate-fade-in">
+                {/* Hero Card: Current Task */}
+                {currentTask && (
+                    <section className="card-mobile bg-white text-foreground animate-scale-in">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-title">Aktuelle Aufgabe</h2>
+                            <StatusBadge status={currentTask.status} size="sm" />
+                        </div>
 
-                    {myTasks.length > 0 ? (
-                        <div className="space-y-4">
-                            <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-accent">
-                                <p className="font-bold text-lg">{myTasks[0].title}</p>
-                                <p className="text-sm text-gray-500 mt-1">Fällig: {myTasks[0].dueDate ? formatDate(myTasks[0].dueDate) : 'Kein Datum'}</p>
-                            </div>
+                        {/* Task Info */}
+                        <div className="p-4 bg-muted rounded-xl border-l-4 border-accent mb-6">
+                            <p className="font-bold text-lg text-foreground">{currentTask.title}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                {currentTask.tradeName} • {currentTask.dueDate ? formatDate(currentTask.dueDate) : 'Flexibel'}
+                            </p>
+                        </div>
 
-                            {/* Big Action Buttons */}
-                            <div className="grid grid-cols-2 gap-4 mt-6">
-                                <button
-                                    onClick={() => onUpdateTaskStatus?.(myTasks[0].id, 'in_progress')}
-                                    className="py-6 rounded-xl bg-gray-800 text-white font-bold text-lg hover:bg-gray-700 active:scale-95 transition-all shadow-lg flex flex-col items-center justify-center gap-2"
-                                >
-                                    <span>🚛</span>
-                                    In Anfahrt
-                                </button>
-                                <button
-                                    onClick={() => onUpdateTaskStatus?.(myTasks[0].id, 'done')}
-                                    className="py-6 rounded-xl bg-green-600 text-white font-bold text-lg hover:bg-green-700 active:scale-95 transition-all shadow-lg flex flex-col items-center justify-center gap-2"
-                                >
-                                    <span>✓</span>
-                                    Erledigt
-                                </button>
-                            </div>
-
-                            <button className="w-full py-4 mt-4 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 active:scale-95 transition-all shadow-lg">
-                                ⚠️ Problem melden
+                        {/* Large Action Buttons (Touch-first) */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={() => handleAction('start')}
+                                className="btn-mobile btn-mobile-lg bg-primary-light text-white tap-active-strong flex flex-col items-center gap-2"
+                            >
+                                <span className="text-2xl">🚛</span>
+                                <span>In Anfahrt</span>
+                            </button>
+                            <button
+                                onClick={() => handleAction('done')}
+                                className="btn-mobile btn-mobile-lg bg-green-600 text-white tap-active-strong flex flex-col items-center gap-2"
+                            >
+                                <span className="text-2xl">✓</span>
+                                <span>Erledigt</span>
                             </button>
                         </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-400">
-                            <p>Keine offenen Aufgaben für heute 🎉</p>
-                        </div>
-                    )}
-                </div>
 
-                {/* Upcoming List */}
-                <div>
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Demnächst</h3>
-                    <div className="space-y-3">
-                        {myTasks.slice(1).map(task => (
-                            <div key={task.id} className="bg-gray-800 p-4 rounded-xl flex items-center justify-between border border-gray-700">
-                                <div>
-                                    <p className="font-medium text-white">{task.title}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">{task.dueDate ? formatDate(task.dueDate) : ''}</p>
+                        {/* Secondary Actions */}
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            <button
+                                onClick={() => onAddPhoto?.(currentTask.id)}
+                                className="btn-mobile btn-mobile-secondary tap-active"
+                            >
+                                <span>📷</span> Foto
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setActiveTaskId(currentTask.id);
+                                    setShowProblemSheet(true);
+                                }}
+                                className="btn-mobile bg-error text-white tap-active"
+                            >
+                                <span>⚠️</span> Problem
+                            </button>
+                        </div>
+                    </section>
+                )}
+
+                {/* Upcoming Tasks */}
+                {upcomingTasks.length > 0 && (
+                    <section>
+                        <h3 className="text-caption text-white/50 mb-3 px-1">DEMNÄCHST</h3>
+                        <div className="space-y-3">
+                            {upcomingTasks.map((task, index) => (
+                                <div
+                                    key={task.id}
+                                    className="card-mobile card-mobile-interactive bg-primary-light text-white flex items-center justify-between tap-active"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate">{task.title}</p>
+                                        <p className="text-xs text-white/50 mt-0.5">
+                                            {task.dueDate ? formatDate(task.dueDate) : 'Kein Datum'}
+                                        </p>
+                                    </div>
+                                    <StatusBadge status={task.status} size="sm" />
                                 </div>
-                                <StatusBadge status={task.status} size="sm" />
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Empty State */}
+                {myTasks.length === 0 && (
+                    <section className="card-mobile text-center py-12 animate-fade-in">
+                        <span className="text-5xl block mb-4">🎉</span>
+                        <p className="text-lg font-medium text-foreground">Keine offenen Aufgaben</p>
+                        <p className="text-muted-foreground mt-1">Du hast alles erledigt!</p>
+                    </section>
+                )}
+            </main>
+
+            {/* === BOTTOM SHEET: Problem Report === */}
+            {showProblemSheet && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/50 z-40 animate-fade-in"
+                        onClick={() => setShowProblemSheet(false)}
+                    />
+                    {/* Sheet */}
+                    <div className="bottom-sheet z-50 p-6 animate-slide-up safe-area-bottom">
+                        <div className="bottom-sheet-handle" />
+
+                        <h3 className="text-headline text-foreground mb-4">Problem melden</h3>
+
+                        <textarea
+                            value={problemReason}
+                            onChange={(e) => setProblemReason(e.target.value)}
+                            placeholder="Beschreibe das Problem..."
+                            className="w-full p-4 bg-muted rounded-xl text-foreground resize-none h-32 focus:outline-none focus:ring-2 focus:ring-accent"
+                            autoFocus
+                        />
+
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                            <button
+                                onClick={() => setShowProblemSheet(false)}
+                                className="btn-mobile btn-mobile-secondary tap-active"
+                            >
+                                Abbrechen
+                            </button>
+                            <button
+                                onClick={handleReportProblem}
+                                disabled={!problemReason.trim()}
+                                className="btn-mobile bg-error text-white tap-active disabled:opacity-50"
+                            >
+                                Melden
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
-}
-
-interface TaskCardProps {
-    task: Task & { tradeName: string };
-    tradeName: string;
-    onStatusChange?: (taskId: string, status: TaskStatus) => void;
-    onAddPhoto?: (taskId: string) => void;
-    compact?: boolean;
-}
-
-function TaskCard({ task, tradeName, onStatusChange, onAddPhoto, compact = false }: TaskCardProps) {
-    // This component is mostly used in legacy view, but kept for type safety or fallback
-    return null;
 }
