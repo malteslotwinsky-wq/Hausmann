@@ -15,7 +15,7 @@ ADD COLUMN IF NOT EXISTS architect_id UUID REFERENCES public.users(id);
 
 -- BauLot Settings
 ALTER TABLE public.projects 
-ADD COLUMN IF NOT EXISTS photo_approval_mode TEXT DEFAULT 'manual' CHECK (photo_approval_mode IN ('manual', 'auto_milestone', 'auto_all'));
+ADD COLUMN IF NOT EXISTS photo_approval_mode TEXT DEFAULT 'manual';
 
 ALTER TABLE public.projects 
 ADD COLUMN IF NOT EXISTS escalation_hours INTEGER DEFAULT 48;
@@ -77,30 +77,34 @@ ALTER TABLE public.users
 ADD COLUMN IF NOT EXISTS project_ids UUID[] DEFAULT '{}';
 
 -- ============================================
--- INSERT POLICIES FOR NEW TABLES
+-- POLICIES (Drop and recreate to avoid conflicts)
 -- ============================================
 
--- Allow architects to insert projects
-CREATE POLICY IF NOT EXISTS "Enable insert for architects" ON public.projects 
+-- Projects policies
+DROP POLICY IF EXISTS "Enable insert for architects" ON public.projects;
+CREATE POLICY "Enable insert for architects" ON public.projects 
 FOR INSERT WITH CHECK (true);
 
--- Allow architects to update projects
-CREATE POLICY IF NOT EXISTS "Enable update for architects" ON public.projects 
+DROP POLICY IF EXISTS "Enable update for architects" ON public.projects;
+CREATE POLICY "Enable update for architects" ON public.projects 
 FOR UPDATE USING (true);
 
--- Allow architects to insert trades
-CREATE POLICY IF NOT EXISTS "Enable insert for trades" ON public.trades 
+-- Trades policies
+DROP POLICY IF EXISTS "Enable insert for trades" ON public.trades;
+CREATE POLICY "Enable insert for trades" ON public.trades 
 FOR INSERT WITH CHECK (true);
 
--- Allow updates to trades
-CREATE POLICY IF NOT EXISTS "Enable update for trades" ON public.trades 
+DROP POLICY IF EXISTS "Enable update for trades" ON public.trades;
+CREATE POLICY "Enable update for trades" ON public.trades 
 FOR UPDATE USING (true);
 
--- Allow user updates
-CREATE POLICY IF NOT EXISTS "Enable update for users" ON public.users 
+-- Users policies
+DROP POLICY IF EXISTS "Enable update for users" ON public.users;
+CREATE POLICY "Enable update for users" ON public.users 
 FOR UPDATE USING (true);
 
-CREATE POLICY IF NOT EXISTS "Enable insert for users" ON public.users 
+DROP POLICY IF EXISTS "Enable insert for users" ON public.users;
+CREATE POLICY "Enable insert for users" ON public.users 
 FOR INSERT WITH CHECK (true);
 
 -- ============================================

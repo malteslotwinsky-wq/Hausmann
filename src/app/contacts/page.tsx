@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
+import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
 import { Role } from '@/types';
 
 interface Contact {
@@ -93,16 +94,6 @@ function ContactsPageContent() {
             setLoading(false);
         }
     };
-
-    // Lock body scroll when modal is open
-    useEffect(() => {
-        if (selectedContact) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => { document.body.style.overflow = ''; };
-    }, [selectedContact]);
 
     if (status === 'loading' || !session) return null;
 
@@ -215,67 +206,69 @@ function ContactsPageContent() {
                 )}
             </div>
 
-            {/* Contact Detail Sheet */}
-            {selectedContact && (
-                <>
-                    <div className="fixed inset-0 bg-black/50 z-50 animate-fade-in" onClick={() => setSelectedContact(null)} />
-                    <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl animate-slide-up safe-area-bottom" style={{ maxHeight: '70vh' }}>
-                        <div className="overflow-y-auto overscroll-contain" style={{ maxHeight: '70vh' }}>
-                            <div className="p-6">
-                                <div className="w-12 h-1.5 bg-border rounded-full mx-auto mb-6" />
-
-                                {/* Avatar & Name */}
-                                <div className="text-center mb-6">
-                                    <div className="w-20 h-20 mx-auto bg-accent rounded-full flex items-center justify-center text-white font-bold text-3xl mb-3">
-                                        {selectedContact.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <h2 className="text-xl font-bold text-foreground">{selectedContact.name}</h2>
-                                    {selectedContact.company && (
-                                        <p className="text-muted-foreground">{selectedContact.company}</p>
-                                    )}
-                                    {selectedContact.trade && (
-                                        <p className="text-sm text-accent mt-1">{selectedContact.trade}</p>
-                                    )}
-                                </div>
-
-                                {/* Quick Actions */}
-                                <div className="grid grid-cols-3 gap-3 mb-6">
-                                    <a href={`tel:${selectedContact.phone || ''}`} className="card-mobile text-center py-4 tap-active">
-                                        <span className="text-2xl block mb-1">📞</span>
-                                        <span className="text-xs text-muted-foreground">Anrufen</span>
-                                    </a>
-                                    <a href={`mailto:${selectedContact.email}`} className="card-mobile text-center py-4 tap-active">
-                                        <span className="text-2xl block mb-1">✉️</span>
-                                        <span className="text-xs text-muted-foreground">E-Mail</span>
-                                    </a>
-                                    <button className="card-mobile text-center py-4 tap-active">
-                                        <span className="text-2xl block mb-1">💬</span>
-                                        <span className="text-xs text-muted-foreground">Nachricht</span>
-                                    </button>
-                                </div>
-
-                                {/* Contact Info */}
-                                <div className="space-y-3">
-                                    <ContactInfoRow icon="📧" label="E-Mail" value={selectedContact.email} href={`mailto:${selectedContact.email}`} />
-                                    {selectedContact.phone && (
-                                        <ContactInfoRow icon="📞" label="Telefon" value={selectedContact.phone} href={`tel:${selectedContact.phone}`} />
-                                    )}
-                                    {selectedContact.projectNames && selectedContact.projectNames.length > 0 && (
-                                        <div className="py-3 border-t border-border">
-                                            <p className="text-xs text-muted-foreground mb-2">PROJEKTE</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {selectedContact.projectNames.map((name, i) => (
-                                                    <span key={i} className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-md">{name}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+            {/* Contact Detail Sheet - Now with Swipe to Dismiss */}
+            <SwipeableSheet
+                isOpen={!!selectedContact}
+                onClose={() => setSelectedContact(null)}
+                maxHeight="70vh"
+            >
+                {selectedContact && (
+                    <div>
+                        {/* Avatar & Name */}
+                        <div className="text-center mb-6">
+                            <div className="w-20 h-20 mx-auto bg-accent rounded-full flex items-center justify-center text-white font-bold text-3xl mb-3">
+                                {selectedContact.name.charAt(0).toUpperCase()}
                             </div>
+                            <h2 className="text-xl font-bold text-foreground">{selectedContact.name}</h2>
+                            {selectedContact.company && (
+                                <p className="text-muted-foreground">{selectedContact.company}</p>
+                            )}
+                            {selectedContact.trade && (
+                                <p className="text-sm text-accent mt-1">{selectedContact.trade}</p>
+                            )}
                         </div>
+
+                        {/* Quick Actions */}
+                        <div className="grid grid-cols-3 gap-3 mb-6">
+                            <a href={`tel:${selectedContact.phone || ''}`} className="card-mobile text-center py-4 tap-active">
+                                <span className="text-2xl block mb-1">📞</span>
+                                <span className="text-xs text-muted-foreground">Anrufen</span>
+                            </a>
+                            <a href={`mailto:${selectedContact.email}`} className="card-mobile text-center py-4 tap-active">
+                                <span className="text-2xl block mb-1">✉️</span>
+                                <span className="text-xs text-muted-foreground">E-Mail</span>
+                            </a>
+                            <button className="card-mobile text-center py-4 tap-active">
+                                <span className="text-2xl block mb-1">💬</span>
+                                <span className="text-xs text-muted-foreground">Nachricht</span>
+                            </button>
+                        </div>
+
+                        {/* Contact Info */}
+                        <div className="space-y-3">
+                            <ContactInfoRow icon="📧" label="E-Mail" value={selectedContact.email} href={`mailto:${selectedContact.email}`} />
+                            {selectedContact.phone && (
+                                <ContactInfoRow icon="📞" label="Telefon" value={selectedContact.phone} href={`tel:${selectedContact.phone}`} />
+                            )}
+                            {selectedContact.projectNames && selectedContact.projectNames.length > 0 && (
+                                <div className="py-3 border-t border-border">
+                                    <p className="text-xs text-muted-foreground mb-2">PROJEKTE</p>
+                                    <div className="flex flex-wrap gap-1">
+                                        {selectedContact.projectNames.map((name, i) => (
+                                            <span key={i} className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-md">{name}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Swipe hint */}
+                        <p className="text-center text-xs text-muted-foreground mt-6">
+                            Nach unten wischen zum Schließen
+                        </p>
                     </div>
-                </>
-            )}
+                )}
+            </SwipeableSheet>
         </AppShell>
     );
 }
@@ -323,3 +316,4 @@ export default function ContactsPage() {
         </ToastProvider>
     );
 }
+

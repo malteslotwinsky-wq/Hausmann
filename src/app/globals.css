@@ -182,6 +182,38 @@ textarea {
   animation: pulseGlow 2s infinite;
 }
 
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
 /* ============================================
    ACTIVE STATES (Haptic-like feedback)
    ============================================ */

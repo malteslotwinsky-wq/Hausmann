@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
+import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
 import { Role, Project, Trade, PhotoApprovalMode } from '@/types';
 
 interface UserData {
@@ -547,18 +548,9 @@ function AdminPageContent() {
 
 function BottomSheet({ onClose, title, children }: { onClose: () => void; title: string; children: React.ReactNode }) {
     return (
-        <>
-            <div className="fixed inset-0 bg-black/50 z-50 animate-fade-in" onClick={onClose} />
-            <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl animate-slide-up safe-area-bottom" style={{ maxHeight: '90vh' }}>
-                <div className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-border rounded-t-2xl">
-                    <div className="w-12 h-1.5 bg-border rounded-full mx-auto mb-3" />
-                    <h2 className="text-lg font-bold text-foreground">{title}</h2>
-                </div>
-                <div className="overflow-y-auto overscroll-contain p-6" style={{ maxHeight: 'calc(90vh - 70px)' }}>
-                    {children}
-                </div>
-            </div>
-        </>
+        <SwipeableSheet isOpen={true} onClose={onClose} title={title} maxHeight="90vh">
+            {children}
+        </SwipeableSheet>
     );
 }
 

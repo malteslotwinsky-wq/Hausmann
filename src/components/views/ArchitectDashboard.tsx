@@ -89,19 +89,22 @@ export function ArchitectDashboard({ project, onUpdateTaskStatus, onTogglePhotoV
 
                 {/* Tabs & Content */}
                 <div className="space-y-6">
-                    <div className="flex gap-1 bg-white p-1.5 rounded-xl border border-border inline-flex shadow-sm">
-                        {(['overview', 'tasks', 'photos'] as const).map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === tab
-                                    ? 'bg-primary text-white shadow-md'
-                                    : 'text-muted-foreground hover:text-primary hover:bg-gray-50'
-                                    }`}
-                            >
-                                {tab === 'overview' ? 'Detailliste' : tab === 'tasks' ? 'Aufgabenplanung' : 'Fotodokumentation'}
-                            </button>
-                        ))}
+                    {/* Mobile-optimized horizontal scrolling tabs */}
+                    <div className="overflow-x-auto no-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0">
+                        <div className="flex gap-1 bg-white p-1.5 rounded-xl border border-border inline-flex shadow-sm min-w-max">
+                            {(['overview', 'tasks', 'photos'] as const).map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`px-4 sm:px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${activeTab === tab
+                                        ? 'bg-primary text-white shadow-md'
+                                        : 'text-muted-foreground hover:text-primary hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {tab === 'overview' ? '📋 Detailliste' : tab === 'tasks' ? '✅ Aufgaben' : '📸 Fotos'}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {activeTab === 'overview' && <OverviewTab progress={progress} project={project} />}
