@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* BauLot Reference Palette */
+  /* BauLot Reference Palette - Light Mode */
   --background: #F1F5F9;
   --foreground: #0F172A;
 
@@ -31,6 +31,31 @@
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+/* Dark Mode Colors */
+.dark {
+  --background: #0F172A;
+  --foreground: #F1F5F9;
+
+  --primary: #F1F5F9;
+  --primary-light: #E2E8F0;
+  --primary-foreground: #0F172A;
+
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
+
+  --border: #334155;
+
+  --accent: #FB923C;
+  --accent-light: #FDBA74;
+  --accent-foreground: #0F172A;
+
+  --success: #34D399;
+  --error: #F87171;
+
+  --surface: #1E293B;
+  --surface-highlight: #334155;
 }
 
 @theme inline {
@@ -383,11 +408,15 @@ textarea {
    ============================================ */
 
 .card-mobile {
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border: 1px solid var(--border);
+}
+
+.dark .card-mobile {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .card-mobile-interactive {
@@ -421,7 +450,7 @@ textarea {
 
 .btn-mobile-primary {
   background: var(--primary);
-  color: white;
+  color: var(--primary-foreground);
 }
 
 .btn-mobile-secondary {
@@ -431,11 +460,32 @@ textarea {
 
 .btn-mobile-accent {
   background: var(--accent);
-  color: white;
+  color: var(--accent-foreground);
 }
 
 .btn-mobile-lg {
   padding: 18px 32px;
   font-size: 1.125rem;
   border-radius: 16px;
+}
+
+/* ============================================
+   DARK MODE COMPONENT OVERRIDES
+   ============================================ */
+
+.dark .bottom-sheet {
+  background: var(--surface);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dark .bottom-sheet-handle {
+  background: var(--border);
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg,
+      var(--muted) 0%,
+      var(--surface-highlight) 50%,
+      var(--muted) 100%);
+  background-size: 200% 100%;
 }

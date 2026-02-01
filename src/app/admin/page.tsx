@@ -189,9 +189,12 @@ function AdminPageContent() {
                 body: JSON.stringify(projectForm),
             });
             if (!res.ok) throw new Error((await res.json()).error);
+            const newProject = await res.json();
             showToast('Projekt erstellt', 'success');
             setShowProjectModal(false);
-            loadData();
+
+            // Navigate to project detail page for template import
+            router.push(`/admin/projects/${newProject.id}`);
         } catch (e: any) {
             showToast(e.message || 'Fehler', 'error');
         }
@@ -238,7 +241,7 @@ function AdminPageContent() {
         <AppShell currentPage="admin">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-0 z-30 bg-surface border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Verwaltung</h1>
                     <p className="text-sm text-muted-foreground">Projekte, Handwerker & Kunden verwalten</p>
                 </header>
@@ -405,7 +408,7 @@ function AdminPageContent() {
                                 <select
                                     value={projectForm.clientId}
                                     onChange={e => setProjectForm({ ...projectForm, clientId: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:border-accent outline-none text-base"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent outline-none text-base"
                                 >
                                     <option value="">— Keiner ausgewählt —</option>
                                     {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
@@ -454,7 +457,7 @@ function AdminPageContent() {
                                         min="1"
                                         value={projectForm.escalationHours}
                                         onChange={e => setProjectForm({ ...projectForm, escalationHours: parseInt(e.target.value) || 48 })}
-                                        className="w-24 px-4 py-3 rounded-xl border border-border bg-white text-center text-base"
+                                        className="w-24 px-4 py-3 rounded-xl border border-border bg-surface text-center text-base"
                                     />
                                     <span className="text-muted-foreground">Stunden bis Eskalation</span>
                                 </div>
@@ -504,7 +507,7 @@ function AdminPageContent() {
                             <select
                                 value={tradeForm.contractorId}
                                 onChange={e => setTradeForm({ ...tradeForm, contractorId: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:border-accent outline-none text-base"
+                                className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent outline-none text-base"
                             >
                                 <option value="">— Später zuweisen —</option>
                                 {contractors.map(c => <option key={c.id} value={c.id}>{c.name} {c.company ? `(${c.company})` : ''}</option>)}
@@ -588,7 +591,7 @@ function InputField({ label, value, onChange, placeholder, type = 'text' }: { la
     return (
         <div>
             <label className="block text-sm font-medium text-foreground mb-2">{label}</label>
-            <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-base" />
+            <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-base" />
         </div>
     );
 }

@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
 
 interface ProvidersProps {
     children: ReactNode;
@@ -10,7 +11,10 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
     return (
         <SessionProvider>
-            {children}
+            <ThemeProvider>
+                {children}
+            </ThemeProvider>
         </SessionProvider>
     );
 }
+

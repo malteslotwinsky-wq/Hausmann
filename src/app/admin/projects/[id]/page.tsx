@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
 import { CalendarIconButton } from '@/components/ui/CalendarExport';
+import { GanttTimeline } from '@/components/ui/GanttTimeline';
+import { DraggableList, DragHandle } from '@/components/ui/DraggableList';
 import { createProjectEvent, createTradeEvent } from '@/lib/calendar';
-import { TRADE_TEMPLATES, getTemplatesByCategory, TradeTemplate } from '@/lib/trade-templates';
+import { TRADE_TEMPLATES, getTemplatesByCategory, TradeTemplate, PROJECT_TEMPLATES } from '@/lib/trade-templates';
 import { Project, Trade, Role } from '@/types';
 
 interface UserData {
@@ -18,6 +20,8 @@ interface UserData {
     role: Role;
     company?: string;
 }
+
+type ViewMode = 'list' | 'timeline' | 'reorder';
 
 function ProjectDetailContent() {
     const { id } = useParams();
@@ -30,8 +34,10 @@ function ProjectDetailContent() {
     const [loading, setLoading] = useState(true);
     const [showTradeModal, setShowTradeModal] = useState(false);
     const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [showBulkImport, setShowBulkImport] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<TradeTemplate | null>(null);
     const [expandedTrade, setExpandedTrade] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<ViewMode>('list');
 
     // Trade Form
     const [tradeForm, setTradeForm] = useState({
@@ -146,6 +152,75 @@ function ProjectDetailContent() {
         setLoading(false);
     };
 
+    // Handle bulk import of multiple trades from a project template
+    const handleBulkImport = async (templateId: string) => {
+        const template = PROJECT_TEMPLATES.find(t => t.id === templateId);
+        if (!template || !project) return;
+
+        setLoading(true);
+        try {
+            let currentDate = new Date(project.startDate);
+
+            for (const tradeId of template.tradeIds) {
+                const tradeTemplate = TRADE_TEMPLATES.find(t => t.id === tradeId);
+                if (!tradeTemplate) continue;
+
+                const endDate = new Date(currentDate);
+                endDate.setDate(endDate.getDate() + tradeTemplate.typicalDurationDays);
+
+                await fetch(`/api/projects/${project.id}/trades`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: tradeTemplate.name,
+                        description: tradeTemplate.description,
+                        startDate: currentDate.toISOString().split('T')[0],
+                        endDate: endDate.toISOString().split('T')[0],
+                    }),
+                });
+
+                // Next trade starts after this one ends
+                currentDate = new Date(endDate);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            showToast(`${template.tradeIds.length} Gewerke importiert`, 'success');
+            setShowBulkImport(false);
+            loadProject();
+        } catch (e: any) {
+            showToast(e.message || 'Fehler beim Import', 'error');
+        }
+        setLoading(false);
+    };
+
+    // Handle trade reordering
+    const handleReorderTrades = useCallback(async (reorderedTrades: Trade[]) => {
+        if (!project) return;
+
+        // Optimistic update
+        setProject({
+            ...project,
+            trades: reorderedTrades.map((t, i) => ({ ...t, order: i + 1 })),
+        });
+
+        // Update on server (in background)
+        try {
+            await Promise.all(
+                reorderedTrades.map((trade, index) =>
+                    fetch(`/api/projects/${project.id}/trades/${trade.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ order: index + 1 }),
+                    })
+                )
+            );
+        } catch {
+            // Reload if update fails
+            loadProject();
+            showToast('Fehler beim Speichern der Reihenfolge', 'error');
+        }
+    }, [project]);
+
     if (loading) {
         return (
             <AppShell currentPage="admin">
@@ -179,7 +254,7 @@ function ProjectDetailContent() {
         <AppShell currentPage="admin">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-0 z-30 bg-surface border-b border-border px-4 py-4">
                     <div className="flex items-start justify-between">
                         <div>
                             <button
@@ -235,7 +310,7 @@ function ProjectDetailContent() {
                                             <button
                                                 key={template.id}
                                                 onClick={() => openTradeModal(template)}
-                                                className="flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg text-sm tap-active border border-border hover:border-accent"
+                                                className="flex items-center gap-1.5 px-3 py-2 bg-surface rounded-lg text-sm tap-active border border-border hover:border-accent"
                                             >
                                                 <span>{template.icon}</span>
                                                 <span>{template.name}</span>
@@ -252,26 +327,103 @@ function ProjectDetailContent() {
                 <div className="px-4 space-y-3">
                     <div className="flex items-center justify-between">
                         <h2 className="text-caption text-muted-foreground">GEWERKE</h2>
-                        <button
-                            onClick={() => openTradeModal()}
-                            className="text-sm text-accent font-medium tap-active"
-                        >
-                            + Benutzerdefiniert
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowBulkImport(true)}
+                                className="text-sm text-accent font-medium tap-active px-2"
+                            >
+                                📦 Import
+                            </button>
+                            <button
+                                onClick={() => openTradeModal()}
+                                className="text-sm text-accent font-medium tap-active"
+                            >
+                                + Neu
+                            </button>
+                        </div>
                     </div>
+
+                    {/* View Mode Toggle */}
+                    {project.trades && project.trades.length > 0 && (
+                        <div className="flex gap-1 bg-muted p-1 rounded-lg">
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`flex-1 py-2 text-sm rounded-md transition-all ${viewMode === 'list' ? 'bg-surface shadow-sm font-medium' : 'text-muted-foreground'
+                                    }`}
+                            >
+                                📋 Liste
+                            </button>
+                            <button
+                                onClick={() => setViewMode('timeline')}
+                                className={`flex-1 py-2 text-sm rounded-md transition-all ${viewMode === 'timeline' ? 'bg-surface shadow-sm font-medium' : 'text-muted-foreground'
+                                    }`}
+                            >
+                                📊 Timeline
+                            </button>
+                            <button
+                                onClick={() => setViewMode('reorder')}
+                                className={`flex-1 py-2 text-sm rounded-md transition-all ${viewMode === 'reorder' ? 'bg-surface shadow-sm font-medium' : 'text-muted-foreground'
+                                    }`}
+                            >
+                                ↕️ Sortieren
+                            </button>
+                        </div>
+                    )}
 
                     {!project.trades || project.trades.length === 0 ? (
                         <div className="card-mobile text-center py-12">
                             <span className="text-5xl block mb-3">🔧</span>
                             <p className="text-muted-foreground mb-4">Noch keine Gewerke</p>
-                            <button
-                                onClick={() => setShowQuickAdd(true)}
-                                className="text-accent font-medium tap-active"
-                            >
-                                Gewerke hinzufügen →
-                            </button>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setShowBulkImport(true)}
+                                    className="text-accent font-medium tap-active px-4 py-2 bg-accent/10 rounded-lg"
+                                >
+                                    📦 Vorlage importieren
+                                </button>
+                                <button
+                                    onClick={() => setShowQuickAdd(true)}
+                                    className="text-accent font-medium tap-active"
+                                >
+                                    Einzeln hinzufügen →
+                                </button>
+                            </div>
                         </div>
+                    ) : viewMode === 'timeline' ? (
+                        // Timeline View
+                        <GanttTimeline
+                            trades={project.trades}
+                            projectStartDate={new Date(project.startDate)}
+                            projectEndDate={new Date(project.targetEndDate)}
+                            onTradeClick={(trade) => setExpandedTrade(trade.id)}
+                        />
+                    ) : viewMode === 'reorder' ? (
+                        // Drag & Drop Reorder View
+                        <DraggableList
+                            items={project.trades}
+                            onReorder={handleReorderTrades}
+                            renderItem={(trade, index) => (
+                                <div className="card-mobile flex items-center gap-3">
+                                    <DragHandle />
+                                    <span className="text-lg font-medium text-muted-foreground w-6">
+                                        {index + 1}.
+                                    </span>
+                                    <div className="flex-1">
+                                        <p className="font-medium text-foreground">{trade.name}</p>
+                                        {trade.companyName && (
+                                            <p className="text-sm text-muted-foreground">{trade.companyName}</p>
+                                        )}
+                                    </div>
+                                    {trade.startDate && trade.endDate && (
+                                        <span className="text-xs text-muted-foreground">
+                                            {new Date(trade.startDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        />
                     ) : (
+                        // Default List View
                         project.trades.map((trade, index) => {
                             const isExpanded = expandedTrade === trade.id;
                             const tradeCalendarEvent = createTradeEvent(
@@ -355,6 +507,57 @@ function ProjectDetailContent() {
                 </div>
             </div>
 
+            {/* Bulk Import Modal */}
+            <SwipeableSheet
+                isOpen={showBulkImport}
+                onClose={() => setShowBulkImport(false)}
+                title="📦 Projekt-Vorlage importieren"
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                        Wähle eine Vorlage, um alle zugehörigen Gewerke automatisch hinzuzufügen.
+                        Die Termine werden automatisch verkettet.
+                    </p>
+
+                    {PROJECT_TEMPLATES.map(template => (
+                        <button
+                            key={template.id}
+                            onClick={() => handleBulkImport(template.id)}
+                            disabled={loading}
+                            className="w-full card-mobile text-left tap-active hover:border-accent transition-colors disabled:opacity-50"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="font-semibold text-foreground">{template.name}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        {template.tradeIds.length} Gewerke · ~{template.tradeIds.reduce((sum, id) => {
+                                            const t = TRADE_TEMPLATES.find(tt => tt.id === id);
+                                            return sum + (t?.typicalDurationDays || 0);
+                                        }, 0)} Tage
+                                    </p>
+                                </div>
+                                <span className="text-2xl">{template.icon}</span>
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-1">
+                                {template.tradeIds.slice(0, 5).map(tid => {
+                                    const t = TRADE_TEMPLATES.find(tt => tt.id === tid);
+                                    return t ? (
+                                        <span key={tid} className="text-xs bg-muted px-2 py-0.5 rounded">
+                                            {t.icon} {t.name}
+                                        </span>
+                                    ) : null;
+                                })}
+                                {template.tradeIds.length > 5 && (
+                                    <span className="text-xs text-muted-foreground">
+                                        +{template.tradeIds.length - 5} weitere
+                                    </span>
+                                )}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </SwipeableSheet>
+
             {/* Trade Modal */}
             <SwipeableSheet
                 isOpen={showTradeModal}
@@ -432,7 +635,7 @@ function ProjectDetailContent() {
                         <select
                             value={tradeForm.contractorId}
                             onChange={e => setTradeForm({ ...tradeForm, contractorId: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:border-accent outline-none text-base"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent outline-none text-base"
                         >
                             <option value="">— Später zuweisen —</option>
                             {contractors.map(c => (
@@ -474,7 +677,7 @@ function InputField({ label, value, onChange, placeholder, type = 'text' }: {
                 value={value}
                 onChange={e => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-base"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-base"
             />
         </div>
     );

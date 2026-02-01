@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
+import { ThemeSelector } from '@/components/ui/ThemeProvider';
 import { Role } from '@/types';
 
 export default function SettingsPage() {
@@ -18,28 +19,28 @@ export default function SettingsPage() {
             label: 'Meine Daten',
             href: '/settings/profile',
             description: 'Name, E-Mail und Passwort ändern',
-            color: 'bg-blue-100',
+            color: 'bg-blue-100 dark:bg-blue-900/30',
         },
         {
             icon: '🔔',
             label: 'Benachrichtigungen',
             href: '/settings/notifications',
             description: 'E-Mail und Push-Einstellungen',
-            color: 'bg-amber-100',
+            color: 'bg-amber-100 dark:bg-amber-900/30',
         },
         ...(role === 'contractor' ? [{
             icon: '🏗',
             label: 'Meine Projekte',
             href: '/settings/projects',
             description: 'Projektzuweisungen ansehen',
-            color: 'bg-green-100',
+            color: 'bg-green-100 dark:bg-green-900/30',
         }] : []),
         {
             icon: '❓',
             label: 'Hilfe & Support',
             href: '/settings/help',
             description: 'FAQ und Kontakt',
-            color: 'bg-purple-100',
+            color: 'bg-purple-100 dark:bg-purple-900/30',
         },
     ];
 
@@ -47,7 +48,7 @@ export default function SettingsPage() {
         <AppShell currentPage="dashboard">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-14 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-14 z-30 bg-surface border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Einstellungen</h1>
                     <p className="text-sm text-muted-foreground">Konto und App-Einstellungen</p>
                 </header>
@@ -70,8 +71,18 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
+                {/* Theme Section */}
+                <div className="px-4 mb-6">
+                    <h3 className="text-caption text-muted-foreground mb-3">ERSCHEINUNGSBILD</h3>
+                    <div className="card-mobile">
+                        <p className="text-sm text-muted-foreground mb-3">Wähle dein bevorzugtes Farbschema</p>
+                        <ThemeSelector />
+                    </div>
+                </div>
+
                 {/* Settings List */}
                 <div className="px-4 space-y-3">
+                    <h3 className="text-caption text-muted-foreground mb-1">KONTO</h3>
                     {settingsItems.map((item) => (
                         <Link
                             key={item.href}
@@ -106,3 +117,4 @@ export default function SettingsPage() {
         </AppShell>
     );
 }
+
