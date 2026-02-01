@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { Header } from './Header';
+import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 
 interface AppShellProps {
     children: ReactNode;
@@ -18,6 +19,9 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
 
     return (
         <div className="min-h-screen bg-background">
+            {/* Offline Status Indicator */}
+            <OfflineIndicator />
+
             {/* Desktop Sidebar - Fixed, hidden on mobile */}
             <aside className="hidden lg:block">
                 <Sidebar currentPage={currentPage} />
@@ -38,3 +42,4 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
         </div>
     );
 }
+

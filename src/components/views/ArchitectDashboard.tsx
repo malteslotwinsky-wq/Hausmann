@@ -7,6 +7,8 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { CircularProgress } from '@/components/ui/CircularProgress';
+import { CalendarIconButton } from '@/components/ui/CalendarExport';
+import { createProjectEvent, createTradeEvent } from '@/lib/calendar';
 import { calculateProjectProgress, formatDate, getDaysUntil } from '@/lib/utils';
 
 interface ArchitectDashboardProps {
