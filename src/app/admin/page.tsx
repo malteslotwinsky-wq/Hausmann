@@ -451,7 +451,18 @@ function AdminPageContent() {
 
             {/* ==================== TRADE CREATION MODAL ==================== */}
             {showTradeModal && selectedProject && (
-                <BottomSheet onClose={() => setShowTradeModal(false)} title={`Gewerk für "${selectedProject.name}"`}>
+                <BottomSheet
+                    onClose={() => setShowTradeModal(false)}
+                    title={`Gewerk für "${selectedProject.name}"`}
+                    footer={
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowTradeModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">Abbrechen</button>
+                            <button onClick={handleSaveTrade} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
+                                {loading ? 'Speichern...' : 'Gewerk anlegen ✓'}
+                            </button>
+                        </div>
+                    }
+                >
                     <div className="space-y-4">
                         <InputField label="Gewerk-Bezeichnung *" value={tradeForm.name} onChange={v => setTradeForm({ ...tradeForm, name: v })} placeholder="z.B. Sanitär-Rohinstallation" />
                         <InputField label="Firma" value={tradeForm.companyName} onChange={v => setTradeForm({ ...tradeForm, companyName: v })} placeholder="Elektro Meier GmbH" />
@@ -482,20 +493,24 @@ function AdminPageContent() {
                             <input type="checkbox" checked={tradeForm.canCreateSubtasks} onChange={e => setTradeForm({ ...tradeForm, canCreateSubtasks: e.target.checked })} className="w-5 h-5 rounded accent-accent" />
                             <span className="text-foreground">Handwerker darf Unteraufträge anlegen</span>
                         </label>
-
-                        <div className="flex gap-3 pt-4">
-                            <button onClick={() => setShowTradeModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">Abbrechen</button>
-                            <button onClick={handleSaveTrade} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
-                                {loading ? 'Speichern...' : 'Gewerk anlegen ✓'}
-                            </button>
-                        </div>
                     </div>
                 </BottomSheet>
             )}
 
             {/* ==================== USER MODAL ==================== */}
             {showUserModal && (
-                <BottomSheet onClose={() => setShowUserModal(false)} title={editingUser ? 'Benutzer bearbeiten' : 'Neuer Benutzer'}>
+                <BottomSheet
+                    onClose={() => setShowUserModal(false)}
+                    title={editingUser ? 'Benutzer bearbeiten' : 'Neuer Benutzer'}
+                    footer={
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowUserModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">Abbrechen</button>
+                            <button onClick={handleSaveUser} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
+                                {loading ? 'Speichern...' : (editingUser ? 'Speichern' : 'Erstellen')}
+                            </button>
+                        </div>
+                    }
+                >
                     <div className="space-y-4">
                         {!editingUser && (
                             <div className="grid grid-cols-2 gap-2">
@@ -530,13 +545,6 @@ function AdminPageContent() {
                                 </div>
                             )}
                         </div>
-
-                        <div className="flex gap-3 pt-4">
-                            <button onClick={() => setShowUserModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">Abbrechen</button>
-                            <button onClick={handleSaveUser} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
-                                {loading ? 'Speichern...' : (editingUser ? 'Speichern' : 'Erstellen')}
-                            </button>
-                        </div>
                     </div>
                 </BottomSheet>
             )}
@@ -546,9 +554,9 @@ function AdminPageContent() {
 
 // ==================== HELPER COMPONENTS ====================
 
-function BottomSheet({ onClose, title, children }: { onClose: () => void; title: string; children: React.ReactNode }) {
+function BottomSheet({ onClose, title, children, footer }: { onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode }) {
     return (
-        <SwipeableSheet isOpen={true} onClose={onClose} title={title} maxHeight="90vh">
+        <SwipeableSheet isOpen={true} onClose={onClose} title={title} maxHeight="85dvh" footer={footer}>
             {children}
         </SwipeableSheet>
     );

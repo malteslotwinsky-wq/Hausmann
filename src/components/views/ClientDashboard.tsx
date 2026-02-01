@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { CircularProgress } from '@/components/ui/CircularProgress';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SimpleStatusBadge } from '@/components/ui/StatusBadge';
+import { CalendarIconButton } from '@/components/ui/CalendarExport';
+import { createProjectEvent } from '@/lib/calendar';
 import { calculateProjectProgress, getSimplifiedStatus, formatDate, getDaysUntil } from '@/lib/utils';
 
 interface ClientDashboardProps {
@@ -15,13 +17,27 @@ export function ClientDashboard({ project }: ClientDashboardProps) {
     const progress = calculateProjectProgress(project);
     const daysRemaining = getDaysUntil(project.targetEndDate);
 
+    // Create calendar event for the project
+    const projectCalendarEvent = createProjectEvent(
+        project.name,
+        project.address,
+        new Date(project.startDate),
+        new Date(project.targetEndDate)
+    );
+
     return (
         <div className="min-h-screen bg-background safe-area-top">
             {/* === HEADER === */}
             <header className="px-5 pt-6 pb-4 bg-white border-b border-border">
-                <p className="text-caption text-muted-foreground mb-1">MEIN BAUPROJEKT</p>
-                <h1 className="text-headline text-foreground">{project.name}</h1>
-                <p className="text-sm text-muted-foreground mt-1">{project.address}</p>
+                <div className="flex items-start justify-between">
+                    <div>
+                        <p className="text-caption text-muted-foreground mb-1">MEIN BAUPROJEKT</p>
+                        <h1 className="text-headline text-foreground">{project.name}</h1>
+                        <p className="text-sm text-muted-foreground mt-1">{project.address}</p>
+                    </div>
+                    {/* Calendar Export Button */}
+                    <CalendarIconButton event={projectCalendarEvent} size="lg" />
+                </div>
             </header>
 
             {/* === MAIN CONTENT === */}

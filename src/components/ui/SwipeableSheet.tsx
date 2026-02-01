@@ -7,6 +7,7 @@ interface SwipeableSheetProps {
     onClose: () => void;
     title?: string;
     children: ReactNode;
+    footer?: ReactNode;
     maxHeight?: string;
 }
 
@@ -15,7 +16,8 @@ export function SwipeableSheet({
     onClose,
     title,
     children,
-    maxHeight = '90vh'
+    footer,
+    maxHeight = '85dvh'
 }: SwipeableSheetProps) {
     const sheetRef = useRef<HTMLDivElement>(null);
     const [translateY, setTranslateY] = useState(0);
@@ -24,7 +26,7 @@ export function SwipeableSheet({
     const startY = useRef(0);
     const currentY = useRef(0);
 
-    const CLOSE_THRESHOLD = 100; // Pixels to swipe down before closing
+    const CLOSE_THRESHOLD = 100;
 
     // Lock body scroll when open
     useEffect(() => {
@@ -48,7 +50,6 @@ export function SwipeableSheet({
     }, [onClose]);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        // Only allow swipe on the handle area or when at top of scroll
         const target = e.target as HTMLElement;
         const isHandle = target.closest('[data-swipe-handle]');
         const scrollContainer = sheetRef.current?.querySelector('[data-scroll-container]');
@@ -67,10 +68,8 @@ export function SwipeableSheet({
         currentY.current = e.touches[0].clientY;
         const deltaY = currentY.current - startY.current;
 
-        // Only allow downward swipe
         if (deltaY > 0) {
             setTranslateY(deltaY);
-            // Prevent default when swiping to avoid page scroll
             e.preventDefault();
         }
     }, [isDragging]);
@@ -83,7 +82,6 @@ export function SwipeableSheet({
         if (translateY > CLOSE_THRESHOLD) {
             handleClose();
         } else {
-            // Snap back
             setTranslateY(0);
         }
     }, [isDragging, translateY, handleClose]);
@@ -98,19 +96,23 @@ export function SwipeableSheet({
         transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
     };
 
+    // Calculate content max height based on whether footer exists
+    const headerHeight = title ? 70 : 50;
+    const footerHeight = footer ? 80 : 0;
+    const contentMaxHeight = `calc(${maxHeight} - ${headerHeight}px - ${footerHeight}px - env(safe-area-inset-bottom, 0px))`;
+
     return (
         <>
             {/* Backdrop */}
             <div
-                className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'animate-fade-in'
-                    }`}
+                className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'animate-fade-in'}`}
                 onClick={handleClose}
             />
 
             {/* Sheet */}
             <div
                 ref={sheetRef}
-                className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl safe-area-bottom"
+                className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl flex flex-col"
                 style={sheetStyle}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -119,7 +121,7 @@ export function SwipeableSheet({
                 {/* Handle */}
                 <div
                     data-swipe-handle
-                    className="sticky top-0 bg-white pt-3 pb-2 px-6 border-b border-border rounded-t-2xl cursor-grab active:cursor-grabbing"
+                    className="flex-shrink-0 bg-white pt-3 pb-2 px-6 border-b border-border rounded-t-2xl cursor-grab active:cursor-grabbing"
                 >
                     <div className="w-12 h-1.5 bg-border rounded-full mx-auto mb-3 hover:bg-muted-foreground/30 transition-colors" />
                     {title && (
@@ -127,15 +129,26 @@ export function SwipeableSheet({
                     )}
                 </div>
 
-                {/* Content */}
+                {/* Content - scrollable */}
                 <div
                     data-scroll-container
-                    className="overflow-y-auto overscroll-contain p-6"
-                    style={{ maxHeight: `calc(${maxHeight} - 70px)` }}
+                    className="flex-1 overflow-y-auto overscroll-contain px-6 py-4"
+                    style={{ maxHeight: contentMaxHeight }}
                 >
                     {children}
                 </div>
+
+                {/* Sticky Footer */}
+                {footer && (
+                    <div
+                        className="flex-shrink-0 bg-white border-t border-border px-6 py-4"
+                        style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+                    >
+                        {footer}
+                    </div>
+                )}
             </div>
         </>
     );
 }
+
