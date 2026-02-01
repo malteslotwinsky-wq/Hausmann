@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
+import { PROJECT_TEMPLATES } from '@/lib/trade-templates';
 import { Role, Project, Trade, PhotoApprovalMode } from '@/types';
 
 interface UserData {
@@ -22,6 +24,7 @@ const DEFAULT_PHASES = ['Erdarbeiten', 'Rohbau', 'Innenausbau', 'Fertigstellung'
 function AdminPageContent() {
     const { data: session, status } = useSession();
     const { showToast } = useToast();
+    const router = useRouter();
 
     const [activeTab, setActiveTab] = useState<'contractors' | 'clients' | 'projects'>('projects');
     const [users, setUsers] = useState<UserData[]>([]);
@@ -284,16 +287,24 @@ function AdminPageContent() {
                                     ) : (
                                         projects.map(project => (
                                             <div key={project.id} className="card-mobile">
-                                                <div className="flex items-start justify-between mb-3">
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="font-semibold text-foreground">{project.name}</h3>
-                                                        <p className="text-sm text-muted-foreground truncate">{project.address}</p>
+                                                <button
+                                                    onClick={() => router.push(`/admin/projects/${project.id}`)}
+                                                    className="w-full text-left tap-active"
+                                                >
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-semibold text-foreground">{project.name}</h3>
+                                                            <p className="text-sm text-muted-foreground truncate">{project.address}</p>
+                                                            <p className="text-xs text-muted-foreground mt-1">
+                                                                {new Date(project.startDate).toLocaleDateString('de-DE')} – {new Date(project.targetEndDate).toLocaleDateString('de-DE')}
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right ml-4">
+                                                            <span className="text-2xl font-bold text-accent">{project.trades?.length || 0}</span>
+                                                            <p className="text-xs text-muted-foreground">Gewerke</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-right ml-4">
-                                                        <span className="text-2xl font-bold text-accent">{project.trades?.length || 0}</span>
-                                                        <p className="text-xs text-muted-foreground">Gewerke</p>
-                                                    </div>
-                                                </div>
+                                                </button>
                                                 {/* Trades list */}
                                                 {project.trades && project.trades.length > 0 && (
                                                     <div className="space-y-1 mb-3">
@@ -308,9 +319,20 @@ function AdminPageContent() {
                                                         )}
                                                     </div>
                                                 )}
-                                                <button onClick={() => openAddTrade(project)} className="w-full py-2.5 text-sm text-accent font-medium bg-accent/10 rounded-lg tap-active">
-                                                    + Gewerk hinzufügen
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => router.push(`/admin/projects/${project.id}`)}
+                                                        className="flex-1 py-2.5 text-sm text-foreground font-medium bg-muted rounded-lg tap-active"
+                                                    >
+                                                        📋 Details
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openAddTrade(project)}
+                                                        className="flex-1 py-2.5 text-sm text-accent font-medium bg-accent/10 rounded-lg tap-active"
+                                                    >
+                                                        + Gewerk
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))
                                     )}
