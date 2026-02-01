@@ -37,7 +37,7 @@ export function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-40 bg-white border-b border-border h-14 lg:ml-56">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border h-14 lg:ml-56 transition-colors duration-300">
             <div className="h-full px-4 lg:px-6 flex items-center justify-between">
                 {/* Left: Page Title */}
                 <div className="flex items-center gap-3">

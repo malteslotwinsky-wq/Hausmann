@@ -26,7 +26,7 @@ export function Sidebar({ currentPage }: SidebarProps) {
     const visibleItems = menuItems.filter(item => !role || !item.hideFor?.includes(role));
 
     return (
-        <div className="w-56 bg-primary text-white flex flex-col h-screen fixed left-0 top-0 z-50">
+        <div className="w-56 bg-slate-900 text-white flex flex-col h-screen fixed left-0 top-0 z-50 transition-colors duration-300">
             {/* Logo / Brand */}
             <div className="p-5 border-b border-white/10">
                 <Link href="/" className="flex items-center gap-3">

@@ -50,18 +50,18 @@ export function ContractorDashboard({
     };
 
     return (
-        <div className="min-h-screen bg-primary text-white safe-area-top">
+        <div className="min-h-screen bg-background text-foreground safe-area-top">
             {/* === HEADER === */}
             <header className="px-5 pt-6 pb-4">
-                <p className="text-caption text-white/50 mb-1">MEIN BAUPROJEKT</p>
-                <h1 className="text-headline text-white">{project.name}</h1>
+                <p className="text-caption text-muted-foreground mb-1">MEIN BAUPROJEKT</p>
+                <h1 className="text-headline text-foreground">{project.name}</h1>
             </header>
 
             {/* === MAIN CONTENT === */}
             <main className="px-4 pb-32 space-y-6 animate-fade-in">
                 {/* Hero Card: Current Task */}
                 {currentTask && (
-                    <section className="card-mobile bg-white text-foreground animate-scale-in">
+                    <section className="card-mobile animate-scale-in">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-title">Aktuelle Aufgabe</h2>
                             <StatusBadge status={currentTask.status} size="sm" />
@@ -79,7 +79,7 @@ export function ContractorDashboard({
                         <div className="grid grid-cols-2 gap-4">
                             <button
                                 onClick={() => handleAction('start')}
-                                className="btn-mobile btn-mobile-lg bg-primary-light text-white tap-active-strong flex flex-col items-center gap-2"
+                                className="btn-mobile btn-mobile-lg bg-primary text-primary-foreground tap-active-strong flex flex-col items-center gap-2"
                             >
                                 <span className="text-2xl">🚛</span>
                                 <span>In Anfahrt</span>
@@ -117,17 +117,17 @@ export function ContractorDashboard({
                 {/* Upcoming Tasks */}
                 {upcomingTasks.length > 0 && (
                     <section>
-                        <h3 className="text-caption text-white/50 mb-3 px-1">DEMNÄCHST</h3>
+                        <h3 className="text-caption text-muted-foreground mb-3 px-1">DEMNÄCHST</h3>
                         <div className="space-y-3">
                             {upcomingTasks.map((task, index) => (
                                 <div
                                     key={task.id}
-                                    className="card-mobile card-mobile-interactive bg-primary-light text-white flex items-center justify-between tap-active"
+                                    className="card-mobile card-mobile-interactive bg-muted/50 text-foreground flex items-center justify-between tap-active"
                                     style={{ animationDelay: `${index * 50}ms` }}
                                 >
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium truncate">{task.title}</p>
-                                        <p className="text-xs text-white/50 mt-0.5">
+                                        <p className="text-xs text-muted-foreground mt-0.5">
                                             {task.dueDate ? formatDate(task.dueDate) : 'Kein Datum'}
                                         </p>
                                     </div>

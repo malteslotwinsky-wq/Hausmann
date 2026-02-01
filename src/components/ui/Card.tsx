@@ -9,12 +9,12 @@ interface CardProps {
 
 export function Card({ children, className = '', onClick, hover = false }: CardProps) {
     const hoverClasses = hover
-        ? 'cursor-pointer hover:shadow-md hover:border-gray-300 transition-all duration-200'
+        ? 'cursor-pointer hover:shadow-md hover:border-accent/50 transition-all duration-200'
         : '';
 
     return (
         <div
-            className={`bg-white rounded-xl border border-gray-200 shadow-sm ${hoverClasses} ${className}`}
+            className={`bg-surface rounded-xl border border-border shadow-sm ${hoverClasses} ${className}`}
             onClick={onClick}
         >
             {children}
@@ -29,7 +29,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ children, className = '' }: CardHeaderProps) {
     return (
-        <div className={`px-4 py-3 border-b border-gray-100 ${className}`}>
+        <div className={`px-4 py-3 border-b border-border ${className}`}>
             {children}
         </div>
     );
@@ -55,7 +55,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
     return (
-        <div className={`px-4 py-3 border-t border-gray-100 bg-gray-50 rounded-b-xl ${className}`}>
+        <div className={`px-4 py-3 border-t border-border bg-muted rounded-b-xl ${className}`}>
             {children}
         </div>
     );

@@ -17,10 +17,10 @@ export function StatusBadge({ status, showLabel = true, size = 'md' }: StatusBad
         : 'text-sm px-3 py-1';
 
     const bgColors: Record<TaskStatus, string> = {
-        open: 'bg-gray-100',
-        in_progress: 'bg-blue-50',
-        done: 'bg-green-50',
-        blocked: 'bg-orange-50',
+        open: 'bg-muted',
+        in_progress: 'bg-blue-500/10',
+        done: 'bg-green-500/10',
+        blocked: 'bg-orange-500/10',
     };
 
     return (
@@ -38,9 +38,9 @@ interface SimpleStatusBadgeProps {
 
 export function SimpleStatusBadge({ status, showLabel = true }: SimpleStatusBadgeProps) {
     const config = {
-        not_started: { icon: '○', color: 'text-gray-400', bg: 'bg-gray-100', label: 'Nicht gestartet' },
-        in_progress: { icon: '→', color: 'text-blue-500', bg: 'bg-blue-50', label: 'In Arbeit' },
-        completed: { icon: '✓', color: 'text-green-600', bg: 'bg-green-50', label: 'Abgeschlossen' },
+        not_started: { icon: '○', color: 'text-muted-foreground', bg: 'bg-muted', label: 'Nicht gestartet' },
+        in_progress: { icon: '→', color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'In Arbeit' },
+        completed: { icon: '✓', color: 'text-green-500', bg: 'bg-green-500/10', label: 'Abgeschlossen' },
     };
 
     const { icon, color, bg, label } = config[status];
