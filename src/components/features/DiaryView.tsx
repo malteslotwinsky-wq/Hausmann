@@ -41,8 +41,8 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900">Bautagebuch</h2>
-                    <p className="text-sm text-gray-500">{project.name}</p>
+                    <h2 className="text-xl font-bold text-foreground">Bautagebuch</h2>
+                    <p className="text-sm text-muted-foreground">{project.name}</p>
                 </div>
                 <Button onClick={handleExportPDF} icon={<span>📄</span>}>
                     PDF Export
@@ -53,8 +53,8 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
             <div className="grid grid-cols-3 gap-3">
                 <Card>
                     <CardContent className="py-4 text-center">
-                        <span className="text-2xl font-bold text-gray-900">{diaryEntries.length}</span>
-                        <p className="text-xs text-gray-500">Tage dokumentiert</p>
+                        <span className="text-2xl font-bold text-foreground">{diaryEntries.length}</span>
+                        <p className="text-xs text-muted-foreground">Tage dokumentiert</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -62,7 +62,7 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
                         <span className="text-2xl font-bold text-blue-600">
                             {diaryEntries.reduce((sum, e) => sum + e.items.filter(i => i.type === 'photo').length, 0)}
                         </span>
-                        <p className="text-xs text-gray-500">Fotos</p>
+                        <p className="text-xs text-muted-foreground">Fotos</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -70,7 +70,7 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
                         <span className="text-2xl font-bold text-green-600">
                             {diaryEntries.reduce((sum, e) => sum + e.items.filter(i => i.type === 'status_change').length, 0)}
                         </span>
-                        <p className="text-xs text-gray-500">Statusänderungen</p>
+                        <p className="text-xs text-muted-foreground">Statusänderungen</p>
                     </CardContent>
                 </Card>
             </div>
@@ -88,20 +88,20 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
                     {diaryEntries.map((entry, idx) => (
                         <div key={idx} className="relative">
                             {/* Date Header */}
-                            <div className="sticky top-16 z-10 bg-gray-50 py-2">
+                            <div className="sticky top-16 z-10 bg-background py-2 border-b border-border/50 mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-3 h-3 rounded-full bg-blue-500" />
-                                    <h3 className="font-semibold text-gray-900">
+                                    <h3 className="font-semibold text-foreground">
                                         {formatDiaryDate(entry.date)}
                                     </h3>
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-muted-foreground">
                                         {entry.items.length} Einträge
                                     </span>
                                 </div>
                             </div>
 
                             {/* Day's Entries */}
-                            <div className="ml-6 border-l-2 border-gray-200 pl-6 space-y-4 pt-2 pb-4">
+                            <div className="ml-6 border-l-2 border-border pl-6 space-y-4 pt-2 pb-4">
                                 {entry.items.map((item) => (
                                     <DiaryItemCard key={item.id} item={item} />
                                 ))}
@@ -116,32 +116,32 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
 
 function DiaryItemCard({ item }: { item: DiaryItem }) {
     const typeConfig = {
-        status_change: { icon: '✓', bgColor: 'bg-green-50', iconColor: 'text-green-600' },
-        photo: { icon: '📷', bgColor: 'bg-blue-50', iconColor: 'text-blue-600' },
-        comment: { icon: '💬', bgColor: 'bg-purple-50', iconColor: 'text-purple-600' },
+        status_change: { icon: '✓', bgColor: 'bg-green-500/10 text-green-500', iconColor: 'text-green-500' },
+        photo: { icon: '📷', bgColor: 'bg-blue-500/10 text-blue-500', iconColor: 'text-blue-500' },
+        comment: { icon: '💬', bgColor: 'bg-purple-500/10 text-purple-500', iconColor: 'text-purple-500' },
     };
 
     const config = typeConfig[item.type];
 
     return (
-        <Card className={`${config.bgColor} border-none`}>
+        <Card className={`${config.bgColor} border border-border/10`}>
             <CardContent className="py-4">
                 <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-xl ${config.bgColor} flex items-center justify-center text-xl`}>
+                    <div className={`w-10 h-10 rounded-xl bg-background/50 flex items-center justify-center text-xl`}>
                         {config.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-gray-900">{item.tradeName}</span>
-                            <span className="text-gray-400">·</span>
-                            <span className="text-sm text-gray-600 truncate">{item.taskTitle}</span>
+                            <span className="font-medium text-foreground">{item.tradeName}</span>
+                            <span className="text-muted-foreground">·</span>
+                            <span className="text-sm text-muted-foreground truncate">{item.taskTitle}</span>
                         </div>
-                        <p className="text-sm text-gray-700">{item.content}</p>
+                        <p className="text-sm text-foreground/80">{item.content}</p>
 
                         {/* Photo Preview */}
                         {item.photo && (
                             <div className="mt-3 inline-block">
-                                <div className="w-32 h-24 bg-gray-200 rounded-lg flex items-center justify-center text-3xl text-gray-400">
+                                <div className="w-32 h-24 bg-muted rounded-lg flex items-center justify-center text-3xl text-muted-foreground/50">
                                     📷
                                 </div>
                                 {item.photo.caption && (
@@ -152,12 +152,12 @@ function DiaryItemCard({ item }: { item: DiaryItem }) {
 
                         {/* Comment Author */}
                         {item.comment && (
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                                 — {item.comment.authorName}
                             </p>
                         )}
 
-                        <p className="text-xs text-gray-400 mt-2">
+                        <p className="text-xs text-muted-foreground/60 mt-2">
                             {formatTime(item.timestamp)}
                         </p>
                     </div>

@@ -29,8 +29,8 @@ export function ActivityFeed({ project, role }: ActivityFeedProps) {
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Aktivitäten</h2>
-                <span className="text-sm text-gray-500">{activities.length} Einträge</span>
+                <h2 className="text-xl font-bold text-foreground">Aktivitäten</h2>
+                <span className="text-sm text-muted-foreground">{activities.length} Einträge</span>
             </div>
 
             {/* Empty State */}
@@ -38,7 +38,7 @@ export function ActivityFeed({ project, role }: ActivityFeedProps) {
                 <Card>
                     <CardContent className="py-16 text-center">
                         <span className="text-6xl block mb-4">🔔</span>
-                        <p className="text-gray-500">Noch keine Aktivitäten</p>
+                        <p className="text-muted-foreground">Noch keine Aktivitäten</p>
                     </CardContent>
                 </Card>
             )}
@@ -67,10 +67,10 @@ function ActivityCard({ activity, showLine }: { activity: ActivityItem; showLine
         <div className="flex gap-4">
             {/* Timeline */}
             <div className="flex flex-col items-center">
-                <div className={`w-10 h-10 ${config.color} rounded-full flex items-center justify-center text-white text-lg shadow-sm`}>
+                <div className={`w-10 h-10 ${config.color} rounded-full flex items-center justify-center text-white text-lg shadow-sm border border-border`}>
                     {config.icon}
                 </div>
-                {showLine && <div className="w-0.5 flex-1 bg-gray-200 my-1" />}
+                {showLine && <div className="w-0.5 flex-1 bg-border my-1" />}
             </div>
 
             {/* Content */}
@@ -80,28 +80,28 @@ function ActivityCard({ activity, showLine }: { activity: ActivityItem; showLine
                         <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-medium text-gray-900">{activity.title}</span>
+                                    <span className="font-medium text-foreground">{activity.title}</span>
                                     {activity.isNew && (
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">
+                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 font-medium">
                                             NEU
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-sm text-gray-600 mt-0.5">{activity.description}</p>
-                                <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                                <p className="text-sm text-muted-foreground mt-0.5">{activity.description}</p>
+                                <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground/60">
                                     <span>{activity.tradeName}</span>
                                     <span>·</span>
                                     <span className="truncate">{activity.taskTitle}</span>
                                 </div>
                             </div>
-                            <div className="text-right text-xs text-gray-400 whitespace-nowrap ml-4">
+                            <div className="text-right text-xs text-muted-foreground/60 whitespace-nowrap ml-4">
                                 <p>{formatDate(activity.timestamp)}</p>
                                 <p>{formatTime(activity.timestamp)}</p>
                             </div>
                         </div>
                         {activity.author && (
-                            <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
-                                von <span className="font-medium text-gray-700">{activity.author}</span>
+                            <div className="mt-2 pt-2 border-t border-border text-xs text-muted-foreground">
+                                von <span className="font-medium text-foreground">{activity.author}</span>
                             </div>
                         )}
                     </CardContent>

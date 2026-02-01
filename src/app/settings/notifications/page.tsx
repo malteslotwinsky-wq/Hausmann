@@ -60,7 +60,7 @@ function NotificationsPageContent() {
         <AppShell currentPage="dashboard">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-14 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-14 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.back()}
@@ -117,12 +117,12 @@ function NotificationsPageContent() {
                     </section>
 
                     {/* Info */}
-                    <div className="card-mobile bg-blue-50 border-blue-100">
+                    <div className="card-mobile bg-blue-500/10 border-blue-500/20">
                         <div className="flex gap-3">
                             <span className="text-xl">💡</span>
-                            <div className="text-sm text-blue-800">
+                            <div className="text-sm text-blue-500">
                                 <p className="font-medium mb-1">Push-Benachrichtigungen</p>
-                                <p className="text-blue-600">
+                                <p className="text-blue-500/80">
                                     Um Push-Benachrichtigungen zu erhalten, müssen Sie die BauLot-App installieren
                                     und die Benachrichtigungen in Ihren Geräteeinstellungen aktivieren.
                                 </p>

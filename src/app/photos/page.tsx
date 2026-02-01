@@ -53,7 +53,7 @@ function PhotosPageContent() {
         <AppShell currentPage="photos">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Fotos</h1>
                     <p className="text-sm text-muted-foreground">
                         {visiblePhotos.length} {role === 'client' ? 'freigegebene' : ''} Fotos
@@ -122,7 +122,7 @@ function PhotosPageContent() {
                                         text-[10px] px-2 py-1 rounded-full font-medium shadow-sm
                                         ${photo.visibility === 'client'
                                             ? 'bg-green-500 text-white'
-                                            : 'bg-primary text-white'
+                                            : 'bg-slate-900 text-white'
                                         }
                                     `}>
                                         {photo.visibility === 'client' ? '👁' : '🔒'}

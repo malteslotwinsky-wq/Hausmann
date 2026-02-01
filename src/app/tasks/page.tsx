@@ -70,18 +70,19 @@ function TasksPageContent() {
     };
 
     const filterConfig = [
-        { id: 'all', label: 'Alle', count: stats.all, color: 'bg-primary text-white' },
-        { id: 'open', label: 'Offen', count: stats.open, color: 'bg-gray-100 text-gray-700' },
-        { id: 'in_progress', label: 'In Arbeit', count: stats.in_progress, color: 'bg-blue-100 text-blue-700' },
-        { id: 'done', label: 'Erledigt', count: stats.done, color: 'bg-green-100 text-green-700' },
-        { id: 'blocked', label: 'Blockiert', count: stats.blocked, color: 'bg-orange-100 text-orange-700' },
+        { id: 'all', label: 'Alle', count: stats.all, color: 'bg-primary text-primary-foreground' },
+        { id: 'open', label: 'Offen', count: stats.open, color: 'bg-muted text-foreground' },
+        { id: 'in_progress', label: 'In Arbeit', count: stats.in_progress, color: 'bg-blue-500/10 text-blue-500' },
+        { id: 'done', label: 'Erledigt', count: stats.done, color: 'bg-green-500/10 text-green-500' },
+        { id: 'blocked', label: 'Blockiert', count: stats.blocked, color: 'bg-orange-500/10 text-orange-500' },
     ];
 
     return (
         <AppShell currentPage="tasks">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white border-b border-border px-4 py-4">
+                {/* Header */}
+                <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Aufgaben</h1>
                     <p className="text-sm text-muted-foreground">{project.name}</p>
                 </header>
@@ -139,7 +140,7 @@ function TasksPageContent() {
                                     </div>
                                 </div>
                                 {task.blockedReason && (
-                                    <p className="mt-2 text-sm text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg">
+                                    <p className="mt-2 text-sm text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-lg">
                                         ⚠ {task.blockedReason}
                                     </p>
                                 )}

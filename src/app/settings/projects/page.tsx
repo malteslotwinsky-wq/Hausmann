@@ -43,7 +43,7 @@ function ProjectsPageContent() {
         <AppShell currentPage="dashboard">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-14 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-14 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.back()}

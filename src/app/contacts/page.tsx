@@ -111,7 +111,7 @@ function ContactsPageContent() {
         <AppShell currentPage="contacts">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white border-b border-border px-4 py-4">
+                <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Kontakte</h1>
                     <p className="text-sm text-muted-foreground">{contacts.length} Kontakte</p>
                 </header>
