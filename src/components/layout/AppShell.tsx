@@ -9,7 +9,7 @@ import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
 
 interface AppShellProps {
     children: ReactNode;
-    currentPage?: 'dashboard' | 'tasks' | 'photos' | 'diary' | 'activity' | 'contacts' | 'admin';
+    currentPage?: 'dashboard' | 'tasks' | 'photos' | 'diary' | 'activity' | 'contacts' | 'admin' | 'settings';
 }
 
 export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps) {

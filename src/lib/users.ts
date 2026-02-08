@@ -37,8 +37,8 @@ export async function findUserByEmail(email: string): Promise<StoredUser | null>
 /**
  * Validate password against stored hash
  */
-export function validatePassword(plainPassword: string, hashedPassword: string): boolean {
-    return bcrypt.compareSync(plainPassword, hashedPassword);
+export async function validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(plainPassword, hashedPassword);
 }
 
 /**
@@ -80,7 +80,7 @@ export async function createUser(
     const existing = await findUserByEmail(email);
     if (existing) return null;
 
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const { data, error } = await supabase
         .from('users')

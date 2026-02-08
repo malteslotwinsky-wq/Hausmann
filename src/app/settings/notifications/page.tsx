@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
@@ -19,20 +19,37 @@ function NotificationsPageContent() {
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
 
-    const [emailSettings, setEmailSettings] = useState<NotificationSetting[]>([
+    const defaultEmailSettings: NotificationSetting[] = [
         { id: 'email_tasks', label: 'Aufgaben-Updates', description: 'Bei neuen oder geänderten Aufgaben', enabled: true },
         { id: 'email_photos', label: 'Neue Fotos', description: 'Wenn Fotos hochgeladen werden', enabled: true },
         { id: 'email_comments', label: 'Kommentare', description: 'Bei neuen Kommentaren', enabled: false },
         { id: 'email_blocked', label: 'Blockierte Aufgaben', description: 'Bei Behinderungsanzeigen', enabled: true },
         { id: 'email_weekly', label: 'Wochenbericht', description: 'Wöchentliche Zusammenfassung', enabled: true },
-    ]);
+    ];
 
-    const [pushSettings, setPushSettings] = useState<NotificationSetting[]>([
+    const defaultPushSettings: NotificationSetting[] = [
         { id: 'push_tasks', label: 'Aufgaben-Updates', description: 'Bei neuen oder geänderten Aufgaben', enabled: true },
         { id: 'push_photos', label: 'Neue Fotos', description: 'Wenn Fotos hochgeladen werden', enabled: false },
         { id: 'push_comments', label: 'Kommentare', description: 'Bei neuen Kommentaren', enabled: true },
         { id: 'push_blocked', label: 'Blockierte Aufgaben', description: 'Bei Behinderungsanzeigen', enabled: true },
-    ]);
+    ];
+
+    const [emailSettings, setEmailSettings] = useState<NotificationSetting[]>(defaultEmailSettings);
+    const [pushSettings, setPushSettings] = useState<NotificationSetting[]>(defaultPushSettings);
+
+    // Load saved settings from localStorage
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('notification_settings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.email) setEmailSettings(parsed.email);
+                if (parsed.push) setPushSettings(parsed.push);
+            }
+        } catch {
+            // ignore parse errors
+        }
+    }, []);
 
     if (status === 'loading' || !session) return null;
 
@@ -48,23 +65,29 @@ function NotificationsPageContent() {
         }
     };
 
-    const handleSave = async () => {
+    const handleSave = () => {
         setLoading(true);
-        // In a real app, save these settings to the backend
-        await new Promise(resolve => setTimeout(resolve, 500));
-        showToast('Einstellungen gespeichert', 'success');
+        try {
+            localStorage.setItem('notification_settings', JSON.stringify({
+                email: emailSettings,
+                push: pushSettings,
+            }));
+            showToast('Einstellungen gespeichert', 'success');
+        } catch {
+            showToast('Fehler beim Speichern', 'error');
+        }
         setLoading(false);
     };
 
     return (
-        <AppShell currentPage="dashboard">
+        <AppShell currentPage="settings">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
                 <header className="sticky top-14 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.back()}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted tap-active"
+                            aria-label="Zurück" className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted tap-active"
                         >
                             ←
                         </button>

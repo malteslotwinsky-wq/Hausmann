@@ -1,10 +1,19 @@
 
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function GET() {
+// POST seed database (Architect only, protected)
+export async function POST() {
+    const session = await getServerSession(authOptions);
+
+    if (!session || session.user.role !== 'architect') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const hashedPassword = await bcrypt.hash('demo1234', 10);
 

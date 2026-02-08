@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Passwort muss mindestens 6 Zeichen haben' }, { status: 400 });
         }
 
-        const newUser = createUser(
+        const newUser = await createUser(
             email,
             password,
             name,

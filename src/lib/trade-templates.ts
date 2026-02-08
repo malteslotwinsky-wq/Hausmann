@@ -336,7 +336,10 @@ export function calculateTradeDates(
             result.push({ template: trade, startDate, endDate });
 
             // Move current date forward (with some overlap for parallel trades)
-            currentDate.setDate(currentDate.getDate() + Math.ceil(trade.typicalDurationDays * 0.7));
+            // Create new Date to avoid mutating shared reference
+            const nextDate = new Date(currentDate);
+            nextDate.setDate(nextDate.getDate() + Math.ceil(trade.typicalDurationDays * 0.7));
+            currentDate = nextDate;
         }
     }
 

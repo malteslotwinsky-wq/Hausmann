@@ -129,20 +129,6 @@ export interface Comment {
   visibility: Visibility;
 }
 
-// Diary Entry (Bautagebuch)
-export interface DiaryEntry {
-  date: Date;
-  entries: {
-    type: 'status_change' | 'photo' | 'comment';
-    tradeName: string;
-    taskTitle: string;
-    content: string;
-    photo?: Photo;
-    comment?: Comment;
-    timestamp: Date;
-  }[];
-}
-
 // Progress calculation helpers
 export interface TradeProgress {
   tradeId: string;

@@ -64,9 +64,9 @@ export default function LandingPage() {
             >
               Kostenlos starten
             </Link>
-            <button className="btn-mobile btn-mobile-lg btn-mobile-secondary tap-active">
+            <Link href="/login" className="btn-mobile btn-mobile-lg btn-mobile-secondary tap-active">
               Demo ansehen
-            </button>
+            </Link>
           </div>
         </div>
       </section>

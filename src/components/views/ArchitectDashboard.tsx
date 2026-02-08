@@ -49,11 +49,11 @@ export function ArchitectDashboard({ project, onUpdateTaskStatus, onTogglePhotoV
                         </CardHeader>
                         <CardContent className="flex flex-col md:flex-row items-center justify-around py-8 gap-8">
                             <div className="flex flex-col items-center gap-4">
-                                <CircularProgress percentage={78} size={160} strokeWidth={12} color="stroke-accent" />
+                                <CircularProgress percentage={progress.totalPercentage} size={160} strokeWidth={12} color="stroke-accent" />
                                 <span className="text-sm font-medium text-muted-foreground">Baufortschritt</span>
                             </div>
                             <div className="flex flex-col items-center gap-4">
-                                <CircularProgress percentage={92} size={160} strokeWidth={12} color="stroke-green-500" />
+                                <CircularProgress percentage={daysRemaining > 0 ? Math.min(100, Math.round(100 - (progress.blockedCount / Math.max(1, progress.trades.reduce((sum, t) => sum + t.total, 0)) * 100))) : 0} size={160} strokeWidth={12} color="stroke-green-500" />
                                 <span className="text-sm font-medium text-muted-foreground">Termintreue</span>
                             </div>
                         </CardContent>

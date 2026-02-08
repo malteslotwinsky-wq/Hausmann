@@ -82,8 +82,7 @@ function ContactsPageContent() {
                         company: u.company,
                         trade: tradeName || undefined,
                         projectNames: userProjects.map((p: any) => p.name),
-                        contactCount: Math.floor(Math.random() * 10), // Mock data
-                        lastContacted: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+                        contactCount: userProjects.length,
                     };
                 });
 

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
+import { InputField } from '@/components/ui/InputField';
 
 function ProfilePageContent() {
     const { data: session, status, update } = useSession();
@@ -89,7 +90,7 @@ function ProfilePageContent() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.back()}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted tap-active"
+                            aria-label="Zurück" className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted tap-active"
                         >
                             ←
                         </button>
@@ -185,33 +186,6 @@ function ProfilePageContent() {
                 </div>
             </div>
         </AppShell>
-    );
-}
-
-function InputField({
-    label,
-    value,
-    onChange,
-    placeholder,
-    type = 'text'
-}: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    placeholder?: string;
-    type?: string;
-}) {
-    return (
-        <div className="card-mobile">
-            <label className="block text-sm font-medium text-foreground mb-2">{label}</label>
-            <input
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-muted/50 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-base"
-            />
-        </div>
     );
 }
 

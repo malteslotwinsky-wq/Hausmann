@@ -62,7 +62,7 @@ export function OfflineIndicator() {
             {isOnline ? (
                 <span>✅ Wieder verbunden</span>
             ) : (
-                <span>📡 Keine Internetverbindung – Änderungen werden lokal gespeichert</span>
+                <span>📡 Keine Internetverbindung – Änderungen können nicht gespeichert werden</span>
             )}
         </div>
     );

@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
-import { Card, CardContent } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TaskDetailModal } from '@/components/modals/TaskDetailModal';
-import { demoProjects } from '@/lib/demo-data';
-import { Task, TaskStatus, Role } from '@/types';
+import { Project, Task, TaskStatus, Role } from '@/types';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 
 function TasksPageContent() {
@@ -15,12 +13,40 @@ function TasksPageContent() {
     const { showToast } = useToast();
     const [filter, setFilter] = useState<TaskStatus | 'all'>('all');
     const [selectedTask, setSelectedTask] = useState<(Task & { tradeName: string }) | null>(null);
-    const [project, setProject] = useState(demoProjects[0]);
+    const [project, setProject] = useState<Project | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const role = session?.user?.role as Role | undefined;
 
-    if (status === 'loading' || !session) {
-        return null;
+    useEffect(() => {
+        if (status !== 'authenticated') return;
+
+        async function fetchProjects() {
+            try {
+                const res = await fetch('/api/projects');
+                if (!res.ok) throw new Error('Fetch failed');
+                const projects: Project[] = await res.json();
+                if (projects.length > 0) {
+                    setProject(projects[0]);
+                }
+            } catch {
+                showToast('Fehler beim Laden der Projekte', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchProjects();
+    }, [status]);
+
+    if (status === 'loading' || !session || loading) {
+        return (
+            <AppShell currentPage="tasks">
+                <div className="min-h-screen bg-background flex items-center justify-center">
+                    <div className="text-muted-foreground">Laden...</div>
+                </div>
+            </AppShell>
+        );
     }
 
     if (role === 'client') {
@@ -29,6 +55,17 @@ function TasksPageContent() {
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
                     <span className="text-6xl block mb-4">🔒</span>
                     <p className="text-muted-foreground">Diese Seite ist für Kunden nicht verfügbar.</p>
+                </div>
+            </AppShell>
+        );
+    }
+
+    if (!project) {
+        return (
+            <AppShell currentPage="tasks">
+                <div className="max-w-4xl mx-auto p-4 text-center py-16">
+                    <span className="text-6xl block mb-4">📋</span>
+                    <p className="text-muted-foreground">Kein Projekt verfügbar</p>
                 </div>
             </AppShell>
         );
@@ -56,15 +93,18 @@ function TasksPageContent() {
     };
 
     const handleUpdateStatus = (taskId: string, newStatus: TaskStatus) => {
-        setProject(prev => ({
-            ...prev,
-            trades: prev.trades.map(trade => ({
-                ...trade,
-                tasks: trade.tasks.map(task =>
-                    task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
-                ),
-            })),
-        }));
+        setProject(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                trades: prev.trades.map(trade => ({
+                    ...trade,
+                    tasks: trade.tasks.map(task =>
+                        task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
+                    ),
+                })),
+            };
+        });
         showToast('Status aktualisiert', 'success');
         setSelectedTask(null);
     };
@@ -81,7 +121,6 @@ function TasksPageContent() {
         <AppShell currentPage="tasks">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
-                {/* Header */}
                 <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Aufgaben</h1>
                     <p className="text-sm text-muted-foreground">{project.name}</p>
@@ -95,7 +134,7 @@ function TasksPageContent() {
                                 key={f.id}
                                 onClick={() => setFilter(f.id as any)}
                                 className={`
-                                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium 
+                                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
                                     whitespace-nowrap flex-shrink-0 tap-active transition-all
                                     ${filter === f.id ? f.color : 'bg-muted text-muted-foreground'}
                                 `}

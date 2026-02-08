@@ -40,14 +40,14 @@ function ProjectsPageContent() {
     if (status === 'loading' || !session) return null;
 
     return (
-        <AppShell currentPage="dashboard">
+        <AppShell currentPage="settings">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
                 <header className="sticky top-14 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.back()}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted tap-active"
+                            aria-label="Zurück" className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted tap-active"
                         >
                             ←
                         </button>

@@ -107,12 +107,16 @@ export function SwipeableSheet({
             <div
                 className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'animate-fade-in'}`}
                 onClick={handleClose}
+                aria-hidden="true"
             />
 
             {/* Sheet */}
             <div
                 ref={sheetRef}
-                className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl flex flex-col"
+                role="dialog"
+                aria-modal="true"
+                aria-label={title || 'Bottom Sheet'}
+                className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-2xl flex flex-col"
                 style={sheetStyle}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -121,7 +125,10 @@ export function SwipeableSheet({
                 {/* Handle */}
                 <div
                     data-swipe-handle
-                    className="flex-shrink-0 bg-white pt-3 pb-2 px-6 border-b border-border rounded-t-2xl cursor-grab active:cursor-grabbing"
+                    aria-label="Zum Schließen nach unten ziehen"
+                    role="button"
+                    tabIndex={0}
+                    className="flex-shrink-0 bg-background pt-3 pb-2 px-6 border-b border-border rounded-t-2xl cursor-grab active:cursor-grabbing"
                 >
                     <div className="w-12 h-1.5 bg-border rounded-full mx-auto mb-3 hover:bg-muted-foreground/30 transition-colors" />
                     {title && (
@@ -141,7 +148,7 @@ export function SwipeableSheet({
                 {/* Sticky Footer */}
                 {footer && (
                     <div
-                        className="flex-shrink-0 bg-white border-t border-border px-6 py-4"
+                        className="flex-shrink-0 bg-background border-t border-border px-6 py-4"
                         style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
                     >
                         {footer}

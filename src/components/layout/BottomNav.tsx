@@ -44,10 +44,6 @@ export function BottomNav({ currentPage }: BottomNavProps) {
                                 ${isActive ? 'bg-accent/10' : ''}
                             `}>
                                 <Icon active={isActive} />
-                                {/* Activity badge */}
-                                {item.id === 'dashboard' && (
-                                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white"></span>
-                                )}
                             </div>
                             <span className={`
                                 text-[11px] font-medium mt-1 tracking-wide

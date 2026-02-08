@@ -81,7 +81,7 @@ export async function GET(
                 title: task.name,
                 status: task.status,
                 createdAt: new Date(task.created_at),
-                updatedAt: new Date(task.created_at),
+                updatedAt: new Date(task.updated_at || task.created_at),
                 photos: [],
                 comments: [],
             }))
@@ -105,6 +105,21 @@ export async function PUT(
     const { id } = await params;
 
     try {
+        // Verify architect owns this project
+        const { data: project } = await supabase
+            .from('projects')
+            .select('architect_id')
+            .eq('id', id)
+            .single();
+
+        if (!project) {
+            return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+        }
+
+        if (project.architect_id && project.architect_id !== session.user.id) {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        }
+
         const body = await request.json();
 
         const { data, error } = await supabase
@@ -148,6 +163,21 @@ export async function DELETE(
     const { id } = await params;
 
     try {
+        // Verify architect owns this project
+        const { data: project } = await supabase
+            .from('projects')
+            .select('architect_id')
+            .eq('id', id)
+            .single();
+
+        if (!project) {
+            return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+        }
+
+        if (project.architect_id && project.architect_id !== session.user.id) {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        }
+
         const { error } = await supabase
             .from('projects')
             .delete()

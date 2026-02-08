@@ -1,32 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
 import { PhotoLightbox } from '@/components/modals/PhotoLightbox';
-import { demoProjects } from '@/lib/demo-data';
-import { Photo, Role } from '@/types';
+import { Project, Photo, Role } from '@/types';
 import { ToastProvider } from '@/components/ui/Toast';
-import { formatDate } from '@/lib/utils';
 
 function PhotosPageContent() {
     const { data: session, status } = useSession();
     const role = session?.user?.role as Role | undefined;
     const [filter, setFilter] = useState<'all' | 'client' | 'internal'>('all');
     const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    if (status === 'loading' || !session) {
-        return null;
+    useEffect(() => {
+        if (status !== 'authenticated') return;
+
+        async function fetchProjects() {
+            try {
+                const res = await fetch('/api/projects');
+                if (!res.ok) throw new Error('Fetch failed');
+                const data: Project[] = await res.json();
+                setProjects(data);
+            } catch {
+                // silently fail
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchProjects();
+    }, [status]);
+
+    if (status === 'loading' || !session || loading) {
+        return (
+            <AppShell currentPage="photos">
+                <div className="min-h-screen bg-background flex items-center justify-center">
+                    <div className="text-muted-foreground">Laden...</div>
+                </div>
+            </AppShell>
+        );
     }
 
     // Gather all photos
-    const accessibleProjects = role === 'client' && session.user.projectIds
-        ? demoProjects.filter(p => session.user.projectIds?.includes(p.id))
-        : demoProjects;
-
     const allPhotos: (Photo & { tradeName?: string; taskTitle?: string; projectName?: string })[] = [];
 
-    accessibleProjects.forEach(project => {
+    projects.forEach(project => {
         project.trades.forEach(trade => {
             trade.tasks.forEach(task => {
                 task.photos.forEach(photo => {
@@ -104,7 +125,7 @@ function PhotosPageContent() {
                             key={photo.id}
                             onClick={() => setSelectedPhotoIndex(index)}
                             className="
-                                group relative aspect-square bg-muted overflow-hidden cursor-pointer 
+                                group relative aspect-square bg-muted overflow-hidden cursor-pointer
                                 tap-active transition-transform active:scale-[0.98]
                             "
                         >

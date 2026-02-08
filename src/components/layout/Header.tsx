@@ -58,10 +58,10 @@ export function Header() {
                     {/* Notification Bell */}
                     <Link
                         href="/settings/notifications"
+                        aria-label="Benachrichtigungen"
                         className="relative p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors tap-active"
                     >
-                        <span className="text-lg">🔔</span>
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full"></span>
+                        <span className="text-lg" aria-hidden="true">🔔</span>
                     </Link>
 
                     {/* User Avatar with Dropdown */}

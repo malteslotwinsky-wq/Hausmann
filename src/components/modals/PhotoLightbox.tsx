@@ -17,6 +17,14 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
         setCurrentIndex(initialIndex);
     }, [initialIndex]);
 
+    const goToPrevious = () => {
+        setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+    };
+
+    const goToNext = () => {
+        setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+    };
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isOpen) return;
@@ -27,22 +35,14 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, currentIndex]);
+    }, [isOpen, photos.length]);
 
     if (!isOpen || photos.length === 0) return null;
 
     const currentPhoto = photos[currentIndex];
 
-    const goToPrevious = () => {
-        setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
-    };
-
-    const goToNext = () => {
-        setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
-    };
-
     return (
-        <div className="fixed inset-0 z-[60] bg-black">
+        <div className="fixed inset-0 z-[60] bg-black" role="dialog" aria-modal="true" aria-label="Foto-Ansicht">
             {/* Close Button */}
             <button
                 onClick={onClose}

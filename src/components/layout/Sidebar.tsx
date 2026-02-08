@@ -14,7 +14,7 @@ export function Sidebar({ currentPage }: SidebarProps) {
     const role = session?.user?.role as Role | undefined;
 
     const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/' },
+        { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard' },
         { id: 'tasks', label: 'Aufgaben', icon: '✓', href: '/tasks', hideFor: ['client'] as Role[] },
         { id: 'photos', label: 'Fotos', icon: '📷', href: '/photos' },
         { id: 'diary', label: 'Bautagebuch', icon: '📓', href: '/diary' },
@@ -55,11 +55,6 @@ export function Sidebar({ currentPage }: SidebarProps) {
                         >
                             <span className="text-lg">{item.icon}</span>
                             <span>{item.label}</span>
-                            {item.id === 'activity' && (
-                                <span className="ml-auto bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                                    3
-                                </span>
-                            )}
                         </Link>
                     );
                 })}

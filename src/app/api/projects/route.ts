@@ -69,7 +69,7 @@ export async function GET() {
                 title: task.name,
                 status: task.status,
                 createdAt: new Date(task.created_at),
-                updatedAt: new Date(task.created_at),
+                updatedAt: new Date(task.updated_at || task.created_at),
                 photos: [],
                 comments: [],
             }))

@@ -8,6 +8,7 @@ import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
 import { PROJECT_TEMPLATES } from '@/lib/trade-templates';
 import { Role, Project, Trade, PhotoApprovalMode } from '@/types';
+import { InputField } from '@/components/ui/InputField';
 
 interface UserData {
     id: string;
@@ -584,15 +585,6 @@ function BottomSheet({ onClose, title, children, footer }: { onClose: () => void
         <SwipeableSheet isOpen={true} onClose={onClose} title={title} maxHeight="85dvh" footer={footer}>
             {children}
         </SwipeableSheet>
-    );
-}
-
-function InputField({ label, value, onChange, placeholder, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
-    return (
-        <div>
-            <label className="block text-sm font-medium text-foreground mb-2">{label}</label>
-            <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none text-base" />
-        </div>
     );
 }
 

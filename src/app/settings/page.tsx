@@ -45,7 +45,7 @@ export default function SettingsPage() {
     ];
 
     return (
-        <AppShell currentPage="dashboard">
+        <AppShell currentPage="settings">
             <div className="min-h-screen bg-background pb-32">
                 {/* Header */}
                 <header className="sticky top-14 z-30 bg-surface border-b border-border px-4 py-4">
