@@ -31,7 +31,7 @@ export function AppShell({ children, currentPage = 'dashboard' }: AppShellProps)
             <Header />
 
             {/* Main Content - offset by sidebar on desktop */}
-            <main className="lg:ml-56 pt-0 pb-20 lg:pb-8 min-h-screen">
+            <main className="lg:ml-56 pt-0 pb-32 lg:pb-8 min-h-screen">
                 {children}
             </main>
 

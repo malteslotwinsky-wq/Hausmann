@@ -243,7 +243,7 @@ function AdminPageContent() {
 
     return (
         <AppShell currentPage="admin">
-            <div className="min-h-screen bg-background pb-32">
+            <div className="min-h-screen bg-background pb-32 safe-area-bottom">
                 {/* Header */}
                 <header className="sticky top-0 z-30 bg-surface border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Verwaltung</h1>
@@ -467,7 +467,7 @@ function AdminPageContent() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-3 pt-4 pb-safe">
                                 <button onClick={() => setProjectStep(2)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">← Zurück</button>
                                 <button onClick={handleSaveProject} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
                                     {loading ? 'Erstellen...' : 'Projekt erstellen ✓'}
@@ -484,7 +484,7 @@ function AdminPageContent() {
                     onClose={() => setShowTradeModal(false)}
                     title={`Gewerk für "${selectedProject.name}"`}
                     footer={
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 pb-safe">
                             <button onClick={() => setShowTradeModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">Abbrechen</button>
                             <button onClick={handleSaveTrade} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
                                 {loading ? 'Speichern...' : 'Gewerk anlegen ✓'}
@@ -532,7 +532,7 @@ function AdminPageContent() {
                     onClose={() => setShowUserModal(false)}
                     title={editingUser ? 'Benutzer bearbeiten' : 'Neuer Benutzer'}
                     footer={
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 pb-safe">
                             <button onClick={() => setShowUserModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">Abbrechen</button>
                             <button onClick={handleSaveUser} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
                                 {loading ? 'Speichern...' : (editingUser ? 'Speichern' : 'Erstellen')}
