@@ -7,7 +7,7 @@ const nextAuth = NextAuth(authOptions);
 
 export { nextAuth as GET };
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, context: { params: any }) {
     // Rate limit login attempts (callback/credentials)
     if (request.nextUrl.pathname.includes('/callback/credentials')) {
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -20,5 +20,5 @@ export async function POST(request: NextRequest) {
         }
     }
 
-    return nextAuth(request as any, {} as any);
+    return nextAuth(request as any, context);
 }
