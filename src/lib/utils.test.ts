@@ -16,7 +16,7 @@ function makeTrade(overrides: Partial<Trade> = {}): Trade {
         id: 'trade-1',
         projectId: 'proj-1',
         name: 'Elektro',
-        status: 'in_progress',
+        status: 'active',
         order: 1,
         canCreateSubtasks: false,
         tasks: [],
