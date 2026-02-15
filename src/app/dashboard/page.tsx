@@ -178,7 +178,7 @@ function DashboardContent() {
         return (
             <AppShell currentPage="dashboard">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
-                    <span className="text-6xl block mb-4">🏗</span>
+                    <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4"><svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9 21v-6h6v6" /></svg></div>
                     <p className="text-muted-foreground">Keine Projekte verfügbar</p>
                 </div>
             </AppShell>

@@ -17,18 +17,18 @@ export function Button({
     className = '',
     ...props
 }: ButtonProps) {
-    const baseClasses = 'inline-flex items-center justify-center gap-2 font-medium rounded-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide text-xs';
+    const baseClasses = 'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-sm';
 
     const variantClasses = {
-        primary: 'bg-primary text-primary-foreground hover:opacity-90 active:scale-95 border border-transparent shadow-sm',
-        secondary: 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 active:scale-95 border border-transparent',
+        primary: 'bg-accent text-accent-foreground hover:bg-accent-light active:scale-[0.97] border border-transparent shadow-sm',
+        secondary: 'bg-muted text-foreground hover:bg-surface-highlight active:scale-[0.97] border border-border/60',
         ghost: 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted/80',
-        danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
+        danger: 'bg-error text-white hover:opacity-90 active:scale-[0.97]',
     };
 
     const sizeClasses = {
-        sm: 'px-3 py-1.5 text-sm',
-        md: 'px-4 py-2 text-sm',
+        sm: 'px-3 py-1.5 text-[13px]',
+        md: 'px-4 py-2',
         lg: 'px-6 py-3 text-base',
     };
 

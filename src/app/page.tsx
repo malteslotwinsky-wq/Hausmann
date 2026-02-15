@@ -10,7 +10,6 @@ export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Redirect to dashboard if already logged in
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/dashboard');
@@ -20,7 +19,7 @@ export default function LandingPage() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-12 h-12 bg-accent rounded-xl animate-pulse"></div>
+        <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -28,13 +27,17 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* === NAVIGATION === */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border">
+      <nav className="sticky top-0 z-50 bg-surface/70 backdrop-blur-xl border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">B</span>
+            <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 21h18" />
+                <path d="M5 21V7l7-4 7 4v14" />
+                <path d="M9 21v-6h6v6" />
+              </svg>
             </div>
-            <span className="font-bold text-xl text-foreground">{defaultTheme.name}</span>
+            <span className="font-semibold text-lg text-foreground tracking-tight">{defaultTheme.name}</span>
           </div>
           <div className="flex items-center gap-4">
             <Link
@@ -48,12 +51,17 @@ export default function LandingPage() {
       </nav>
 
       {/* === HERO SECTION === */}
-      <section className="py-16 md:py-24 px-4">
+      <section className="py-20 md:py-28 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight mb-6">
-            Die digitale Schaltzentrale für <span className="text-accent">Ihre Baustelle</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-muted text-accent rounded-full text-sm font-medium mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+            Jetzt verfügbar – Version 3.0
+          </div>
+          <h1 className="text-4xl md:text-[3.25rem] font-bold text-foreground leading-[1.1] mb-6 tracking-tight">
+            Die digitale Schaltzentrale für{' '}
+            <span className="text-accent">Ihre Baustelle</span>
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             {defaultTheme.name} verbindet Bauleitung, Handwerker und Bauherren auf einer Plattform.
             Echtzeit-Updates, Foto-Dokumentation und automatisches Bautagebuch.
           </p>
@@ -63,6 +71,10 @@ export default function LandingPage() {
               className="btn-mobile btn-mobile-lg btn-mobile-accent tap-active"
             >
               Kostenlos starten
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </Link>
             <Link href="/login" className="btn-mobile btn-mobile-lg btn-mobile-secondary tap-active">
               Demo ansehen
@@ -72,39 +84,44 @@ export default function LandingPage() {
       </section>
 
       {/* === FEATURES SECTION === */}
-      <section className="py-16 bg-white">
+      <section className="py-20 bg-surface border-y border-border">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
-            Alles, was Sie für die Bauleitung brauchen
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+              Alles, was Sie für die Bauleitung brauchen
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Eine Plattform, die Ihr gesamtes Baustellenmanagement vereinfacht und digitalisiert.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
             <FeatureCard
-              icon="📊"
+              icon={<ChartIcon />}
               title="Live-Fortschritt"
               description="Sehen Sie in Echtzeit, welche Gewerke arbeiten und wie weit Ihr Projekt ist."
             />
             <FeatureCard
-              icon="📷"
+              icon={<CameraIcon />}
               title="Foto-Dokumentation"
               description="Handwerker dokumentieren ihre Arbeit mit Fotos. Alles revisionssicher gespeichert."
             />
             <FeatureCard
-              icon="📓"
+              icon={<BookIcon />}
               title="Automatisches Bautagebuch"
               description="Das Bautagebuch schreibt sich selbst. Jede Aktivität wird protokolliert."
             />
             <FeatureCard
-              icon="📱"
+              icon={<MobileIcon />}
               title="Mobile-First"
               description="Optimiert für die Baustelle. Große Buttons, schnelle Bedienung, offline-fähig."
             />
             <FeatureCard
-              icon="🔔"
+              icon={<BellFeatureIcon />}
               title="Sofort-Benachrichtigungen"
               description="Wissen Sie sofort, wenn etwas blockiert ist oder Aufmerksamkeit braucht."
             />
             <FeatureCard
-              icon="🔐"
+              icon={<ShieldIcon />}
               title="Rollen & Rechte"
               description="Bauleitung, Handwerker und Bauherren sehen genau das, was sie sehen sollen."
             />
@@ -113,14 +130,16 @@ export default function LandingPage() {
       </section>
 
       {/* === PRICING SECTION === */}
-      <section className="py-16 md:py-24 px-4">
+      <section className="py-20 md:py-24 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-4">
-            Einfache, transparente Preise
-          </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-            Wählen Sie das passende Paket für Ihre Projekte. Jederzeit kündbar.
-          </p>
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+              Einfache, transparente Preise
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Wählen Sie das passende Paket für Ihre Projekte. Jederzeit kündbar.
+            </p>
+          </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <PricingCard
               name="Starter"
@@ -169,34 +188,42 @@ export default function LandingPage() {
       </section>
 
       {/* === CTA SECTION === */}
-      <section className="py-16 bg-primary text-white">
+      <section className="py-20 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 tracking-tight">
             Bereit, Ihre Baustelle zu digitalisieren?
           </h2>
-          <p className="text-white/70 mb-8">
+          <p className="text-white/60 mb-8 max-w-lg mx-auto">
             Starten Sie noch heute kostenlos und überzeugen Sie sich selbst.
           </p>
           <Link
             href="/login"
-            className="btn-mobile btn-mobile-lg bg-white text-primary tap-active inline-flex"
+            className="btn-mobile btn-mobile-lg bg-accent text-white tap-active inline-flex hover:bg-accent-light transition-colors"
           >
             Jetzt loslegen
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
           </Link>
         </div>
       </section>
 
       {/* === FOOTER === */}
-      <footer className="py-8 border-t border-border bg-white">
+      <footer className="py-8 border-t border-border bg-surface">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">B</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 bg-accent rounded-lg flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 21h18" />
+                <path d="M5 21V7l7-4 7 4v14" />
+                <path d="M9 21v-6h6v6" />
+              </svg>
             </div>
-            <span className="font-medium text-foreground">{defaultTheme.name}</span>
+            <span className="font-medium text-foreground text-sm">{defaultTheme.name}</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2026 {defaultTheme.name} · Made in Germany 🇩🇪 · DSGVO-konform
+            © 2026 {defaultTheme.name} · Made in Germany · DSGVO-konform
           </p>
         </div>
       </footer>
@@ -204,12 +231,14 @@ export default function LandingPage() {
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="card-mobile text-center p-6">
-      <span className="text-4xl block mb-4">{icon}</span>
-      <h3 className="font-bold text-lg text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground text-sm">{description}</p>
+    <div className="card-mobile p-6 group">
+      <div className="w-10 h-10 bg-accent-muted rounded-xl flex items-center justify-center text-accent mb-4 group-hover:bg-accent group-hover:text-white transition-colors duration-200">
+        {icon}
+      </div>
+      <h3 className="font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -231,24 +260,26 @@ function PricingCard({
 }) {
   return (
     <div className={`
-            card-mobile p-6 flex flex-col relative
-            ${highlighted ? 'border-2 border-accent shadow-lg' : ''}
-        `}>
+        card-mobile p-6 flex flex-col relative
+        ${highlighted ? 'ring-2 ring-accent' : ''}
+    `}>
       {highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
           BELIEBT
         </div>
       )}
-      <h3 className="font-bold text-xl text-foreground">{name}</h3>
+      <h3 className="font-semibold text-lg text-foreground">{name}</h3>
       <p className="text-muted-foreground text-sm mb-4">{description}</p>
       <div className="mb-6">
-        <span className="text-4xl font-bold text-foreground">€{price}</span>
-        <span className="text-muted-foreground">/Monat</span>
+        <span className="text-4xl font-bold text-foreground tracking-tight">€{price}</span>
+        <span className="text-muted-foreground text-sm">/Monat</span>
       </div>
       <ul className="space-y-3 mb-6 flex-1">
         {features.map((feature, idx) => (
-          <li key={idx} className="flex items-center gap-2 text-sm text-foreground">
-            <span className="text-accent">✓</span>
+          <li key={idx} className="flex items-center gap-2.5 text-sm text-foreground">
+            <svg className="text-accent shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             {feature}
           </li>
         ))}
@@ -256,12 +287,68 @@ function PricingCard({
       <Link
         href="/login"
         className={`
-                    btn-mobile tap-active text-center
-                    ${highlighted ? 'btn-mobile-accent' : 'btn-mobile-secondary'}
-                `}
+            btn-mobile tap-active text-center
+            ${highlighted ? 'btn-mobile-accent' : 'btn-mobile-secondary'}
+        `}
       >
         {cta}
       </Link>
     </div>
+  );
+}
+
+// Feature SVG Icons
+function ChartIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
+function CameraIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+
+function BookIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
+
+function MobileIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+      <line x1="12" y1="18" x2="12.01" y2="18" />
+    </svg>
+  );
+}
+
+function BellFeatureIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 12 15 16 10" />
+    </svg>
   );
 }

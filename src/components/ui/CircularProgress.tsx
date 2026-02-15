@@ -31,7 +31,7 @@ export function CircularProgress({
                     stroke="currentColor"
                     strokeWidth={strokeWidth}
                     fill="transparent"
-                    className="text-gray-200"
+                    className="text-border"
                 />
                 {/* Progress Ring */}
                 <circle
@@ -49,7 +49,7 @@ export function CircularProgress({
             </svg>
             {showLabel && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl font-bold text-primary">{percentage}%</span>
+                    <span className="text-xl font-bold text-foreground">{percentage}%</span>
                 </div>
             )}
         </div>

@@ -28,7 +28,7 @@ export function ClientDashboard({ project }: ClientDashboardProps) {
     return (
         <div className="min-h-screen bg-background safe-area-top">
             {/* === HEADER === */}
-            <header className="px-5 pt-6 pb-4 bg-white border-b border-border">
+            <header className="px-5 pt-6 pb-4 bg-surface border-b border-border">
                 <div className="flex items-start justify-between">
                     <div>
                         <p className="text-caption text-muted-foreground mb-1">MEIN BAUPROJEKT</p>
@@ -155,7 +155,7 @@ function DiaryPreview({ project }: { project: Project }) {
                         <p className="text-sm text-muted-foreground">{activity.task}</p>
                     </div>
                     {activity.type === 'photo' && (
-                        <span className="text-accent">📷</span>
+                        <svg className="text-accent shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                     )}
                 </div>
             ))}
@@ -173,7 +173,9 @@ function PhotoGalleryPreview({ project }: { project: Project }) {
     if (allPhotos.length === 0) {
         return (
             <div className="card-mobile text-center py-8">
-                <span className="text-4xl block mb-2">📷</span>
+                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg className="text-muted-foreground" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                </div>
                 <p className="text-muted-foreground text-sm">Noch keine Fotos</p>
             </div>
         );
@@ -188,7 +190,7 @@ function PhotoGalleryPreview({ project }: { project: Project }) {
                 >
                     {/* Placeholder - would be actual image */}
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-border">
-                        <span className="text-3xl">📷</span>
+                        <svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                     </div>
                 </div>
             ))}

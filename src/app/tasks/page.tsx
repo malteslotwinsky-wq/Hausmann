@@ -53,7 +53,7 @@ function TasksPageContent() {
         return (
             <AppShell currentPage="tasks">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
-                    <span className="text-6xl block mb-4">🔒</span>
+                    <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4"><svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></div>
                     <p className="text-muted-foreground">Diese Seite ist für Kunden nicht verfügbar.</p>
                 </div>
             </AppShell>
@@ -64,7 +64,7 @@ function TasksPageContent() {
         return (
             <AppShell currentPage="tasks">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
-                    <span className="text-6xl block mb-4">📋</span>
+                    <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4"><svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg></div>
                     <p className="text-muted-foreground">Kein Projekt verfügbar</p>
                 </div>
             </AppShell>
@@ -157,7 +157,7 @@ function TasksPageContent() {
                                 <span>{f.label}</span>
                                 <span className={`
                                     text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full px-1.5
-                                    ${filter === f.id ? 'bg-white/20' : 'bg-border'}
+                                    ${filter === f.id ? 'bg-surface/20' : 'bg-border'}
                                 `}>
                                     {f.count}
                                 </span>
@@ -170,7 +170,7 @@ function TasksPageContent() {
                 <div className="p-4 space-y-3">
                     {filteredTasks.length === 0 ? (
                         <div className="card-mobile text-center py-12">
-                            <span className="text-5xl block mb-3">📋</span>
+                            <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-3"><svg className="text-muted-foreground" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg></div>
                             <p className="text-muted-foreground">Keine Aufgaben in diesem Filter</p>
                         </div>
                     ) : (
@@ -188,14 +188,14 @@ function TasksPageContent() {
                                     </div>
                                     <div className="flex items-center gap-2 flex-shrink-0">
                                         {task.photos.length > 0 && (
-                                            <span className="text-xs text-muted-foreground">📷 {task.photos.length}</span>
+                                            <span className="text-xs text-muted-foreground inline-flex items-center gap-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>{task.photos.length}</span>
                                         )}
                                         <span className="text-muted-foreground">›</span>
                                     </div>
                                 </div>
                                 {task.blockedReason && (
                                     <p className="mt-2 text-sm text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-lg">
-                                        ⚠ {task.blockedReason}
+                                        <svg className="inline mr-1" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>{task.blockedReason}
                                     </p>
                                 )}
                             </div>

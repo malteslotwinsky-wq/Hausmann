@@ -24,7 +24,7 @@ export function BottomNav({ currentPage }: BottomNavProps) {
     const mobileItems = visibleItems.slice(0, 5);
 
     return (
-        <div className="bg-white/95 backdrop-blur-lg border-t border-border safe-area-bottom">
+        <div className="bg-surface/90 backdrop-blur-xl border-t border-border safe-area-bottom">
             <div className="flex justify-around items-stretch">
                 {mobileItems.map((item) => {
                     const isActive = currentPage === item.id;
@@ -34,19 +34,22 @@ export function BottomNav({ currentPage }: BottomNavProps) {
                             key={item.id}
                             href={item.href}
                             className={`
-                                flex flex-col items-center justify-center py-3 px-4 flex-1 tap-active
+                                relative flex flex-col items-center justify-center py-3 px-4 flex-1 tap-active
                                 transition-all duration-200
                                 ${isActive ? 'text-accent' : 'text-muted-foreground'}
                             `}
                         >
+                            {isActive && (
+                                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-accent" />
+                            )}
                             <div className={`
                                 relative p-1.5 rounded-xl transition-all duration-200
-                                ${isActive ? 'bg-accent/10' : ''}
+                                ${isActive ? 'bg-accent-muted' : ''}
                             `}>
                                 <Icon active={isActive} />
                             </div>
                             <span className={`
-                                text-[11px] font-medium mt-1 tracking-wide
+                                text-[11px] font-medium mt-1
                                 ${isActive ? 'text-accent' : 'text-muted-foreground'}
                             `}>
                                 {item.label}

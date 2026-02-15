@@ -13,7 +13,7 @@ export const defaultTheme: OrganizationTheme = {
     colors: {
         primary: '#0F172A', // Slate 900
         secondary: '#64748B', // Slate 500
-        accent: '#F97316', // Orange 500
+        accent: '#059669', // Emerald 600
     },
 };
 

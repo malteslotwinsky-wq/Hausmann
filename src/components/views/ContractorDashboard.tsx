@@ -81,14 +81,14 @@ export function ContractorDashboard({
                                 onClick={() => handleAction('start')}
                                 className="btn-mobile btn-mobile-lg bg-primary text-primary-foreground tap-active-strong flex flex-col items-center gap-2"
                             >
-                                <span className="text-2xl">🚛</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="10" width="22" height="7" rx="1.5" /><path d="M5 10V6a2 2 0 0 1 2-2h5l3 4" /><circle cx="7" cy="19" r="2" /><circle cx="17" cy="19" r="2" /></svg>
                                 <span>In Anfahrt</span>
                             </button>
                             <button
                                 onClick={() => handleAction('done')}
-                                className="btn-mobile btn-mobile-lg bg-green-600 text-white tap-active-strong flex flex-col items-center gap-2"
+                                className="btn-mobile btn-mobile-lg bg-success text-white tap-active-strong flex flex-col items-center gap-2"
                             >
-                                <span className="text-2xl">✓</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                 <span>Erledigt</span>
                             </button>
                         </div>
@@ -99,7 +99,8 @@ export function ContractorDashboard({
                                 onClick={() => onAddPhoto?.(currentTask.id)}
                                 className="btn-mobile btn-mobile-secondary tap-active"
                             >
-                                <span>📷</span> Foto
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                                Foto
                             </button>
                             <button
                                 onClick={() => {
@@ -108,7 +109,8 @@ export function ContractorDashboard({
                                 }}
                                 className="btn-mobile bg-error text-white tap-active"
                             >
-                                <span>⚠️</span> Problem
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                                Problem
                             </button>
                         </div>
                     </section>
@@ -141,7 +143,9 @@ export function ContractorDashboard({
                 {/* Empty State */}
                 {myTasks.length === 0 && (
                     <section className="card-mobile text-center py-12 animate-fade-in">
-                        <span className="text-5xl block mb-4">🎉</span>
+                        <div className="w-14 h-14 bg-success-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg className="text-success" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                        </div>
                         <p className="text-lg font-medium text-foreground">Keine offenen Aufgaben</p>
                         <p className="text-muted-foreground mt-1">Du hast alles erledigt!</p>
                     </section>
