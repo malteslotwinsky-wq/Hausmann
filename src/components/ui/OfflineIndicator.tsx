@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * Hook to detect online/offline status
  */
 export function useOnlineStatus(): boolean {
-    const [isOnline, setIsOnline] = useState(true);
+    const [isOnline, setIsOnline] = useState(() =>
+        typeof navigator !== 'undefined' ? navigator.onLine : true
+    );
 
     useEffect(() => {
-        // Set initial state
-        setIsOnline(navigator.onLine);
-
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
 
@@ -32,22 +31,23 @@ export function useOnlineStatus(): boolean {
  */
 export function OfflineIndicator() {
     const isOnline = useOnlineStatus();
-    const [wasOffline, setWasOffline] = useState(false);
     const [showReconnected, setShowReconnected] = useState(false);
+    const wasOfflineRef = useRef(false);
+
+    const onReconnect = useCallback(() => {
+        setShowReconnected(true);
+        const timer = setTimeout(() => setShowReconnected(false), 3000);
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (!isOnline) {
-            setWasOffline(true);
-        } else if (wasOffline) {
-            // Show "reconnected" message briefly
-            setShowReconnected(true);
-            const timer = setTimeout(() => {
-                setShowReconnected(false);
-                setWasOffline(false);
-            }, 3000);
-            return () => clearTimeout(timer);
+            wasOfflineRef.current = true;
+        } else if (wasOfflineRef.current) {
+            wasOfflineRef.current = false;
+            return onReconnect();
         }
-    }, [isOnline, wasOffline]);
+    }, [isOnline, onReconnect]);
 
     if (isOnline && !showReconnected) return null;
 

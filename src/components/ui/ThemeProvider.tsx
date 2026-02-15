@@ -16,16 +16,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const STORAGE_KEY = 'baulot-theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [theme, setThemeState] = useState<Theme>('system');
+    const [theme, setThemeState] = useState<Theme>(() => {
+        if (typeof window === 'undefined') return 'system';
+        return (localStorage.getItem(STORAGE_KEY) as Theme) || 'system';
+    });
     const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
-
-    // Initialize theme from localStorage
-    useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-        if (stored) {
-            setThemeState(stored);
-        }
-    }, []);
 
     // Apply theme to document
     useEffect(() => {

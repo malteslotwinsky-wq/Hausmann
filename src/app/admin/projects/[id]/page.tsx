@@ -579,7 +579,7 @@ function ProjectDetailContent() {
                 <div className="space-y-4">
                     {selectedTemplate && (
                         <div className="bg-accent/10 p-3 rounded-xl text-sm text-muted-foreground">
-                            💡 Vorausgefüllt mit typischen Werten für "{selectedTemplate.name}"
+                            💡 Vorausgefüllt mit typischen Werten für &ldquo;{selectedTemplate.name}&rdquo;
                         </div>
                     )}
 

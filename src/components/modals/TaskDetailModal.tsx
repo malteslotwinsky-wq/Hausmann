@@ -242,7 +242,7 @@ export function TaskDetailModal({
                             <div className="flex items-start gap-3 text-sm">
                                 <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">✓</span>
                                 <div>
-                                    <p className="text-gray-900">Status auf "In Arbeit" gesetzt</p>
+                                    <p className="text-gray-900">Status auf &ldquo;In Arbeit&rdquo; gesetzt</p>
                                     <p className="text-xs text-gray-500">{formatDate(task.updatedAt)} · System</p>
                                 </div>
                             </div>

@@ -34,22 +34,28 @@ function NotificationsPageContent() {
         { id: 'push_blocked', label: 'Blockierte Aufgaben', description: 'Bei Behinderungsanzeigen', enabled: true },
     ];
 
-    const [emailSettings, setEmailSettings] = useState<NotificationSetting[]>(defaultEmailSettings);
-    const [pushSettings, setPushSettings] = useState<NotificationSetting[]>(defaultPushSettings);
-
-    // Load saved settings from localStorage
-    useEffect(() => {
+    const [emailSettings, setEmailSettings] = useState<NotificationSetting[]>(() => {
+        if (typeof window === 'undefined') return defaultEmailSettings;
         try {
             const saved = localStorage.getItem('notification_settings');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (parsed.email) setEmailSettings(parsed.email);
-                if (parsed.push) setPushSettings(parsed.push);
+                if (parsed.email) return parsed.email;
             }
-        } catch {
-            // ignore parse errors
-        }
-    }, []);
+        } catch { /* ignore */ }
+        return defaultEmailSettings;
+    });
+    const [pushSettings, setPushSettings] = useState<NotificationSetting[]>(() => {
+        if (typeof window === 'undefined') return defaultPushSettings;
+        try {
+            const saved = localStorage.getItem('notification_settings');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.push) return parsed.push;
+            }
+        } catch { /* ignore */ }
+        return defaultPushSettings;
+    });
 
     if (status === 'loading' || !session) return null;
 

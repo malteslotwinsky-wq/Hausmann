@@ -25,15 +25,23 @@ export function SwipeableSheet({
     const [isClosing, setIsClosing] = useState(false);
     const startY = useRef(0);
     const currentY = useRef(0);
+    const prevIsOpen = useRef(false);
 
     const CLOSE_THRESHOLD = 100;
+
+    // Reset state when sheet opens
+    if (isOpen && !prevIsOpen.current) {
+        prevIsOpen.current = true;
+        setTranslateY(0);
+        setIsClosing(false);
+    } else if (!isOpen && prevIsOpen.current) {
+        prevIsOpen.current = false;
+    }
 
     // Lock body scroll when open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            setTranslateY(0);
-            setIsClosing(false);
         }
         return () => {
             document.body.style.overflow = '';

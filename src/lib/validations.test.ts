@@ -5,7 +5,6 @@ import {
     createTradeSchema,
     updateTradeSchema,
     createUserSchema,
-    updateUserSchema,
     createTaskSchema,
     updateTaskSchema,
     createMessageSchema,
