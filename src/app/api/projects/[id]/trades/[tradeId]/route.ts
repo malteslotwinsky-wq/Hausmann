@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { updateTradeSchema, uuidParamSchema, formatZodError } from '@/lib/validations';
 
 // PATCH update trade
 export async function PATCH(
@@ -16,23 +17,48 @@ export async function PATCH(
 
     const { id: projectId, tradeId } = await params;
 
-    try {
-        const body = await request.json();
+    if (!uuidParamSchema.safeParse(projectId).success || !uuidParamSchema.safeParse(tradeId).success) {
+        return NextResponse.json({ error: 'Ungültige ID' }, { status: 400 });
+    }
 
+    try {
+        // Verify architect owns this project
+        const { data: project } = await supabase
+            .from('projects')
+            .select('architect_id')
+            .eq('id', projectId)
+            .single();
+
+        if (!project) {
+            return NextResponse.json({ error: 'Projekt nicht gefunden' }, { status: 404 });
+        }
+
+        if (project.architect_id && project.architect_id !== session.user.id) {
+            return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
+        }
+
+        const body = await request.json();
+        const parsed = updateTradeSchema.safeParse(body);
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+        }
+
+        const input = parsed.data;
         const updateData: Record<string, unknown> = {};
 
-        if (body.name !== undefined) updateData.name = body.name;
-        if (body.companyName !== undefined) updateData.company_name = body.companyName;
-        if (body.contactPerson !== undefined) updateData.contact_person = body.contactPerson;
-        if (body.phone !== undefined) updateData.phone = body.phone;
-        if (body.description !== undefined) updateData.description = body.description;
-        if (body.contractorId !== undefined) updateData.contractor_id = body.contractorId;
-        if (body.startDate !== undefined) updateData.start_date = body.startDate;
-        if (body.endDate !== undefined) updateData.end_date = body.endDate;
-        if (body.budget !== undefined) updateData.budget = body.budget;
-        if (body.order !== undefined) updateData.order = body.order;
-        if (body.status !== undefined) updateData.status = body.status;
-        if (body.canCreateSubtasks !== undefined) updateData.can_create_subtasks = body.canCreateSubtasks;
+        if (input.name !== undefined) updateData.name = input.name;
+        if (input.companyName !== undefined) updateData.company_name = input.companyName;
+        if (input.contactPerson !== undefined) updateData.contact_person = input.contactPerson;
+        if (input.phone !== undefined) updateData.phone = input.phone;
+        if (input.description !== undefined) updateData.description = input.description;
+        if (input.contractorId !== undefined) updateData.contractor_id = input.contractorId;
+        if (input.startDate !== undefined) updateData.start_date = input.startDate;
+        if (input.endDate !== undefined) updateData.end_date = input.endDate;
+        if (input.budget !== undefined) updateData.budget = input.budget;
+        if (input.order !== undefined) updateData.order = input.order;
+        if (input.status !== undefined) updateData.status = input.status;
+        if (input.canCreateSubtasks !== undefined) updateData.can_create_subtasks = input.canCreateSubtasks;
 
         if (Object.keys(updateData).length === 0) {
             return NextResponse.json({ error: 'Keine Änderungen' }, { status: 400 });
@@ -46,7 +72,10 @@ export async function PATCH(
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Trade update error:', error);
+            return NextResponse.json({ error: 'Fehler beim Aktualisieren' }, { status: 500 });
+        }
 
         return NextResponse.json({
             id: data.id,
@@ -64,8 +93,8 @@ export async function PATCH(
             status: data.status,
             canCreateSubtasks: data.can_create_subtasks,
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Server-Fehler' }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }
 
@@ -82,17 +111,39 @@ export async function DELETE(
 
     const { id: projectId, tradeId } = await params;
 
+    if (!uuidParamSchema.safeParse(projectId).success || !uuidParamSchema.safeParse(tradeId).success) {
+        return NextResponse.json({ error: 'Ungültige ID' }, { status: 400 });
+    }
+
     try {
+        // Verify architect owns this project
+        const { data: project } = await supabase
+            .from('projects')
+            .select('architect_id')
+            .eq('id', projectId)
+            .single();
+
+        if (!project) {
+            return NextResponse.json({ error: 'Projekt nicht gefunden' }, { status: 404 });
+        }
+
+        if (project.architect_id && project.architect_id !== session.user.id) {
+            return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
+        }
+
         const { error } = await supabase
             .from('trades')
             .delete()
             .eq('id', tradeId)
             .eq('project_id', projectId);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Trade delete error:', error);
+            return NextResponse.json({ error: 'Fehler beim Löschen' }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Server-Fehler' }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }

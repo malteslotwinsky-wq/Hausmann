@@ -92,7 +92,10 @@ function AdminPageContent() {
                 fetch('/api/users'),
                 fetch('/api/projects')
             ]);
-            if (usersRes.ok) setUsers(await usersRes.json());
+            if (usersRes.ok) {
+                const usersData = await usersRes.json();
+                setUsers(usersData.data || usersData);
+            }
             if (projectsRes.ok) {
                 const data = await projectsRes.json();
                 setProjects(data.map((p: any) => ({

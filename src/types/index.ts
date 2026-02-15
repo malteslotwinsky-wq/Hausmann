@@ -7,7 +7,7 @@ export type Role = 'client' | 'architect' | 'contractor';
 export type Visibility = 'internal' | 'client';
 
 // Status
-export type TaskStatus = 'open' | 'in_progress' | 'done' | 'blocked';
+export type TaskStatus = 'pending' | 'in_progress' | 'done' | 'blocked';
 export type ProjectStatus = 'active' | 'completed' | 'paused';
 export type TradeStatus = 'pending' | 'active' | 'completed';
 

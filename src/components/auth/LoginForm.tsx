@@ -119,13 +119,12 @@ export function LoginForm() {
 
                     {/* Forgot Password */}
                     <div className="mt-4 text-center">
-                        <button
-                            type="button"
-                            onClick={() => alert('Bitte kontaktieren Sie Ihre Bauleitung zum Zurücksetzen des Passworts.')}
+                        <a
+                            href="/reset-password"
                             className="text-sm text-muted-foreground hover:text-accent tap-active"
                         >
                             Passwort vergessen?
-                        </button>
+                        </a>
                     </div>
                 </div>
 

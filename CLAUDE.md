@@ -90,9 +90,10 @@ BauLot ist eine Web-App zur Verwaltung von Bauprojekten mit Gewerke-Timeline, Au
 │       ├── index.ts            # Alle TypeScript Interfaces
 │       └── next-auth.d.ts      # NextAuth Type Extensions
 ├── public/                     # Statische Assets
-├── supabase_schema.sql         # Haupt-Datenbankschema
-├── supabase_migration_trades.sql # Trades-Migration
-├── supabase_tasks_schema.sql   # Tasks-Schema
+├── supabase_schema.sql         # Konsolidiertes Datenbankschema
+├── .github/workflows/ci.yml   # CI/CD Pipeline
+├── vitest.config.ts            # Test-Konfiguration
+├── .env.example                # Umgebungsvariablen-Vorlage
 ├── package.json
 ├── tsconfig.json
 ├── next.config.ts
@@ -120,8 +121,9 @@ NEXTAUTH_URL=                    # App-URL (z.B. http://localhost:3000)
 
 ## Architektur-Entscheidungen
 - **Server-Supabase:** `supabase` (mit Service Role Key, umgeht RLS)
-- **Client-Supabase:** `supabaseClient` (mit Anon Key, respektiert RLS)
-- **Auth:** JWT-basiert, Session in NextAuth gespeichert, `getServerSession()` in API-Routes
+- **Client-Supabase:** Entfernt (kein Client-Export mehr, `server-only` erzwungen)
+- **Auth:** JWT-basiert (7 Tage), Session in NextAuth gespeichert, `getServerSession()` in API-Routes
+- **Validierung:** Zod v4 für alle API-Inputs (`src/lib/validations.ts`)
 - **Middleware:** Schützt alle Routen außer `/`, `/login`, `/api/auth`
 - **DB-Mapping:** `snake_case` (DB) → `camelCase` (TypeScript) in API-Routes
 - **UI-Pattern:** Mobile-First mit `AppShell` (Sidebar desktop, BottomNav mobile)
@@ -142,8 +144,13 @@ NEXTAUTH_URL=                    # App-URL (z.B. http://localhost:3000)
 | POST | `/api/users` | Architect | Neuen Benutzer erstellen |
 | PUT | `/api/users/[id]` | Self/Architect | Benutzer aktualisieren |
 | DELETE | `/api/users/[id]` | Architect | Benutzer löschen (nicht sich selbst) |
+| GET | `/api/tasks` | Ja | Tasks (filter: tradeId, projectId) |
+| POST | `/api/tasks` | Architect/Contractor | Neue Aufgabe erstellen |
+| PATCH | `/api/tasks/[taskId]` | Architect/Contractor | Aufgabe aktualisieren |
+| DELETE | `/api/tasks/[taskId]` | Architect | Aufgabe löschen |
 | GET | `/api/messages` | Ja | Nachrichten |
-| POST | `/api/seed` | Architect | Datenbank mit Demodaten befüllen |
+| POST | `/api/messages` | Ja | Nachricht senden |
+| POST | `/api/seed` | Architect (nur Dev) | Datenbank mit Demodaten befüllen |
 
 ## Abgeschlossene Verbesserungen
 1. **Security:** `/api/seed` gesichert (POST + Auth), bcrypt async, Service Role Key
@@ -156,36 +163,60 @@ NEXTAUTH_URL=                    # App-URL (z.B. http://localhost:3000)
 8. **Shared Component:** `InputField` extrahiert und in 3 Seiten wiederverwendet
 9. **Projektstruktur:** Von `app/`-Subdirectory zu Repo-Root verschoben
 
+### Security-Härtung (2026-02-15)
+10. **Zod-Validierung:** Alle API-Routes mit Input-Validierung (Typ, Länge, Format, UUID-Check)
+11. **Security Headers:** CSP, HSTS, X-Frame-Options, X-Content-Type-Options in next.config.ts
+12. **Seed nur Dev:** `NODE_ENV === 'production'` Check auf `/api/seed`
+13. **Passwort-Verifikation:** Aktuelles Passwort wird bei Änderung geprüft (bcrypt.compare)
+14. **RLS gehärtet:** Client-Supabase-Export entfernt, `server-only` erzwungen, echte RLS-Policies
+15. **Contractor-Filterung:** GET /api/projects zeigt nur Projekte mit zugewiesenen Gewerken
+16. **Error-Sanitierung:** Keine Supabase-Fehlerdetails an Client, generische deutsche Meldungen
+17. **Ownership-Checks:** Trades POST/PATCH/DELETE prüft architect_id am Projekt
+18. **DB-Schema konsolidiert:** CHECK-Constraints, Indizes, updated_at-Trigger, Tasks-Spalten ergänzt
+19. **JWT auf 7 Tage:** Session-Dauer von 30 auf 7 Tage reduziert
+
+### Phase 2 (2026-02-15)
+20. **Tasks API:** Vollständiger CRUD-Endpoint (`/api/tasks`, `/api/tasks/[taskId]`)
+21. **Task-Persistierung:** Frontend ruft API bei Status-Änderungen auf (Tasks-Seite + Dashboard)
+22. **Error Boundaries:** `error.tsx` für alle Route-Segmente + `not-found.tsx` + `loading.tsx`
+23. **TaskStatus konsistent:** `'open'` → `'pending'` in gesamter Codebase (passend zur DB)
+24. **Aufräumung:** `demo-data.ts`, alte SQL-Migrations, altes `app/`-Verzeichnis entfernt
+25. **`.env.example`** erstellt
+
+### Phase 3 (2026-02-15)
+26. **Pagination:** GET `/api/users`, `/api/messages`, `/api/tasks` mit `PaginatedResponse<T>` Format
+27. **Frontend-Pagination:** Admin, Contacts, Projekt-Editor extrahieren `.data` aus paginierter Antwort
+28. **Tests:** Vitest + @testing-library eingerichtet, 78 Tests (validations, utils, trade-templates)
+29. **CI/CD:** GitHub Actions Pipeline (Lint, TypeCheck, Test, Build) in `.github/workflows/ci.yml`
+
 ## Offene Punkte / TODO
 ### Kritisch
-- [ ] Task-Statusänderungen werden nicht persistiert (kein `/api/tasks` Endpoint)
 - [ ] Fotos/Kommentare kommen immer leer vom API zurück (keine separaten Tabellen/Queries)
 - [ ] Foto-Upload nicht implementiert (kein File-Input, kein Supabase Storage)
+- [ ] CSRF-Schutz fehlt (mutating requests ohne Token)
+- [ ] Rate Limiting fehlt (Brute-Force auf Login möglich)
 
 ### Wichtig
 - [ ] PDF-Export ist nur Platzhalter (`alert()`)
 - [ ] Keine Echtzeit-Updates (kein WebSocket/Polling)
 - [ ] Timeline nutzt fiktive Positionierungslogik
 - [ ] TaskDetailModal Verlaufs-Tab ist hardcoded
-- [ ] Keine Error Boundaries (`error.tsx` / `not-found.tsx`)
-- [ ] `.env.example` Datei fehlt
-- [ ] Passwortänderung prüft nicht das aktuelle Passwort
+- [ ] Passwort-vergessen ist nur `alert()` Platzhalter (E-Mail-Provider nötig)
 - [ ] Alle Seiten nutzen `projects[0]` (kein Multi-Projekt-Selektor)
-- [ ] `demo-data.ts` existiert noch (wird aber nicht mehr importiert)
-- [ ] Seed-Route sollte nur im Dev-Modus verfügbar sein (`NODE_ENV`-Check)
+- [ ] Kein Error-Tracking (Sentry o.ä.)
 
 ### Nice-to-have
-- [ ] No pagination on lists
 - [ ] Kein Suchfeld funktional (nur UI)
-- [ ] Keine Tests vorhanden
 - [ ] Kein Loading-State bei API-Calls (teilweise)
 - [ ] Kein Service Worker / PWA Support
 - [ ] Hard-coded Organization ID verhindert Multi-Tenancy
 
 ## Befehle
 ```bash
-npm run dev      # Entwicklungsserver starten
-npm run build    # Produktions-Build
-npm run start    # Produktionsserver starten
-npm run lint     # ESLint ausführen
+npm run dev        # Entwicklungsserver starten
+npm run build      # Produktions-Build
+npm run start      # Produktionsserver starten
+npm run lint       # ESLint ausführen
+npm test           # Tests ausführen (vitest)
+npm run test:watch # Tests im Watch-Modus
 ```

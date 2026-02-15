@@ -87,19 +87,30 @@ function DashboardContent() {
         return null;
     }
 
-    const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus) => {
+    const handleUpdateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
         if (!selectedProject) return;
-        setSelectedProject(prev => prev ? {
-            ...prev,
-            trades: prev.trades.map(trade => ({
-                ...trade,
-                tasks: trade.tasks.map(task =>
-                    task.id === taskId
-                        ? { ...task, status: newStatus, updatedAt: new Date() }
-                        : task
-                ),
-            })),
-        } : null);
+        try {
+            const res = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
+            });
+            if (!res.ok) throw new Error('Fehler');
+
+            setSelectedProject(prev => prev ? {
+                ...prev,
+                trades: prev.trades.map(trade => ({
+                    ...trade,
+                    tasks: trade.tasks.map(task =>
+                        task.id === taskId
+                            ? { ...task, status: newStatus, updatedAt: new Date() }
+                            : task
+                    ),
+                })),
+            } : null);
+        } catch {
+            console.error('Failed to update task status');
+        }
     };
 
     const handleTogglePhotoVisibility = (photoId: string) => {
@@ -120,19 +131,30 @@ function DashboardContent() {
         } : null);
     };
 
-    const handleReportProblem = (taskId: string, reason: string) => {
+    const handleReportProblem = async (taskId: string, reason: string) => {
         if (!selectedProject) return;
-        setSelectedProject(prev => prev ? {
-            ...prev,
-            trades: prev.trades.map(trade => ({
-                ...trade,
-                tasks: trade.tasks.map(task =>
-                    task.id === taskId
-                        ? { ...task, status: 'blocked' as TaskStatus, blockedReason: reason, updatedAt: new Date() }
-                        : task
-                ),
-            })),
-        } : null);
+        try {
+            const res = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'blocked', blockedReason: reason }),
+            });
+            if (!res.ok) throw new Error('Fehler');
+
+            setSelectedProject(prev => prev ? {
+                ...prev,
+                trades: prev.trades.map(trade => ({
+                    ...trade,
+                    tasks: trade.tasks.map(task =>
+                        task.id === taskId
+                            ? { ...task, status: 'blocked' as TaskStatus, blockedReason: reason, updatedAt: new Date() }
+                            : task
+                    ),
+                })),
+            } : null);
+        } catch {
+            console.error('Failed to report problem');
+        }
     };
 
     if (showProjectList && projects.length > 1) {

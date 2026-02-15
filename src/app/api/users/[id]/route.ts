@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+import { updateUserSchema, uuidParamSchema, formatZodError } from '@/lib/validations';
+import { apiWriteRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // PUT update user (architect can update any, users can update own profile)
 export async function PUT(
@@ -16,37 +18,76 @@ export async function PUT(
     }
 
     const { id } = await params;
+    const idCheck = uuidParamSchema.safeParse(id);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Benutzer-ID' }, { status: 400 });
+    }
+
     const isOwnProfile = session.user.id === id;
     const isArchitect = session.user.role === 'architect';
 
     if (!isOwnProfile && !isArchitect) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
     }
+
+    const { success } = await apiWriteRateLimit.limit(session.user.id);
+    if (!success) return rateLimitResponse();
 
     try {
         const body = await request.json();
+        const parsed = updateUserSchema.safeParse(body);
 
+        if (!parsed.success) {
+            return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+        }
+
+        const input = parsed.data;
         const updateData: Record<string, unknown> = {};
 
         // Fields everyone can update on their own profile
-        if (body.name !== undefined) updateData.name = body.name;
-        if (body.phone !== undefined) updateData.phone = body.phone;
-        if (body.company !== undefined) updateData.company = body.company;
-        if (body.avatarUrl !== undefined) updateData.avatar_url = body.avatarUrl;
+        if (input.name !== undefined) updateData.name = input.name;
+        if (input.phone !== undefined) updateData.phone = input.phone;
+        if (input.company !== undefined) updateData.company = input.company;
+        if (input.avatarUrl !== undefined) updateData.avatar_url = input.avatarUrl;
 
         // Fields only architects can update
         if (isArchitect) {
-            if (body.role !== undefined) updateData.role = body.role;
-            if (body.email !== undefined) updateData.email = body.email;
-            if (body.projectIds !== undefined) updateData.project_ids = body.projectIds;
+            if (input.role !== undefined) updateData.role = input.role;
+            if (input.email !== undefined) updateData.email = input.email;
+            if (input.projectIds !== undefined) updateData.project_ids = input.projectIds;
+        } else {
+            // Non-architects cannot change role, email, or projectIds
+            if (input.role !== undefined || input.email !== undefined || input.projectIds !== undefined) {
+                return NextResponse.json({ error: 'Keine Berechtigung für diese Felder' }, { status: 403 });
+            }
         }
 
         // Password change
-        if (body.password) {
-            if (body.password.length < 6) {
-                return NextResponse.json({ error: 'Passwort muss mindestens 6 Zeichen haben' }, { status: 400 });
+        if (input.password) {
+            // For own profile changes, require current password
+            if (isOwnProfile) {
+                if (!input.currentPassword) {
+                    return NextResponse.json({ error: 'Aktuelles Passwort ist erforderlich' }, { status: 400 });
+                }
+
+                // Fetch current password hash
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('password')
+                    .eq('id', id)
+                    .single();
+
+                if (!userData) {
+                    return NextResponse.json({ error: 'Benutzer nicht gefunden' }, { status: 404 });
+                }
+
+                const isCurrentValid = await bcrypt.compare(input.currentPassword, userData.password);
+                if (!isCurrentValid) {
+                    return NextResponse.json({ error: 'Aktuelles Passwort ist falsch' }, { status: 400 });
+                }
             }
-            updateData.password = await bcrypt.hash(body.password, 10);
+
+            updateData.password = await bcrypt.hash(input.password, 10);
         }
 
         if (Object.keys(updateData).length === 0) {
@@ -60,7 +101,10 @@ export async function PUT(
             .select('id, email, name, role, phone, company, avatar_url, created_at')
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('User update error:', error);
+            return NextResponse.json({ error: 'Fehler beim Aktualisieren' }, { status: 500 });
+        }
 
         return NextResponse.json({
             id: data.id,
@@ -72,8 +116,8 @@ export async function PUT(
             avatarUrl: data.avatar_url,
             createdAt: data.created_at,
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Server-Fehler' }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }
 
@@ -89,6 +133,10 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const idCheck = uuidParamSchema.safeParse(id);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Benutzer-ID' }, { status: 400 });
+    }
 
     // Prevent self-deletion
     if (session.user.id === id) {
@@ -101,10 +149,13 @@ export async function DELETE(
             .delete()
             .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('User delete error:', error);
+            return NextResponse.json({ error: 'Fehler beim Löschen' }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Server-Fehler' }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }

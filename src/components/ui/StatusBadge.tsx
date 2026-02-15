@@ -17,7 +17,7 @@ export function StatusBadge({ status, showLabel = true, size = 'md' }: StatusBad
         : 'text-sm px-3 py-1';
 
     const bgColors: Record<TaskStatus, string> = {
-        open: 'bg-muted',
+        pending: 'bg-muted',
         in_progress: 'bg-blue-500/10',
         done: 'bg-green-500/10',
         blocked: 'bg-orange-500/10',

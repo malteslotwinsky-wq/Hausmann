@@ -225,7 +225,7 @@ function TaskRow({
     task: Task;
     onUpdateStatus?: (taskId: string, status: TaskStatus) => void;
 }) {
-    const statuses: TaskStatus[] = ['open', 'in_progress', 'done', 'blocked'];
+    const statuses: TaskStatus[] = ['pending', 'in_progress', 'done', 'blocked'];
 
     return (
         <div className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
@@ -247,7 +247,7 @@ function TaskRow({
                 >
                     {statuses.map((s) => (
                         <option key={s} value={s}>
-                            {s === 'open' ? 'Offen' : s === 'in_progress' ? 'In Arbeit' : s === 'done' ? 'Erledigt' : 'Blockiert'}
+                            {s === 'pending' ? 'Offen' : s === 'in_progress' ? 'In Arbeit' : s === 'done' ? 'Erledigt' : 'Blockiert'}
                         </option>
                     ))}
                 </select>

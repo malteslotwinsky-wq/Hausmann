@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { Project, Role } from '@/types';
+import { updateProjectSchema, uuidParamSchema, formatZodError } from '@/lib/validations';
+import { apiWriteRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 // GET single project by ID
 export async function GET(
@@ -16,6 +18,11 @@ export async function GET(
     }
 
     const { id } = await params;
+    const idCheck = uuidParamSchema.safeParse(id);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Projekt-ID' }, { status: 400 });
+    }
+
     const { user } = session;
     const role = user.role as Role;
 
@@ -25,13 +32,13 @@ export async function GET(
         .eq('id', id)
         .single();
 
-    if (error) {
-        return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    if (error || !projectData) {
+        return NextResponse.json({ error: 'Projekt nicht gefunden' }, { status: 404 });
     }
 
     // Check access rights
     if (role === 'client' && projectData.client_id !== user.id) {
-        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
     }
 
     if (role === 'contractor') {
@@ -40,7 +47,7 @@ export async function GET(
             (t: any) => t.contractor_id === user.id
         );
         if (!hasAccess) {
-            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+            return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
         }
     }
 
@@ -103,8 +110,24 @@ export async function PUT(
     }
 
     const { id } = await params;
+    const idCheck = uuidParamSchema.safeParse(id);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Projekt-ID' }, { status: 400 });
+    }
+
+    const { success } = await apiWriteRateLimit.limit(session.user.id);
+    if (!success) return rateLimitResponse();
 
     try {
+        const body = await request.json();
+        const parsed = updateProjectSchema.safeParse(body);
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+        }
+
+        const input = parsed.data;
+
         // Verify architect owns this project
         const { data: project } = await supabase
             .from('projects')
@@ -113,39 +136,40 @@ export async function PUT(
             .single();
 
         if (!project) {
-            return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Projekt nicht gefunden' }, { status: 404 });
         }
 
         if (project.architect_id && project.architect_id !== session.user.id) {
-            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+            return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
         }
 
-        const body = await request.json();
+        const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+        if (input.name !== undefined) updateData.name = input.name;
+        if (input.projectNumber !== undefined) updateData.project_number = input.projectNumber;
+        if (input.address !== undefined) updateData.address = input.address;
+        if (input.clientId !== undefined) updateData.client_id = input.clientId;
+        if (input.startDate !== undefined) updateData.start_date = input.startDate;
+        if (input.targetEndDate !== undefined) updateData.target_end_date = input.targetEndDate;
+        if (input.photoApprovalMode !== undefined) updateData.photo_approval_mode = input.photoApprovalMode;
+        if (input.escalationHours !== undefined) updateData.escalation_hours = input.escalationHours;
+        if (input.logoUrl !== undefined) updateData.logo_url = input.logoUrl;
+        if (input.status !== undefined) updateData.status = input.status;
 
         const { data, error } = await supabase
             .from('projects')
-            .update({
-                name: body.name,
-                project_number: body.projectNumber,
-                address: body.address,
-                client_id: body.clientId || null,
-                start_date: body.startDate,
-                target_end_date: body.targetEndDate,
-                photo_approval_mode: body.photoApprovalMode,
-                escalation_hours: body.escalationHours,
-                logo_url: body.logoUrl,
-                status: body.status,
-                updated_at: new Date().toISOString(),
-            })
+            .update(updateData)
             .eq('id', id)
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Project update error:', error);
+            return NextResponse.json({ error: 'Fehler beim Aktualisieren' }, { status: 500 });
+        }
 
         return NextResponse.json(data);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }
 
@@ -161,6 +185,10 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const idCheck = uuidParamSchema.safeParse(id);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Projekt-ID' }, { status: 400 });
+    }
 
     try {
         // Verify architect owns this project
@@ -171,11 +199,11 @@ export async function DELETE(
             .single();
 
         if (!project) {
-            return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Projekt nicht gefunden' }, { status: 404 });
         }
 
         if (project.architect_id && project.architect_id !== session.user.id) {
-            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+            return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
         }
 
         const { error } = await supabase
@@ -183,10 +211,13 @@ export async function DELETE(
             .delete()
             .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Project delete error:', error);
+            return NextResponse.json({ error: 'Fehler beim Löschen' }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }

@@ -37,7 +37,7 @@ export function TaskDetailModal({
     ] as const;
 
     const statuses: { status: TaskStatus; label: string; shortIcon: string }[] = [
-        { status: 'open', label: 'Offen', shortIcon: '○' },
+        { status: 'pending', label: 'Offen', shortIcon: '○' },
         { status: 'in_progress', label: 'In Arbeit', shortIcon: '→' },
         { status: 'done', label: 'Erledigt', shortIcon: '✓' },
         { status: 'blocked', label: 'Blockiert', shortIcon: '⚠' },

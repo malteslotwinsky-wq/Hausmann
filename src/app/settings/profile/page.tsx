@@ -48,6 +48,11 @@ function ProfilePageContent() {
             return;
         }
 
+        if (form.newPassword && !form.currentPassword) {
+            showToast('Aktuelles Passwort ist erforderlich', 'error');
+            return;
+        }
+
         setLoading(true);
         try {
             const res = await fetch(`/api/users/${session.user.id}`, {
@@ -55,10 +60,9 @@ function ProfilePageContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: form.name,
-                    email: form.email,
                     phone: form.phone,
                     company: form.company,
-                    ...(form.newPassword ? { password: form.newPassword } : {}),
+                    ...(form.newPassword ? { password: form.newPassword, currentPassword: form.currentPassword } : {}),
                 }),
             });
 

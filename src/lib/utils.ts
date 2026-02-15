@@ -21,7 +21,7 @@ export function calculateTradeProgress(trade: Trade): TradeProgress {
     const done = trade.tasks.filter(t => t.status === 'done').length;
     const inProgress = trade.tasks.filter(t => t.status === 'in_progress').length;
     const blocked = trade.tasks.filter(t => t.status === 'blocked').length;
-    const open = trade.tasks.filter(t => t.status === 'open').length;
+    const open = trade.tasks.filter(t => t.status === 'pending').length;
 
     return {
         tradeId: trade.id,
@@ -67,7 +67,7 @@ export function getSimplifiedStatus(progress: TradeProgress): 'not_started' | 'i
  */
 export function getStatusDisplay(status: TaskStatus): { icon: string; color: string; label: string } {
     switch (status) {
-        case 'open':
+        case 'pending':
             return { icon: '○', color: 'text-gray-400', label: 'Offen' };
         case 'in_progress':
             return { icon: '→', color: 'text-blue-500', label: 'In Arbeit' };

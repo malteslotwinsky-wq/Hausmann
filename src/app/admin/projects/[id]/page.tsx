@@ -86,7 +86,8 @@ function ProjectDetailContent() {
         try {
             const res = await fetch('/api/users');
             if (res.ok) {
-                const users = await res.json();
+                const usersData = await res.json();
+                const users = usersData.data || usersData;
                 setContractors(users.filter((u: UserData) => u.role === 'contractor'));
             }
         } catch { }

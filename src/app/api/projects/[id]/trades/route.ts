@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { createTradeSchema, uuidParamSchema, formatZodError } from '@/lib/validations';
 
 // POST create trade for a project
 export async function POST(
@@ -15,9 +16,35 @@ export async function POST(
     }
 
     const { id: projectId } = await params;
+    const idCheck = uuidParamSchema.safeParse(projectId);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Projekt-ID' }, { status: 400 });
+    }
 
     try {
+        // Verify architect owns this project
+        const { data: project } = await supabase
+            .from('projects')
+            .select('architect_id')
+            .eq('id', projectId)
+            .single();
+
+        if (!project) {
+            return NextResponse.json({ error: 'Projekt nicht gefunden' }, { status: 404 });
+        }
+
+        if (project.architect_id && project.architect_id !== session.user.id) {
+            return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
+        }
+
         const body = await request.json();
+        const parsed = createTradeSchema.safeParse(body);
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+        }
+
+        const input = parsed.data;
 
         // Get the next order number
         const { data: existingTrades } = await supabase
@@ -36,32 +63,34 @@ export async function POST(
             .from('trades')
             .insert({
                 project_id: projectId,
-                name: body.name,
-                company_name: body.companyName || null,
-                contact_person: body.contactPerson || null,
-                phone: body.phone || null,
-                description: body.description || null,
-                contractor_id: body.contractorId || null,
-                start_date: body.startDate || null,
-                end_date: body.endDate || null,
-                predecessor_trade_id: body.predecessorTradeId || null,
-                budget: body.budget || null,
-                can_create_subtasks: body.canCreateSubtasks || false,
+                name: input.name,
+                company_name: input.companyName || null,
+                contact_person: input.contactPerson || null,
+                phone: input.phone || null,
+                description: input.description || null,
+                contractor_id: input.contractorId || null,
+                start_date: input.startDate || null,
+                end_date: input.endDate || null,
+                predecessor_trade_id: input.predecessorTradeId || null,
+                budget: input.budget || null,
+                can_create_subtasks: input.canCreateSubtasks,
                 order: nextOrder,
                 status: 'pending'
             })
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Trade creation error:', error);
+            return NextResponse.json({ error: 'Fehler beim Erstellen des Gewerks' }, { status: 500 });
+        }
 
         // If a contractor was assigned, update their project assignments
-        if (body.contractorId) {
-            // Get the user's current project_ids
+        if (input.contractorId) {
             const { data: userData } = await supabase
                 .from('users')
                 .select('project_ids')
-                .eq('id', body.contractorId)
+                .eq('id', input.contractorId)
                 .single();
 
             if (userData) {
@@ -70,7 +99,7 @@ export async function POST(
                     await supabase
                         .from('users')
                         .update({ project_ids: [...currentProjectIds, projectId] })
-                        .eq('id', body.contractorId);
+                        .eq('id', input.contractorId);
                 }
             }
         }
@@ -90,9 +119,8 @@ export async function POST(
             order: data.order,
             status: data.status,
         }, { status: 201 });
-    } catch (error: any) {
-        console.error('Trade creation error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }
 
@@ -108,6 +136,10 @@ export async function GET(
     }
 
     const { id: projectId } = await params;
+    const idCheck = uuidParamSchema.safeParse(projectId);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Projekt-ID' }, { status: 400 });
+    }
 
     try {
         const { data, error } = await supabase
@@ -116,9 +148,12 @@ export async function GET(
             .eq('project_id', projectId)
             .order('order', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Trades fetch error:', error);
+            return NextResponse.json({ error: 'Fehler beim Laden der Gewerke' }, { status: 500 });
+        }
 
-        const trades = data.map((t: any) => ({
+        const trades = (data || []).map((t: any) => ({
             id: t.id,
             projectId: t.project_id,
             name: t.name,
@@ -137,7 +172,7 @@ export async function GET(
         }));
 
         return NextResponse.json(trades);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }

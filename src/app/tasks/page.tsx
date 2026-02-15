@@ -86,32 +86,47 @@ function TasksPageContent() {
 
     const stats = {
         all: allTasks.length,
-        open: allTasks.filter(t => t.status === 'open').length,
+        pending: allTasks.filter(t => t.status === 'pending').length,
         in_progress: allTasks.filter(t => t.status === 'in_progress').length,
         done: allTasks.filter(t => t.status === 'done').length,
         blocked: allTasks.filter(t => t.status === 'blocked').length,
     };
 
-    const handleUpdateStatus = (taskId: string, newStatus: TaskStatus) => {
-        setProject(prev => {
-            if (!prev) return prev;
-            return {
-                ...prev,
-                trades: prev.trades.map(trade => ({
-                    ...trade,
-                    tasks: trade.tasks.map(task =>
-                        task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
-                    ),
-                })),
-            };
-        });
-        showToast('Status aktualisiert', 'success');
-        setSelectedTask(null);
+    const handleUpdateStatus = async (taskId: string, newStatus: TaskStatus) => {
+        try {
+            const res = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Fehler beim Aktualisieren');
+            }
+
+            setProject(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    trades: prev.trades.map(trade => ({
+                        ...trade,
+                        tasks: trade.tasks.map(task =>
+                            task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
+                        ),
+                    })),
+                };
+            });
+            showToast('Status aktualisiert', 'success');
+            setSelectedTask(null);
+        } catch (error: any) {
+            showToast(error.message || 'Fehler beim Aktualisieren', 'error');
+        }
     };
 
     const filterConfig = [
         { id: 'all', label: 'Alle', count: stats.all, color: 'bg-primary text-primary-foreground' },
-        { id: 'open', label: 'Offen', count: stats.open, color: 'bg-muted text-foreground' },
+        { id: 'pending', label: 'Offen', count: stats.pending, color: 'bg-muted text-foreground' },
         { id: 'in_progress', label: 'In Arbeit', count: stats.in_progress, color: 'bg-blue-500/10 text-blue-500' },
         { id: 'done', label: 'Erledigt', count: stats.done, color: 'bg-green-500/10 text-green-500' },
         { id: 'blocked', label: 'Blockiert', count: stats.blocked, color: 'bg-orange-500/10 text-orange-500' },

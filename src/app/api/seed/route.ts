@@ -6,8 +6,12 @@ import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
-// POST seed database (Architect only, protected)
+// POST seed database (Architect only, development only)
 export async function POST() {
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Not available in production' }, { status: 403 });
+    }
+
     const session = await getServerSession(authOptions);
 
     if (!session || session.user.role !== 'architect') {

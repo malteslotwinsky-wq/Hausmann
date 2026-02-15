@@ -45,7 +45,8 @@ function ContactsPageContent() {
 
             if (!usersRes.ok || !projectsRes.ok) throw new Error();
 
-            const allUsers = await usersRes.json();
+            const usersJson = await usersRes.json();
+            const allUsers = usersJson.data || usersJson;
             const allProjects = await projectsRes.json();
 
             // Build contact list (exclude current user and architects)
