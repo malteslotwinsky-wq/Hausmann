@@ -366,7 +366,7 @@ export function ArchitectDashboard({ project, userName, onUpdateTaskStatus, onTo
                                         <span className="text-[11px] text-muted-foreground font-medium">{day.label}</span>
                                         <span className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                                             day.isToday
-                                                ? 'bg-accent text-accent-foreground'
+                                                ? 'bg-foreground text-background'
                                                 : 'text-foreground hover:bg-muted'
                                         }`}>
                                             {day.date.getDate()}

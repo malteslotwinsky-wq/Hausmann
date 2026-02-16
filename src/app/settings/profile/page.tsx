@@ -108,7 +108,7 @@ function ProfilePageContent() {
                 <div className="p-4 space-y-6">
                     {/* Avatar */}
                     <div className="flex flex-col items-center py-6">
-                        <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-white font-bold text-4xl mb-4">
+                        <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-4xl mb-4">
                             {form.name.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <button className="text-accent font-medium tap-active">

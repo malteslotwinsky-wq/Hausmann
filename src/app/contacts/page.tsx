@@ -149,7 +149,7 @@ function ContactsPageContent() {
                                 onClick={() => setFilter(f.id as any)}
                                 className={`
                                     px-4 py-2 rounded-full text-sm font-medium tap-active transition-all flex-shrink-0
-                                    ${filter === f.id ? 'bg-accent text-white' : 'bg-muted text-muted-foreground'}
+                                    ${filter === f.id ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}
                                 `}
                             >
                                 {f.label}
@@ -182,7 +182,7 @@ function ContactsPageContent() {
                                             onClick={() => setSelectedContact(contact)}
                                             className="flex-shrink-0 w-24 text-center tap-active"
                                         >
-                                            <div className="w-16 h-16 mx-auto bg-accent rounded-full flex items-center justify-center text-white font-bold text-xl mb-2">
+                                            <div className="w-16 h-16 mx-auto bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-xl mb-2">
                                                 {contact.name.charAt(0).toUpperCase()}
                                             </div>
                                             <p className="font-medium text-foreground text-sm truncate">{contact.name.split(' ')[0]}</p>
@@ -236,7 +236,7 @@ function ContactsPageContent() {
                     <div>
                         {/* Avatar & Name */}
                         <div className="text-center mb-6">
-                            <div className="w-20 h-20 mx-auto bg-accent rounded-full flex items-center justify-center text-white font-bold text-3xl mb-3">
+                            <div className="w-20 h-20 mx-auto bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-3xl mb-3">
                                 {selectedContact.name.charAt(0).toUpperCase()}
                             </div>
                             <h2 className="text-xl font-bold text-foreground">{selectedContact.name}</h2>
@@ -307,7 +307,7 @@ function ContactCard({ contact, onClick }: { contact: Contact; onClick: () => vo
     return (
         <div onClick={onClick} className="card-mobile tap-active">
             <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-accent rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                <div className="w-11 h-11 bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold flex-shrink-0">
                     {contact.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

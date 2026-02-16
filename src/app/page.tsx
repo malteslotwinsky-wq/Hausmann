@@ -31,7 +31,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="text-accent-foreground" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 21h18" />
                 <path d="M5 21V7l7-4 7 4v14" />
                 <path d="M9 21v-6h6v6" />
@@ -198,7 +198,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/login"
-            className="btn-mobile btn-mobile-lg bg-accent text-white tap-active inline-flex hover:bg-accent-light transition-colors"
+            className="btn-mobile btn-mobile-lg bg-accent text-accent-foreground tap-active inline-flex hover:bg-accent-light transition-colors"
           >
             Jetzt loslegen
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -214,7 +214,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-accent rounded-lg flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="text-accent-foreground" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 21h18" />
                 <path d="M5 21V7l7-4 7 4v14" />
                 <path d="M9 21v-6h6v6" />
@@ -234,7 +234,7 @@ export default function LandingPage() {
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
     <div className="card-mobile p-6 group">
-      <div className="w-10 h-10 bg-accent-muted rounded-xl flex items-center justify-center text-accent mb-4 group-hover:bg-accent group-hover:text-white transition-colors duration-200">
+      <div className="w-10 h-10 bg-accent-muted rounded-xl flex items-center justify-center text-accent mb-4 group-hover:bg-accent group-hover:text-accent-foreground transition-colors duration-200">
         {icon}
       </div>
       <h3 className="font-semibold text-foreground mb-2">{title}</h3>
@@ -264,7 +264,7 @@ function PricingCard({
         ${highlighted ? 'ring-2 ring-accent' : ''}
     `}>
       {highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1 rounded-full">
           BELIEBT
         </div>
       )}

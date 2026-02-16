@@ -261,7 +261,7 @@ function AdminPageContent() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium tap-active transition-all flex-shrink-0 ${activeTab === tab.id ? 'bg-accent text-white' : 'bg-muted text-muted-foreground'}`}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium tap-active transition-all flex-shrink-0 ${activeTab === tab.id ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}
                             >
                                 <span>{tab.label}</span>
                                 <span className={`text-xs px-1.5 rounded ${activeTab === tab.id ? 'bg-white/20' : 'bg-border'}`}>{tab.count}</span>
@@ -544,7 +544,7 @@ function AdminPageContent() {
                         {!editingUser && (
                             <div className="grid grid-cols-2 gap-2">
                                 {['contractor', 'client'].map(r => (
-                                    <button key={r} onClick={() => setUserForm({ ...userForm, role: r as any })} className={`py-3 rounded-xl text-sm font-medium tap-active ${userForm.role === r ? 'bg-accent text-white' : 'bg-muted text-muted-foreground'}`}>
+                                    <button key={r} onClick={() => setUserForm({ ...userForm, role: r as any })} className={`py-3 rounded-xl text-sm font-medium tap-active ${userForm.role === r ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}>
                                         {r === 'contractor' ? '🔧 Handwerker' : '👤 Kunde'}
                                     </button>
                                 ))}
@@ -596,7 +596,7 @@ function UserCard({ user, projects, onEdit }: { user: UserData; projects: Projec
     return (
         <div onClick={onEdit} className="card-mobile tap-active">
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-lg flex-shrink-0">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

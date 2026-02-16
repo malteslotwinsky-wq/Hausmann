@@ -57,7 +57,7 @@ export default function SettingsPage() {
                 <div className="p-4">
                     <div className="card-mobile bg-gradient-to-br from-accent/10 to-accent/5">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-2xl">
                                 {session.user.name?.charAt(0).toUpperCase() || 'U'}
                             </div>
                             <div className="flex-1 min-w-0">

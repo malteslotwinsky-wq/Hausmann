@@ -88,7 +88,7 @@ function ResetPasswordForm() {
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <span className="text-white text-2xl font-bold">B</span>
+                        <span className="text-accent-foreground text-2xl font-bold">B</span>
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">{defaultTheme.name}</h1>
                     <p className="text-muted-foreground mt-1">Passwort zurücksetzen</p>

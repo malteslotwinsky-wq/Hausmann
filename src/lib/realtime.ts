@@ -26,30 +26,42 @@ export function useRealtimeSubscription({
     useEffect(() => {
         if (!enabled) return;
 
-        const channelName = `realtime-${table}-${filter || 'all'}-${Date.now()}`;
+        // Skip if supabase is not properly configured
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (!url) return;
 
-        const channelConfig: any = {
-            event,
-            schema: 'public',
-            table,
-        };
+        try {
+            const channelName = `realtime-${table}-${filter || 'all'}-${Date.now()}`;
 
-        if (filter) {
-            channelConfig.filter = filter;
+            const channelConfig: any = {
+                event,
+                schema: 'public',
+                table,
+            };
+
+            if (filter) {
+                channelConfig.filter = filter;
+            }
+
+            const channel = supabaseClient
+                .channel(channelName)
+                .on('postgres_changes', channelConfig, (payload: any) => {
+                    onEvent(payload);
+                })
+                .subscribe();
+
+            channelRef.current = channel;
+        } catch {
+            // Silently fail if realtime is not available
         }
-
-        const channel = supabaseClient
-            .channel(channelName)
-            .on('postgres_changes', channelConfig, (payload: any) => {
-                onEvent(payload);
-            })
-            .subscribe();
-
-        channelRef.current = channel;
 
         return () => {
             if (channelRef.current) {
-                supabaseClient.removeChannel(channelRef.current);
+                try {
+                    supabaseClient.removeChannel(channelRef.current);
+                } catch {
+                    // ignore cleanup errors
+                }
                 channelRef.current = null;
             }
         };

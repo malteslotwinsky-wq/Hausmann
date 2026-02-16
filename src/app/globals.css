@@ -101,6 +101,7 @@
   --color-border-subtle: var(--border-subtle);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-accent-foreground: var(--accent-foreground);
   --color-accent-muted: var(--accent-muted);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
