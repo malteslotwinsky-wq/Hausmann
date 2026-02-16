@@ -1,29 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { Project, Trade, Task, TaskStatus } from '@/types';
+import { useState, useRef } from 'react';
+import { Project, Task, TaskStatus } from '@/types';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { TaskDetailModal } from '@/components/modals/TaskDetailModal';
+import { useToast } from '@/components/ui/Toast';
 import { formatDate } from '@/lib/utils';
 
 interface ContractorDashboardProps {
     project: Project;
     contractorId: string;
     onUpdateTaskStatus?: (taskId: string, status: TaskStatus) => void;
-    onAddPhoto?: (taskId: string) => void;
-    onAddComment?: (taskId: string, content: string) => void;
     onReportProblem?: (taskId: string, reason: string) => void;
+    onRefresh?: () => void;
 }
 
 export function ContractorDashboard({
     project,
     contractorId,
     onUpdateTaskStatus,
-    onAddPhoto,
     onReportProblem,
+    onRefresh,
 }: ContractorDashboardProps) {
     const [showProblemSheet, setShowProblemSheet] = useState(false);
     const [problemReason, setProblemReason] = useState('');
     const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+    const [selectedTask, setSelectedTask] = useState<(Task & { tradeName?: string }) | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { showToast } = useToast();
 
     // Find trades assigned to this contractor
     const myTrades = project.trades.filter(t => t.contractorId === contractorId);
@@ -38,6 +43,10 @@ export function ContractorDashboard({
         if (!currentTask) return;
         const newStatus = action === 'start' ? 'in_progress' : 'done';
         onUpdateTaskStatus?.(currentTask.id, newStatus);
+        showToast(
+            newStatus === 'in_progress' ? 'Status: In Arbeit' : 'Aufgabe erledigt!',
+            'success'
+        );
     };
 
     const handleReportProblem = () => {
@@ -46,11 +55,63 @@ export function ContractorDashboard({
             setShowProblemSheet(false);
             setProblemReason('');
             setActiveTaskId(null);
+            showToast('Problem wurde gemeldet', 'info');
+        }
+    };
+
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0 || !currentTask) return;
+
+        setUploading(true);
+        try {
+            for (const file of Array.from(files)) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('taskId', currentTask.id);
+                formData.append('visibility', 'internal');
+
+                const res = await fetch('/api/photos', { method: 'POST', body: formData });
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Upload fehlgeschlagen');
+                }
+            }
+            showToast('Foto hochgeladen', 'success');
+            onRefresh?.();
+        } catch (error) {
+            console.error('Photo upload failed:', error);
+            showToast('Foto-Upload fehlgeschlagen', 'error');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const handleTaskModalStatusUpdate = (status: TaskStatus) => {
+        if (selectedTask) {
+            onUpdateTaskStatus?.(selectedTask.id, status);
+            showToast(
+                status === 'done' ? 'Aufgabe erledigt!' :
+                status === 'in_progress' ? 'Status: In Arbeit' :
+                status === 'blocked' ? 'Aufgabe blockiert' : 'Status aktualisiert',
+                'success'
+            );
         }
     };
 
     return (
         <div className="min-h-screen bg-background text-foreground safe-area-top">
+            {/* Hidden file input for photo capture */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handlePhotoUpload}
+            />
+
             {/* === HEADER === */}
             <header className="px-5 pt-6 pb-4">
                 <p className="text-caption text-muted-foreground mb-1">MEIN BAUPROJEKT</p>
@@ -61,22 +122,30 @@ export function ContractorDashboard({
             <main className="px-4 pb-32 space-y-6 animate-fade-in">
                 {/* Hero Card: Current Task */}
                 {currentTask && (
-                    <section className="card-mobile animate-scale-in">
+                    <section
+                        className="card-mobile animate-scale-in cursor-pointer"
+                        onClick={() => setSelectedTask(currentTask)}
+                    >
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-title">Aktuelle Aufgabe</h2>
                             <StatusBadge status={currentTask.status} size="sm" />
                         </div>
 
                         {/* Task Info */}
-                        <div className="p-4 bg-muted rounded-xl border-l-4 border-accent mb-6">
+                        <div className="p-4 bg-muted rounded-xl border-l-4 border-accent mb-4">
                             <p className="font-bold text-lg text-foreground">{currentTask.title}</p>
                             <p className="text-sm text-muted-foreground mt-1">
                                 {currentTask.tradeName} • {currentTask.dueDate ? formatDate(currentTask.dueDate) : 'Flexibel'}
                             </p>
+                            {currentTask.description && (
+                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                                    {currentTask.description}
+                                </p>
+                            )}
                         </div>
 
                         {/* Large Action Buttons (Touch-first) */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4" onClick={(e) => e.stopPropagation()}>
                             <button
                                 onClick={() => handleAction('start')}
                                 className="btn-mobile btn-mobile-lg bg-primary text-primary-foreground tap-active-strong flex flex-col items-center gap-2"
@@ -94,12 +163,17 @@ export function ContractorDashboard({
                         </div>
 
                         {/* Secondary Actions */}
-                        <div className="grid grid-cols-2 gap-3 mt-4">
+                        <div className="grid grid-cols-2 gap-3 mt-4" onClick={(e) => e.stopPropagation()}>
                             <button
-                                onClick={() => onAddPhoto?.(currentTask.id)}
-                                className="btn-mobile btn-mobile-secondary tap-active"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="btn-mobile btn-mobile-secondary tap-active disabled:opacity-50"
                             >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                                {uploading ? (
+                                    <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                                )}
                                 Foto
                             </button>
                             <button
@@ -124,8 +198,9 @@ export function ContractorDashboard({
                             {upcomingTasks.map((task, index) => (
                                 <div
                                     key={task.id}
-                                    className="card-mobile card-mobile-interactive bg-muted/50 text-foreground flex items-center justify-between tap-active"
+                                    className="card-mobile card-mobile-interactive bg-muted/50 text-foreground flex items-center justify-between tap-active cursor-pointer"
                                     style={{ animationDelay: `${index * 50}ms` }}
+                                    onClick={() => setSelectedTask(task)}
                                 >
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium truncate">{task.title}</p>
@@ -133,7 +208,10 @@ export function ContractorDashboard({
                                             {task.dueDate ? formatDate(task.dueDate) : 'Kein Datum'}
                                         </p>
                                     </div>
-                                    <StatusBadge status={task.status} size="sm" />
+                                    <div className="flex items-center gap-2">
+                                        <StatusBadge status={task.status} size="sm" />
+                                        <svg className="text-muted-foreground" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -191,6 +269,18 @@ export function ContractorDashboard({
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* === Task Detail Modal === */}
+            {selectedTask && (
+                <TaskDetailModal
+                    task={selectedTask}
+                    isOpen={!!selectedTask}
+                    onClose={() => setSelectedTask(null)}
+                    onUpdateStatus={handleTaskModalStatusUpdate}
+                    onReportProblem={onReportProblem}
+                    role="contractor"
+                />
             )}
         </div>
     );

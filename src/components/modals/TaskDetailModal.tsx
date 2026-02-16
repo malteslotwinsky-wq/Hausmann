@@ -105,7 +105,7 @@ export function TaskDetailModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Aufgabe: ${task.title}`}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Aufgabe: ${task.title}`}>
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -113,20 +113,31 @@ export function TaskDetailModal({
                 aria-hidden="true"
             />
 
-            {/* Modal */}
-            <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal - fullscreen on mobile, centered card on desktop */}
+            <div className="relative bg-white dark:bg-gray-900 sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="flex items-start justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-                    <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{task.title}</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {task.tradeName} {task.contractorName && `· ${task.contractorName}`}
-                        </p>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Back arrow on mobile, hidden on desktop */}
+                        <button
+                            onClick={onClose}
+                            aria-label="Zurück"
+                            className="sm:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 -ml-2"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                        </button>
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{task.title}</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                                {task.tradeName} {task.contractorName && `· ${task.contractorName}`}
+                            </p>
+                        </div>
                     </div>
+                    {/* Close X on desktop only */}
                     <button
                         onClick={onClose}
                         aria-label="Schließen"
-                        className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="hidden sm:flex w-10 h-10 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     >
                         ✕
                     </button>
@@ -387,7 +398,7 @@ export function TaskDetailModal({
 
                 {/* Footer Actions (Mobile-friendly) */}
                 {role !== 'client' && (
-                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex gap-2">
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex gap-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
                         <Button
                             variant="secondary"
                             fullWidth
