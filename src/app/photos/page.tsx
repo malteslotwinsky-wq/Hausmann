@@ -182,13 +182,21 @@ function PhotosPageContent() {
                                 <path d="M21 15l-5-5L5 21" />
                             </svg>
                         </div>
-                        <p className="text-muted-foreground">
+                        <p className="text-foreground font-medium mb-1">
                             {filter !== 'all' ? 'Keine Fotos in diesem Filter' : 'Noch keine Fotos vorhanden'}
                         </p>
-                        {role !== 'client' && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                                Laden Sie Fotos über den Button unten rechts hoch
-                            </p>
+                        {role !== 'client' && filter === 'all' && (
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="mt-3 text-sm text-accent font-medium hover:underline"
+                            >
+                                Erstes Foto hochladen
+                            </button>
+                        )}
+                        {filter !== 'all' && (
+                            <button onClick={() => setFilter('all')} className="mt-3 text-sm text-accent font-medium hover:underline">
+                                Alle Fotos anzeigen
+                            </button>
                         )}
                     </div>
                 )}

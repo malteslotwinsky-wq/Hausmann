@@ -75,7 +75,9 @@ function TasksPageContent() {
             <AppShell currentPage="tasks">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
                     <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4"><svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></div>
-                    <p className="text-muted-foreground">Diese Seite ist für Kunden nicht verfügbar.</p>
+                    <p className="text-foreground font-medium mb-1">Nur für Bauleitung & Handwerker</p>
+                    <p className="text-sm text-muted-foreground mb-4">Aufgaben sind für Kunden nicht sichtbar.</p>
+                    <a href="/dashboard" className="text-sm text-accent font-medium hover:underline">Zum Dashboard</a>
                 </div>
             </AppShell>
         );
@@ -86,7 +88,9 @@ function TasksPageContent() {
             <AppShell currentPage="tasks">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
                     <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4"><svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg></div>
-                    <p className="text-muted-foreground">Kein Projekt verfügbar</p>
+                    <p className="text-foreground font-medium mb-1">Kein Projekt vorhanden</p>
+                    <p className="text-sm text-muted-foreground mb-4">Erstellen Sie zuerst ein Projekt in der Verwaltung.</p>
+                    {role === 'architect' && <a href="/admin" className="text-sm text-accent font-medium hover:underline">Zur Verwaltung</a>}
                 </div>
             </AppShell>
         );
@@ -189,7 +193,9 @@ function TasksPageContent() {
                     {filteredTasks.length === 0 ? (
                         <div className="card-mobile text-center py-12">
                             <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-3"><svg className="text-muted-foreground" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg></div>
-                            <p className="text-muted-foreground">Keine Aufgaben in diesem Filter</p>
+                            <p className="text-foreground font-medium mb-1">{filter === 'all' ? 'Noch keine Aufgaben' : 'Keine Aufgaben in diesem Filter'}</p>
+                            <p className="text-sm text-muted-foreground">{filter === 'all' ? 'Aufgaben werden über die Gewerke-Verwaltung erstellt.' : 'Wählen Sie einen anderen Filter oder erstellen Sie neue Aufgaben.'}</p>
+                            {filter !== 'all' && <button onClick={() => setFilter('all')} className="text-sm text-accent font-medium hover:underline mt-3">Alle anzeigen</button>}
                         </div>
                     ) : (
                         filteredTasks.map(task => (

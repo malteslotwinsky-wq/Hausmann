@@ -56,7 +56,9 @@ function DiaryPageContent() {
                     <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
                     </div>
-                    <p className="text-muted-foreground">Kein Projekt verfügbar</p>
+                    <p className="text-foreground font-medium mb-1">Kein Projekt vorhanden</p>
+                    <p className="text-sm text-muted-foreground mb-4">Das Bautagebuch wird automatisch befüllt, sobald ein Projekt existiert.</p>
+                    {role === 'architect' && <a href="/admin" className="text-sm text-accent font-medium hover:underline">Projekt anlegen</a>}
                 </div>
             </AppShell>
         );

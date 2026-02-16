@@ -77,10 +77,21 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
             {/* Image Container */}
             <div className="absolute inset-0 flex items-center justify-center p-16">
                 <div className="relative max-w-full max-h-full flex items-center justify-center">
-                    {/* Placeholder for actual image */}
-                    <div className="bg-gray-800 rounded-lg flex items-center justify-center w-[600px] h-[400px]">
-                        <span className="text-8xl text-gray-600">📷</span>
-                    </div>
+                    {currentPhoto.fileUrl && currentPhoto.fileUrl.startsWith('http') ? (
+                        <img
+                            src={currentPhoto.fileUrl}
+                            alt={currentPhoto.caption || 'Foto'}
+                            className="max-w-full max-h-full object-contain rounded-lg"
+                        />
+                    ) : (
+                        <div className="bg-gray-800 rounded-lg flex items-center justify-center w-[600px] h-[400px]">
+                            <svg className="text-gray-600" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                <path d="M21 15l-5-5L5 21" />
+                            </svg>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -116,9 +127,13 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
                                         : 'border-transparent opacity-50 hover:opacity-75'
                                     }`}
                             >
-                                <div className="w-full h-full bg-gray-700 flex items-center justify-center text-2xl text-gray-500">
-                                    📷
-                                </div>
+                                {photo.fileUrl && photo.fileUrl.startsWith('http') ? (
+                                    <img src={photo.fileUrl} alt={photo.caption || 'Foto'} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                                        <svg className="text-gray-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                                    </div>
+                                )}
                             </button>
                         ))}
                     </div>

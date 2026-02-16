@@ -306,18 +306,45 @@ export function TaskDetailModal({
                     {/* History Tab */}
                     {activeTab === 'history' && (
                         <div className="space-y-3">
-                            <div className="flex items-start gap-3 text-sm">
-                                <span className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600">✓</span>
-                                <div>
-                                    <p className="text-gray-900 dark:text-gray-100">Status auf &ldquo;{task.status === 'pending' ? 'Offen' : task.status === 'in_progress' ? 'In Arbeit' : task.status === 'done' ? 'Erledigt' : 'Blockiert'}&rdquo; gesetzt</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.updatedAt)} · System</p>
+                            {task.updatedAt.getTime() !== task.createdAt.getTime() && (
+                                <div className="flex items-start gap-3 text-sm">
+                                    <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                                        task.status === 'done' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
+                                        task.status === 'blocked' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' :
+                                        task.status === 'in_progress' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' :
+                                        'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                                    }`}>
+                                        {task.status === 'done' ? '✓' : task.status === 'blocked' ? '⚠' : task.status === 'in_progress' ? '→' : '○'}
+                                    </span>
+                                    <div>
+                                        <p className="text-gray-900 dark:text-gray-100">
+                                            Status: {task.status === 'pending' ? 'Offen' : task.status === 'in_progress' ? 'In Arbeit' : task.status === 'done' ? 'Erledigt' : 'Blockiert'}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.updatedAt)}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+                            {task.photos.length > 0 && (
+                                <div className="flex items-start gap-3 text-sm">
+                                    <span className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 shrink-0">📷</span>
+                                    <div>
+                                        <p className="text-gray-900 dark:text-gray-100">{task.photos.length} Foto{task.photos.length > 1 ? 's' : ''} hochgeladen</p>
+                                    </div>
+                                </div>
+                            )}
+                            {task.comments.length > 0 && (
+                                <div className="flex items-start gap-3 text-sm">
+                                    <span className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 shrink-0">💬</span>
+                                    <div>
+                                        <p className="text-gray-900 dark:text-gray-100">{task.comments.length} Kommentar{task.comments.length > 1 ? 'e' : ''}</p>
+                                    </div>
+                                </div>
+                            )}
                             <div className="flex items-start gap-3 text-sm">
-                                <span className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600">+</span>
+                                <span className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 shrink-0">+</span>
                                 <div>
                                     <p className="text-gray-900 dark:text-gray-100">Aufgabe erstellt</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.createdAt)} · System</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.createdAt)}</p>
                                 </div>
                             </div>
                         </div>

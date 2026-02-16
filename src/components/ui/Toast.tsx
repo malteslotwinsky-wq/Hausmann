@@ -54,7 +54,7 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) {
     useEffect(() => {
-        const timer = setTimeout(onRemove, 3000);
+        const timer = setTimeout(onRemove, 5000);
         return () => clearTimeout(timer);
     }, [onRemove]);
 

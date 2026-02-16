@@ -9,6 +9,7 @@ import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
 import { PROJECT_TEMPLATES } from '@/lib/trade-templates';
 import { Role, Project, Trade, PhotoApprovalMode } from '@/types';
 import { InputField } from '@/components/ui/InputField';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface UserData {
     id: string;
@@ -39,6 +40,7 @@ function AdminPageContent() {
     const [projectStep, setProjectStep] = useState(1);
     const [showTradeModal, setShowTradeModal] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'user' | 'project' | 'trade'; id: string; name: string } | null>(null);
 
     // User Form
     const [userForm, setUserForm] = useState({
@@ -205,6 +207,27 @@ function AdminPageContent() {
         setLoading(false);
     };
 
+    // Delete handler
+    const handleDelete = async () => {
+        if (!deleteConfirm) return;
+        try {
+            let url = '';
+            if (deleteConfirm.type === 'user') url = `/api/users/${deleteConfirm.id}`;
+            else if (deleteConfirm.type === 'project') url = `/api/projects/${deleteConfirm.id}`;
+
+            const res = await fetch(url, { method: 'DELETE' });
+            if (!res.ok) throw new Error((await res.json()).error);
+
+            if (deleteConfirm.type === 'user') setUsers(users.filter(u => u.id !== deleteConfirm.id));
+            else if (deleteConfirm.type === 'project') setProjects(projects.filter(p => p.id !== deleteConfirm.id));
+
+            showToast(`${deleteConfirm.name} gelöscht`, 'success');
+        } catch (e: any) {
+            showToast(e.message || 'Fehler beim Löschen', 'error');
+        }
+        setDeleteConfirm(null);
+    };
+
     // Trade handlers
     const openAddTrade = (project: Project) => {
         setSelectedProject(project);
@@ -339,6 +362,13 @@ function AdminPageContent() {
                                                     >
                                                         + Gewerk
                                                     </button>
+                                                    <button
+                                                        onClick={() => setDeleteConfirm({ type: 'project', id: project.id, name: project.name })}
+                                                        className="py-2.5 px-3 text-sm text-red-500 font-medium bg-red-500/10 rounded-lg tap-active"
+                                                        aria-label="Projekt löschen"
+                                                    >
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))
@@ -358,7 +388,7 @@ function AdminPageContent() {
                                             <p className="text-muted-foreground">Noch keine Handwerker</p>
                                         </div>
                                     ) : contractors.map(user => (
-                                        <UserCard key={user.id} user={user} projects={projects} onEdit={() => openEditUser(user)} />
+                                        <UserCard key={user.id} user={user} projects={projects} onEdit={() => openEditUser(user)} onDelete={() => setDeleteConfirm({ type: 'user', id: user.id, name: user.name })} />
                                     ))}
                                 </>
                             )}
@@ -375,7 +405,7 @@ function AdminPageContent() {
                                             <p className="text-muted-foreground">Noch keine Kunden</p>
                                         </div>
                                     ) : clients.map(user => (
-                                        <UserCard key={user.id} user={user} projects={projects} onEdit={() => openEditUser(user)} />
+                                        <UserCard key={user.id} user={user} projects={projects} onEdit={() => openEditUser(user)} onDelete={() => setDeleteConfirm({ type: 'user', id: user.id, name: user.name })} />
                                     ))}
                                 </>
                             )}
@@ -526,6 +556,17 @@ function AdminPageContent() {
                 </BottomSheet>
             )}
 
+            {/* ==================== DELETE CONFIRMATION ==================== */}
+            <ConfirmDialog
+                isOpen={deleteConfirm !== null}
+                title={deleteConfirm?.type === 'project' ? 'Projekt löschen?' : 'Benutzer löschen?'}
+                message={`Möchten Sie "${deleteConfirm?.name}" wirklich unwiderruflich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+                confirmLabel="Endgültig löschen"
+                variant="danger"
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteConfirm(null)}
+            />
+
             {/* ==================== USER MODAL ==================== */}
             {showUserModal && (
                 <BottomSheet
@@ -591,7 +632,7 @@ function BottomSheet({ onClose, title, children, footer }: { onClose: () => void
     );
 }
 
-function UserCard({ user, projects, onEdit }: { user: UserData; projects: Project[]; onEdit: () => void }) {
+function UserCard({ user, projects, onEdit, onDelete }: { user: UserData; projects: Project[]; onEdit: () => void; onDelete: () => void }) {
     const assignedProjects = projects.filter(p => user.projectIds?.includes(p.id));
     return (
         <div onClick={onEdit} className="card-mobile tap-active">
@@ -604,6 +645,13 @@ function UserCard({ user, projects, onEdit }: { user: UserData; projects: Projec
                     <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     {user.company && <p className="text-xs text-accent mt-0.5">{user.company}</p>}
                 </div>
+                <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    className="p-2 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                    aria-label="Benutzer löschen"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                </button>
                 <span className="text-muted-foreground">›</span>
             </div>
             {assignedProjects.length > 0 && (

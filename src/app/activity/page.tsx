@@ -56,7 +56,9 @@ function ActivityPageContent() {
                     <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                     </div>
-                    <p className="text-muted-foreground">Diese Seite ist für Kunden nicht verfügbar.</p>
+                    <p className="text-foreground font-medium mb-1">Nur für Bauleitung & Handwerker</p>
+                    <p className="text-sm text-muted-foreground mb-4">Der Aktivitätsfeed ist für Kunden nicht sichtbar.</p>
+                    <a href="/dashboard" className="text-sm text-accent font-medium hover:underline">Zum Dashboard</a>
                 </div>
             </AppShell>
         );
@@ -69,7 +71,9 @@ function ActivityPageContent() {
                     <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
                     </div>
-                    <p className="text-muted-foreground">Kein Projekt verfügbar</p>
+                    <p className="text-foreground font-medium mb-1">Kein Projekt vorhanden</p>
+                    <p className="text-sm text-muted-foreground mb-4">Aktivitäten werden angezeigt, sobald Projekte mit Aufgaben existieren.</p>
+                    {role === 'architect' && <a href="/admin" className="text-sm text-accent font-medium hover:underline">Projekt anlegen</a>}
                 </div>
             </AppShell>
         );
