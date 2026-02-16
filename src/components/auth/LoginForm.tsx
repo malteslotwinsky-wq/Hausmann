@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { defaultTheme } from '@/lib/branding';
+import { BauLotIcon } from '@/components/ui/Logo';
 
 export function LoginForm() {
     const router = useRouter();
@@ -47,12 +48,8 @@ export function LoginForm() {
             <div className="w-full max-w-md animate-scale-in">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ boxShadow: 'var(--shadow-md)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 21h18" />
-                            <path d="M5 21V7l7-4 7 4v14" />
-                            <path d="M9 21v-6h6v6" />
-                        </svg>
+                    <div className="w-14 h-14 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4 text-accent-foreground" style={{ boxShadow: 'var(--shadow-md)' }}>
+                        <BauLotIcon size={24} />
                     </div>
                     <h1 className="text-2xl font-bold text-foreground tracking-tight">{defaultTheme.name}</h1>
                     <p className="text-muted-foreground mt-1 text-sm">Digitale Bauleitung</p>

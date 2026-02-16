@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Role, Project } from '@/types';
 import { ProfileDropdown } from '@/components/ui/ProfileDropdown';
+import { BauLotIcon } from '@/components/ui/Logo';
 import { useProjectContext } from '@/lib/ProjectContext';
 
 export function Header() {
@@ -76,12 +77,8 @@ export function Header() {
                 <div className="flex items-center gap-3">
                     {/* Mobile Logo */}
                     <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-                        <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 21h18" />
-                                <path d="M5 21V7l7-4 7 4v14" />
-                                <path d="M9 21v-6h6v6" />
-                            </svg>
+                        <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-accent-foreground">
+                            <BauLotIcon size={16} />
                         </div>
                     </Link>
                     <h2 className="text-[15px] font-semibold text-foreground hidden sm:block">{getPageTitle()}</h2>
@@ -99,11 +96,7 @@ export function Header() {
                                 onClick={() => setShowProjectDropdown(!showProjectDropdown)}
                                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-sm max-w-[180px]"
                             >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground shrink-0">
-                                    <path d="M3 21h18" />
-                                    <path d="M5 21V7l7-4 7 4v14" />
-                                    <path d="M9 21v-6h6v6" />
-                                </svg>
+                                <BauLotIcon size={14} className="text-muted-foreground shrink-0" />
                                 <span className="truncate text-foreground font-medium">{currentProject?.name || 'Projekt'}</span>
                                 {projects.length > 1 && (
                                     <svg className="text-muted-foreground shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

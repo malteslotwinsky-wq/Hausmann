@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { defaultTheme } from '@/lib/branding';
+import { BauLotIcon } from '@/components/ui/Logo';
 
 export default function LandingPage() {
   const { data: session, status } = useSession();
@@ -30,12 +31,8 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-surface/70 backdrop-blur-xl border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center">
-              <svg className="text-accent-foreground" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 21h18" />
-                <path d="M5 21V7l7-4 7 4v14" />
-                <path d="M9 21v-6h6v6" />
-              </svg>
+            <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center text-accent-foreground">
+              <BauLotIcon size={16} />
             </div>
             <span className="font-semibold text-lg text-foreground tracking-tight">{defaultTheme.name}</span>
           </div>
@@ -213,12 +210,8 @@ export default function LandingPage() {
       <footer className="py-8 border-t border-border bg-surface">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-accent rounded-lg flex items-center justify-center">
-              <svg className="text-accent-foreground" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 21h18" />
-                <path d="M5 21V7l7-4 7 4v14" />
-                <path d="M9 21v-6h6v6" />
-              </svg>
+            <div className="w-7 h-7 bg-accent rounded-lg flex items-center justify-center text-accent-foreground">
+              <BauLotIcon size={12} />
             </div>
             <span className="font-medium text-foreground text-sm">{defaultTheme.name}</span>
           </div>

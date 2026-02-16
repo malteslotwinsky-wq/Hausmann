@@ -12,6 +12,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Button } from '@/components/ui/Button';
 import { Project, TaskStatus, Role } from '@/types';
 import { ToastProvider } from '@/components/ui/Toast';
+import { BauLotIcon } from '@/components/ui/Logo';
 import { calculateProjectProgress, formatDate, getDaysUntil } from '@/lib/utils';
 import { useProjectContext } from '@/lib/ProjectContext';
 import { exportProjectReport } from '@/lib/pdf-export';
@@ -121,8 +122,8 @@ function DashboardContent() {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-                        <span className="text-accent-foreground text-2xl font-bold">B</span>
+                    <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse text-accent-foreground">
+                        <BauLotIcon size={28} />
                     </div>
                     <p className="text-muted-foreground">Laden...</p>
                 </div>

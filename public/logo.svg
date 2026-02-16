@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="108" fill="#18181B"/>
+  <g transform="translate(96, 80) scale(13.33)" stroke="#FAFAFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Building body -->
+    <rect x="3" y="10" width="11" height="12" rx="1"/>
+    <!-- Crane mast -->
+    <path d="M8.5 10V3"/>
+    <!-- Crane arm -->
+    <path d="M4 3h17"/>
+    <!-- Crane cable -->
+    <path d="M19 3v4"/>
+    <!-- Ground line -->
+    <path d="M1 22h22"/>
+    <!-- Window row 1 -->
+    <path d="M6 13.5h3" stroke-width="1.5"/>
+    <!-- Window row 2 -->
+    <path d="M6 17h3" stroke-width="1.5"/>
+  </g>
+</svg>

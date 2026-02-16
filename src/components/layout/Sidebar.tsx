@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Role } from '@/types';
 import { defaultTheme } from '@/lib/branding';
+import { BauLotIcon } from '@/components/ui/Logo';
 
 interface SidebarProps {
     currentPage: string;
@@ -30,12 +31,8 @@ export function Sidebar({ currentPage }: SidebarProps) {
             {/* Logo / Brand */}
             <div className="p-5 border-b border-white/[0.06]">
                 <Link href="/" className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center shadow-md">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 21h18" />
-                            <path d="M5 21V7l7-4 7 4v14" />
-                            <path d="M9 21v-6h6v6" />
-                        </svg>
+                    <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center shadow-md text-white">
+                        <BauLotIcon size={18} />
                     </div>
                     <span className="text-[15px] font-semibold tracking-tight">{defaultTheme.name}</span>
                 </Link>
