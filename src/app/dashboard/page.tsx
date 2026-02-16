@@ -219,6 +219,7 @@ function DashboardContent() {
             {role === 'architect' && (
                 <ArchitectDashboard
                     project={project}
+                    userName={user.name ?? undefined}
                     onUpdateTaskStatus={handleUpdateTaskStatus}
                     onTogglePhotoVisibility={handleTogglePhotoVisibility}
                 />
