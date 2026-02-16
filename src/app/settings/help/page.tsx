@@ -120,19 +120,19 @@ export default function HelpPage() {
                         <h2 className="text-caption text-muted-foreground px-1">RECHTLICHES</h2>
 
                         <div className="card-mobile space-y-0 divide-y divide-border">
-                            <a href="#" className="flex items-center justify-between py-3 tap-active">
+                            <a href="/legal/datenschutz" className="flex items-center justify-between py-3 tap-active">
                                 <span className="font-medium text-foreground">Datenschutzerklärung</span>
                                 <span className="text-muted-foreground">›</span>
                             </a>
-                            <a href="#" className="flex items-center justify-between py-3 tap-active">
+                            <a href="/legal/impressum" className="flex items-center justify-between py-3 tap-active">
                                 <span className="font-medium text-foreground">Impressum</span>
                                 <span className="text-muted-foreground">›</span>
                             </a>
-                            <a href="#" className="flex items-center justify-between py-3 tap-active">
+                            <a href="/legal/agb" className="flex items-center justify-between py-3 tap-active">
                                 <span className="font-medium text-foreground">Allgemeine Geschäftsbedingungen</span>
                                 <span className="text-muted-foreground">›</span>
                             </a>
-                            <a href="#" className="flex items-center justify-between py-3 tap-active">
+                            <a href="/legal/lizenzen" className="flex items-center justify-between py-3 tap-active">
                                 <span className="font-medium text-foreground">Lizenzen</span>
                                 <span className="text-muted-foreground">›</span>
                             </a>

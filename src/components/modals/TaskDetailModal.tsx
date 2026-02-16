@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Task, TaskStatus, Photo, Comment, Role } from '@/types';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
@@ -12,6 +12,8 @@ interface TaskDetailModalProps {
     onClose: () => void;
     onUpdateStatus?: (status: TaskStatus) => void;
     onAddComment?: (content: string, visibility: 'internal' | 'client') => void;
+    onPhotoUploaded?: () => void;
+    onReportProblem?: (taskId: string, reason: string) => void;
     role: Role;
 }
 
@@ -21,11 +23,17 @@ export function TaskDetailModal({
     onClose,
     onUpdateStatus,
     onAddComment,
+    onPhotoUploaded,
+    onReportProblem,
     role
 }: TaskDetailModalProps) {
     const [activeTab, setActiveTab] = useState<'info' | 'photos' | 'comments' | 'history'>('info');
     const [newComment, setNewComment] = useState('');
     const [commentVisibility, setCommentVisibility] = useState<'internal' | 'client'>('internal');
+    const [uploading, setUploading] = useState(false);
+    const [showProblemDialog, setShowProblemDialog] = useState(false);
+    const [problemReason, setProblemReason] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!isOpen) return null;
 
@@ -50,6 +58,52 @@ export function TaskDetailModal({
         }
     };
 
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        try {
+            for (const file of Array.from(files)) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('taskId', task.id);
+                formData.append('visibility', 'internal');
+
+                const res = await fetch('/api/photos', { method: 'POST', body: formData });
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Upload fehlgeschlagen');
+                }
+            }
+            onPhotoUploaded?.();
+            setActiveTab('photos');
+        } catch (error) {
+            console.error('Photo upload failed:', error);
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const handleReportProblem = () => {
+        if (!problemReason.trim()) return;
+        if (onReportProblem) {
+            onReportProblem(task.id, problemReason);
+        } else if (onUpdateStatus) {
+            // Fallback: set status to blocked via PATCH
+            fetch(`/api/tasks/${task.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'blocked', blockedReason: problemReason }),
+            }).then(() => {
+                onUpdateStatus('blocked');
+            }).catch(console.error);
+        }
+        setShowProblemDialog(false);
+        setProblemReason('');
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Aufgabe: ${task.title}`}>
             {/* Backdrop */}
@@ -60,26 +114,26 @@ export function TaskDetailModal({
             />
 
             {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex items-start justify-between p-5 border-b border-gray-100">
+                <div className="flex items-start justify-between p-5 border-b border-gray-100 dark:border-gray-800">
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-semibold text-gray-900 truncate">{task.title}</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{task.title}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                             {task.tradeName} {task.contractorName && `· ${task.contractorName}`}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
                         aria-label="Schließen"
-                        className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                        className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     >
                         ✕
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-100 px-5">
+                <div className="flex border-b border-gray-100 dark:border-gray-800 px-5">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -87,8 +141,8 @@ export function TaskDetailModal({
                             className={`
                 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
                 ${activeTab === tab.id
-                                    ? 'text-blue-600 border-blue-600'
-                                    : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+                                    ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
+                                    : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                                 }
               `}
                         >
@@ -105,10 +159,10 @@ export function TaskDetailModal({
                         <div className="space-y-6">
                             {/* Current Status */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
                                 <StatusBadge status={task.status} />
                                 {task.blockedReason && (
-                                    <p className="mt-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg">
+                                    <p className="mt-2 text-sm text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg">
                                         ⚠ {task.blockedReason}
                                     </p>
                                 )}
@@ -117,23 +171,23 @@ export function TaskDetailModal({
                             {/* Description */}
                             {task.description && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Beschreibung</label>
-                                    <p className="text-gray-600 text-sm">{task.description}</p>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Beschreibung</label>
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm">{task.description}</p>
                                 </div>
                             )}
 
                             {/* Due Date */}
                             {task.dueDate && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Fällig am</label>
-                                    <p className="text-gray-600 text-sm">{formatDate(task.dueDate)}</p>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fällig am</label>
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm">{formatDate(task.dueDate)}</p>
                                 </div>
                             )}
 
                             {/* Quick Status Change */}
                             {role !== 'client' && onUpdateStatus && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">Status ändern</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Status ändern</label>
                                     <div className="grid grid-cols-4 gap-2">
                                         {statuses.map(({ status, label, shortIcon }) => (
                                             <button
@@ -149,7 +203,7 @@ export function TaskDetailModal({
                                                                 : status === 'blocked'
                                                                     ? 'bg-orange-500 text-white'
                                                                     : 'bg-gray-400 text-white'
-                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                                     }
                         `}
                                             >
@@ -162,7 +216,7 @@ export function TaskDetailModal({
                             )}
 
                             {/* Timestamps */}
-                            <div className="pt-4 border-t border-gray-100 text-xs text-gray-400 space-y-1">
+                            <div className="pt-4 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 space-y-1">
                                 <p>Erstellt: {formatDate(task.createdAt)}</p>
                                 <p>Zuletzt aktualisiert: {formatDate(task.updatedAt)}</p>
                             </div>
@@ -173,9 +227,18 @@ export function TaskDetailModal({
                     {activeTab === 'photos' && (
                         <div>
                             {task.photos.length === 0 ? (
-                                <div className="text-center py-12 text-gray-500">
-                                    <span className="text-4xl block mb-3">📷</span>
+                                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                        <svg className="text-gray-400" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <path d="M21 15l-5-5L5 21" />
+                                        </svg>
+                                    </div>
                                     <p>Keine Fotos vorhanden</p>
+                                    {role !== 'client' && (
+                                        <p className="text-sm mt-2">Nutzen Sie den Foto-Button unten</p>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -192,8 +255,12 @@ export function TaskDetailModal({
                         <div className="space-y-4">
                             {/* Existing Comments */}
                             {task.comments.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    <span className="text-4xl block mb-3">💬</span>
+                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                        <svg className="text-gray-400" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                        </svg>
+                                    </div>
                                     <p>Noch keine Kommentare</p>
                                 </div>
                             ) : (
@@ -208,20 +275,20 @@ export function TaskDetailModal({
 
                             {/* Add Comment */}
                             {role !== 'client' && (
-                                <div className="pt-4 border-t border-gray-100">
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
                                     <textarea
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
                                         placeholder="Kommentar schreiben..."
-                                        className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                     />
                                     <div className="flex items-center justify-between mt-3">
                                         <div className="flex items-center gap-2">
-                                            <label className="text-xs text-gray-500">Sichtbar für:</label>
+                                            <label className="text-xs text-gray-500 dark:text-gray-400">Sichtbar für:</label>
                                             <select
                                                 value={commentVisibility}
                                                 onChange={(e) => setCommentVisibility(e.target.value as 'internal' | 'client')}
-                                                className="text-xs border border-gray-200 rounded-lg px-2 py-1"
+                                                className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                             >
                                                 <option value="internal">Nur intern</option>
                                                 <option value="client">Auch für Kunde</option>
@@ -240,34 +307,86 @@ export function TaskDetailModal({
                     {activeTab === 'history' && (
                         <div className="space-y-3">
                             <div className="flex items-start gap-3 text-sm">
-                                <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">✓</span>
+                                <span className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600">✓</span>
                                 <div>
-                                    <p className="text-gray-900">Status auf &ldquo;In Arbeit&rdquo; gesetzt</p>
-                                    <p className="text-xs text-gray-500">{formatDate(task.updatedAt)} · System</p>
+                                    <p className="text-gray-900 dark:text-gray-100">Status auf &ldquo;{task.status === 'pending' ? 'Offen' : task.status === 'in_progress' ? 'In Arbeit' : task.status === 'done' ? 'Erledigt' : 'Blockiert'}&rdquo; gesetzt</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.updatedAt)} · System</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 text-sm">
-                                <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">+</span>
+                                <span className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600">+</span>
                                 <div>
-                                    <p className="text-gray-900">Aufgabe erstellt</p>
-                                    <p className="text-xs text-gray-500">{formatDate(task.createdAt)} · System</p>
+                                    <p className="text-gray-900 dark:text-gray-100">Aufgabe erstellt</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(task.createdAt)} · System</p>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
 
+                {/* Problem Report Dialog */}
+                {showProblemDialog && (
+                    <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center p-6">
+                        <div className="bg-white dark:bg-gray-900 rounded-xl p-5 w-full max-w-sm shadow-xl">
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Problem melden</h3>
+                            <textarea
+                                value={problemReason}
+                                onChange={(e) => setProblemReason(e.target.value)}
+                                placeholder="Beschreiben Sie das Problem..."
+                                className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                                autoFocus
+                            />
+                            <div className="flex gap-2 mt-3">
+                                <Button variant="secondary" fullWidth onClick={() => { setShowProblemDialog(false); setProblemReason(''); }}>
+                                    Abbrechen
+                                </Button>
+                                <Button variant="primary" fullWidth onClick={handleReportProblem} disabled={!problemReason.trim()}>
+                                    Melden
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                />
+
                 {/* Footer Actions (Mobile-friendly) */}
                 {role !== 'client' && (
-                    <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-2">
-                        <Button variant="secondary" fullWidth icon={<span>📷</span>}>
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex gap-2">
+                        <Button
+                            variant="secondary"
+                            fullWidth
+                            icon={uploading ? (
+                                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
+                            )}
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                        >
                             Foto
                         </Button>
                         <Button variant="secondary" fullWidth icon={<span>💬</span>} onClick={() => setActiveTab('comments')}>
                             Kommentar
                         </Button>
                         {role === 'contractor' && (
-                            <Button variant="secondary" fullWidth icon={<span>⚠</span>}>
+                            <Button
+                                variant="secondary"
+                                fullWidth
+                                icon={<span>⚠</span>}
+                                onClick={() => setShowProblemDialog(true)}
+                            >
                                 Problem
                             </Button>
                         )}
@@ -280,10 +399,23 @@ export function TaskDetailModal({
 
 function PhotoThumbnail({ photo, role }: { photo: Photo; role: Role }) {
     return (
-        <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden group cursor-pointer">
-            <div className="absolute inset-0 flex items-center justify-center text-4xl text-gray-300">
-                📷
-            </div>
+        <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden group cursor-pointer">
+            {photo.fileUrl && photo.fileUrl.startsWith('http') ? (
+                <img
+                    src={photo.fileUrl}
+                    alt={photo.caption || 'Foto'}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                />
+            ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="text-gray-300 dark:text-gray-600" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                </div>
+            )}
             {/* Visibility Badge */}
             {role !== 'client' && (
                 <div className="absolute top-2 right-2">
@@ -303,7 +435,12 @@ function PhotoThumbnail({ photo, role }: { photo: Photo; role: Role }) {
             )}
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <span className="text-white text-2xl">🔍</span>
+                <svg className="text-white" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="11" y1="8" x2="11" y2="14" />
+                    <line x1="8" y1="11" x2="14" y2="11" />
+                </svg>
             </div>
         </div>
     );
@@ -311,26 +448,26 @@ function PhotoThumbnail({ photo, role }: { photo: Photo; role: Role }) {
 
 function CommentItem({ comment, role }: { comment: Comment; role: Role }) {
     const roleColors = {
-        client: 'bg-emerald-100 text-emerald-700',
-        architect: 'bg-blue-100 text-blue-700',
-        contractor: 'bg-amber-100 text-amber-700',
+        client: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+        architect: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        contractor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     };
 
     return (
-        <div className="bg-gray-50 rounded-xl p-4">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${roleColors[comment.authorRole]}`}>
                     {comment.authorRole === 'architect' ? 'Architekt' : comment.authorRole === 'contractor' ? 'Handwerker' : 'Kunde'}
                 </span>
-                <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{comment.authorName}</span>
                 {role !== 'client' && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${comment.visibility === 'client' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${comment.visibility === 'client' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                         }`}>
-                        {comment.visibility === 'client' ? '👁 Kunde sieht' : '🔒 Intern'}
+                        {comment.visibility === 'client' ? 'Kunde sieht' : 'Intern'}
                     </span>
                 )}
             </div>
-            <p className="text-sm text-gray-700">{comment.content}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
             <p className="text-xs text-gray-400 mt-2">{formatDate(comment.createdAt)} · {formatTime(comment.createdAt)}</p>
         </div>
     );

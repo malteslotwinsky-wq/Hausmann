@@ -6,11 +6,13 @@ import { AppShell } from '@/components/layout/AppShell';
 import { DiaryView } from '@/components/features/DiaryView';
 import { Project, Role } from '@/types';
 import { ToastProvider } from '@/components/ui/Toast';
+import { useProjectContext } from '@/lib/ProjectContext';
 
 function DiaryPageContent() {
     const { data: session, status } = useSession();
     const role = session?.user?.role as Role | undefined;
-    const [project, setProject] = useState<Project | null>(null);
+    const { selectedProjectId, setSelectedProjectId } = useProjectContext();
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -20,9 +22,10 @@ function DiaryPageContent() {
             try {
                 const res = await fetch('/api/projects');
                 if (!res.ok) throw new Error('Fetch failed');
-                const projects: Project[] = await res.json();
-                if (projects.length > 0) {
-                    setProject(projects[0]);
+                const data: Project[] = await res.json();
+                setProjects(data);
+                if (!selectedProjectId && data.length > 0) {
+                    setSelectedProjectId(data[0].id);
                 }
             } catch {
                 // silently fail
@@ -33,6 +36,8 @@ function DiaryPageContent() {
 
         fetchProjects();
     }, [status]);
+
+    const project = projects.find(p => p.id === selectedProjectId) || projects[0] || null;
 
     if (status === 'loading' || !session || loading) {
         return (
@@ -48,8 +53,10 @@ function DiaryPageContent() {
         return (
             <AppShell currentPage="diary">
                 <div className="max-w-4xl mx-auto p-4 text-center py-16">
-                    <span className="text-6xl block mb-4">📓</span>
-                    <p className="text-gray-500">Kein Projekt verfügbar</p>
+                    <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg className="text-muted-foreground" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+                    </div>
+                    <p className="text-muted-foreground">Kein Projekt verfügbar</p>
                 </div>
             </AppShell>
         );

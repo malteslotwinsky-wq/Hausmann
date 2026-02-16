@@ -1,16 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Role } from '@/types';
+import { Role, Project } from '@/types';
 import { ProfileDropdown } from '@/components/ui/ProfileDropdown';
+import { useProjectContext } from '@/lib/ProjectContext';
 
 export function Header() {
     const { data: session } = useSession();
     const pathname = usePathname();
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+    const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
+    const { selectedProjectId, setSelectedProjectId } = useProjectContext();
+    const projectDropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (session) {
+            fetch('/api/projects')
+                .then(res => res.ok ? res.json() : [])
+                .then((data: Project[]) => {
+                    const list = data.map(p => ({ id: p.id, name: p.name }));
+                    setProjects(list);
+                    if (!selectedProjectId && list.length > 0) {
+                        setSelectedProjectId(list[0].id);
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [session]);
+
+    useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target as Node)) {
+                setShowProjectDropdown(false);
+            }
+        }
+        if (showProjectDropdown) {
+            document.addEventListener('mousedown', handleClick);
+            return () => document.removeEventListener('mousedown', handleClick);
+        }
+    }, [showProjectDropdown]);
 
     if (!session) return null;
 
@@ -35,6 +67,8 @@ export function Header() {
         return 'Dashboard';
     };
 
+    const currentProject = projects.find(p => p.id === selectedProjectId) || projects[0];
+
     return (
         <header className="sticky top-0 z-40 bg-surface/70 backdrop-blur-xl border-b border-border h-14 lg:ml-56 transition-colors duration-200">
             <div className="h-full px-4 lg:px-6 flex items-center justify-between">
@@ -56,8 +90,53 @@ export function Header() {
                     </span>
                 </div>
 
-                {/* Right: User Actions */}
+                {/* Right: Project Switcher + User Actions */}
                 <div className="flex items-center gap-1.5 sm:gap-3">
+                    {/* Project Switcher */}
+                    {projects.length > 0 && (
+                        <div className="relative" ref={projectDropdownRef}>
+                            <button
+                                onClick={() => setShowProjectDropdown(!showProjectDropdown)}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-sm max-w-[180px]"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground shrink-0">
+                                    <path d="M3 21h18" />
+                                    <path d="M5 21V7l7-4 7 4v14" />
+                                    <path d="M9 21v-6h6v6" />
+                                </svg>
+                                <span className="truncate text-foreground font-medium">{currentProject?.name || 'Projekt'}</span>
+                                {projects.length > 1 && (
+                                    <svg className="text-muted-foreground shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                )}
+                            </button>
+
+                            {showProjectDropdown && projects.length > 1 && (
+                                <div className="absolute right-0 top-full mt-1 w-64 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
+                                    <div className="py-1">
+                                        {projects.map(p => (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => {
+                                                    setSelectedProjectId(p.id);
+                                                    setShowProjectDropdown(false);
+                                                }}
+                                                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                                                    p.id === selectedProjectId
+                                                        ? 'bg-accent/10 text-accent font-medium'
+                                                        : 'text-foreground hover:bg-muted'
+                                                }`}
+                                            >
+                                                {p.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Notification Bell */}
                     <Link
                         href="/settings/notifications"

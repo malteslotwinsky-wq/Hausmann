@@ -21,7 +21,7 @@ export async function GET() {
 
     try {
         let query = supabase.from('projects')
-            .select('*, trades(*, tasks(*))')
+            .select('*, trades(*, tasks(*, photos(*)))')
             .eq('organization_id', orgId);
 
         // Filter based on role
@@ -79,10 +79,22 @@ export async function GET() {
                     id: task.id,
                     tradeId: task.trade_id,
                     title: task.name,
+                    description: task.description,
                     status: task.status,
+                    blockedReason: task.blocked_reason,
+                    dueDate: task.due_date ? new Date(task.due_date) : undefined,
                     createdAt: new Date(task.created_at),
                     updatedAt: new Date(task.updated_at || task.created_at),
-                    photos: [],
+                    photos: (task.photos || []).map((photo: any) => ({
+                        id: photo.id,
+                        taskId: photo.task_id,
+                        fileUrl: photo.file_url,
+                        thumbnailUrl: photo.thumbnail_url || photo.file_url,
+                        uploadedBy: photo.uploaded_by,
+                        uploadedAt: new Date(photo.created_at),
+                        visibility: photo.visibility,
+                        caption: photo.caption,
+                    })),
                     comments: [],
                 }))
             })).sort((a: any, b: any) => a.order - b.order)

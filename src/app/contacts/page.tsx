@@ -238,10 +238,10 @@ function ContactsPageContent() {
                                 <span className="text-2xl block mb-1">✉️</span>
                                 <span className="text-xs text-muted-foreground">E-Mail</span>
                             </a>
-                            <button className="card-mobile text-center py-4 tap-active">
+                            <a href={`mailto:${selectedContact.email}?subject=BauLot Nachricht`} className="card-mobile text-center py-4 tap-active">
                                 <span className="text-2xl block mb-1">💬</span>
                                 <span className="text-xs text-muted-foreground">Nachricht</span>
-                            </button>
+                            </a>
                         </div>
 
                         {/* Contact Info */}

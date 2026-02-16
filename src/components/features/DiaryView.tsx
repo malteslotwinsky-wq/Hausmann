@@ -4,6 +4,7 @@ import { Project, Photo, Comment, Task, Trade } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatDiaryDate, formatDate, formatTime } from '@/lib/utils';
+import { exportDiaryPDF } from '@/lib/pdf-export';
 
 interface DiaryViewProps {
     project: Project;
@@ -32,8 +33,7 @@ export function DiaryView({ project, isClientView = false }: DiaryViewProps) {
     const diaryEntries = generateDiaryEntries(project, isClientView);
 
     const handleExportPDF = () => {
-        // Placeholder for PDF export
-        alert('PDF-Export wird generiert...\n\nIn der Produktionsversion würde hier ein PDF mit allen Einträgen erstellt.');
+        exportDiaryPDF(project);
     };
 
     return (

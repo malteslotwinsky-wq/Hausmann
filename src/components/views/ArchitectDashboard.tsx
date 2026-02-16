@@ -10,6 +10,7 @@ import { CircularProgress } from '@/components/ui/CircularProgress';
 import { CalendarIconButton } from '@/components/ui/CalendarExport';
 import { createProjectEvent, createTradeEvent } from '@/lib/calendar';
 import { calculateProjectProgress, formatDate, getDaysUntil } from '@/lib/utils';
+import { exportProjectReport } from '@/lib/pdf-export';
 
 interface ArchitectDashboardProps {
     project: Project;
@@ -36,7 +37,7 @@ export function ArchitectDashboard({ project, onUpdateTaskStatus, onTogglePhotoV
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="secondary" icon={
+                        <Button variant="secondary" onClick={() => exportProjectReport(project)} icon={
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <polyline points="17 8 12 3 7 8" />

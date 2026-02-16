@@ -7,13 +7,16 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TaskDetailModal } from '@/components/modals/TaskDetailModal';
 import { Project, Task, TaskStatus, Role } from '@/types';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
+import { useProjectContext } from '@/lib/ProjectContext';
+import { useRealtimeSubscription } from '@/lib/realtime';
 
 function TasksPageContent() {
     const { data: session, status } = useSession();
     const { showToast } = useToast();
+    const { selectedProjectId, setSelectedProjectId } = useProjectContext();
     const [filter, setFilter] = useState<TaskStatus | 'all'>('all');
     const [selectedTask, setSelectedTask] = useState<(Task & { tradeName: string }) | null>(null);
-    const [project, setProject] = useState<Project | null>(null);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
 
     const role = session?.user?.role as Role | undefined;
@@ -25,9 +28,10 @@ function TasksPageContent() {
             try {
                 const res = await fetch('/api/projects');
                 if (!res.ok) throw new Error('Fetch failed');
-                const projects: Project[] = await res.json();
-                if (projects.length > 0) {
-                    setProject(projects[0]);
+                const data: Project[] = await res.json();
+                setProjects(data);
+                if (!selectedProjectId && data.length > 0) {
+                    setSelectedProjectId(data[0].id);
                 }
             } catch {
                 showToast('Fehler beim Laden der Projekte', 'error');
@@ -38,6 +42,23 @@ function TasksPageContent() {
 
         fetchProjects();
     }, [status]);
+
+    const project = projects.find(p => p.id === selectedProjectId) || projects[0] || null;
+
+    // Real-time task updates
+    useRealtimeSubscription({
+        table: 'tasks',
+        event: '*',
+        onEvent: () => {
+            // Refetch projects on any task change
+            fetch('/api/projects')
+                .then(res => res.ok ? res.json() : null)
+                .then(data => { if (data) setProjects(data); })
+                .catch(() => {});
+            showToast('Aufgaben aktualisiert', 'info');
+        },
+        enabled: status === 'authenticated',
+    });
 
     if (status === 'loading' || !session || loading) {
         return (
@@ -105,18 +126,15 @@ function TasksPageContent() {
                 throw new Error(data.error || 'Fehler beim Aktualisieren');
             }
 
-            setProject(prev => {
-                if (!prev) return prev;
-                return {
-                    ...prev,
-                    trades: prev.trades.map(trade => ({
-                        ...trade,
-                        tasks: trade.tasks.map(task =>
-                            task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
-                        ),
-                    })),
-                };
-            });
+            setProjects(prev => prev.map(proj => proj.id !== project.id ? proj : {
+                ...proj,
+                trades: proj.trades.map(trade => ({
+                    ...trade,
+                    tasks: trade.tasks.map(task =>
+                        task.id === taskId ? { ...task, status: newStatus, updatedAt: new Date() } : task
+                    ),
+                })),
+            }));
             showToast('Status aktualisiert', 'success');
             setSelectedTask(null);
         } catch (error: any) {

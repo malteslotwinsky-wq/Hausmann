@@ -10,6 +10,7 @@ import { ContractorDashboard } from '@/components/views/ContractorDashboard';
 import { ProjectList } from '@/components/features/ProjectList';
 import { Project, TaskStatus, Role } from '@/types';
 import { ToastProvider } from '@/components/ui/Toast';
+import { useProjectContext } from '@/lib/ProjectContext';
 
 function DashboardContent() {
     const { data: session, status } = useSession();
@@ -19,6 +20,7 @@ function DashboardContent() {
     const [loading, setLoading] = useState(true);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [showProjectList, setShowProjectList] = useState(true);
+    const { selectedProjectId, setSelectedProjectId } = useProjectContext();
 
     const user = session?.user;
     const role = user?.role as Role | undefined;
@@ -56,6 +58,19 @@ function DashboardContent() {
                     accessibleProjects = parsedProjects.filter(p => user.projectIds?.includes(p.id));
                 }
                 setProjects(accessibleProjects);
+
+                // Sync with ProjectContext
+                if (selectedProjectId) {
+                    const found = accessibleProjects.find(p => p.id === selectedProjectId);
+                    if (found) {
+                        setSelectedProject(found);
+                        setShowProjectList(false);
+                    }
+                }
+
+                if (!selectedProjectId && accessibleProjects.length > 0) {
+                    setSelectedProjectId(accessibleProjects[0].id);
+                }
 
                 if (role === 'client' && accessibleProjects.length === 1) {
                     setSelectedProject(accessibleProjects[0]);
@@ -165,6 +180,7 @@ function DashboardContent() {
                         projects={projects}
                         onSelectProject={(p) => {
                             setSelectedProject(p);
+                            setSelectedProjectId(p.id);
                             setShowProjectList(false);
                         }}
                     />
