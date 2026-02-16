@@ -38,16 +38,36 @@ function ContactsPageContent() {
 
     const fetchContacts = async () => {
         try {
-            const [usersRes, projectsRes] = await Promise.all([
-                fetch('/api/users'),
-                fetch('/api/projects')
-            ]);
-
-            if (!usersRes.ok || !projectsRes.ok) throw new Error();
-
-            const usersJson = await usersRes.json();
-            const allUsers = usersJson.data || usersJson;
+            // Only architects can list all users; others see contacts from their projects
+            const projectsRes = await fetch('/api/projects');
+            if (!projectsRes.ok) throw new Error();
             const allProjects = await projectsRes.json();
+
+            let allUsers: any[] = [];
+            if (role === 'architect') {
+                const usersRes = await fetch('/api/users');
+                if (usersRes.ok) {
+                    const usersJson = await usersRes.json();
+                    allUsers = usersJson.data || usersJson;
+                }
+            } else {
+                // Build user list from project data (trades have contractor info)
+                const userMap = new Map<string, any>();
+                allProjects.forEach((p: any) => {
+                    p.trades?.forEach((t: any) => {
+                        if (t.contractorId && !userMap.has(t.contractorId)) {
+                            userMap.set(t.contractorId, {
+                                id: t.contractorId,
+                                name: t.contactPerson || t.companyName || 'Unbekannt',
+                                email: '',
+                                role: 'contractor',
+                                company: t.companyName,
+                            });
+                        }
+                    });
+                });
+                allUsers = Array.from(userMap.values());
+            }
 
             // Build contact list (exclude current user and architects)
             const contactList: Contact[] = allUsers
@@ -228,25 +248,35 @@ function ContactsPageContent() {
                             )}
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            <a href={`tel:${selectedContact.phone || ''}`} className="card-mobile text-center py-4 tap-active">
-                                <span className="text-2xl block mb-1">📞</span>
-                                <span className="text-xs text-muted-foreground">Anrufen</span>
-                            </a>
-                            <a href={`mailto:${selectedContact.email}`} className="card-mobile text-center py-4 tap-active">
-                                <span className="text-2xl block mb-1">✉️</span>
-                                <span className="text-xs text-muted-foreground">E-Mail</span>
-                            </a>
-                            <a href={`mailto:${selectedContact.email}?subject=BauLot Nachricht`} className="card-mobile text-center py-4 tap-active">
-                                <span className="text-2xl block mb-1">💬</span>
-                                <span className="text-xs text-muted-foreground">Nachricht</span>
-                            </a>
-                        </div>
+                        {/* Quick Actions - only show contact actions if data available */}
+                        {(role === 'architect' || selectedContact.email) && (
+                            <div className={`grid ${selectedContact.phone ? 'grid-cols-3' : 'grid-cols-2'} gap-3 mb-6`}>
+                                {selectedContact.phone && (
+                                    <a href={`tel:${selectedContact.phone}`} className="card-mobile text-center py-4 tap-active">
+                                        <span className="text-2xl block mb-1">📞</span>
+                                        <span className="text-xs text-muted-foreground">Anrufen</span>
+                                    </a>
+                                )}
+                                {selectedContact.email && (
+                                    <a href={`mailto:${selectedContact.email}`} className="card-mobile text-center py-4 tap-active">
+                                        <span className="text-2xl block mb-1">✉️</span>
+                                        <span className="text-xs text-muted-foreground">E-Mail</span>
+                                    </a>
+                                )}
+                                {selectedContact.email && (
+                                    <a href={`mailto:${selectedContact.email}?subject=BauLot Nachricht`} className="card-mobile text-center py-4 tap-active">
+                                        <span className="text-2xl block mb-1">💬</span>
+                                        <span className="text-xs text-muted-foreground">Nachricht</span>
+                                    </a>
+                                )}
+                            </div>
+                        )}
 
                         {/* Contact Info */}
                         <div className="space-y-3">
-                            <ContactInfoRow icon="📧" label="E-Mail" value={selectedContact.email} href={`mailto:${selectedContact.email}`} />
+                            {selectedContact.email && (
+                                <ContactInfoRow icon="📧" label="E-Mail" value={selectedContact.email} href={`mailto:${selectedContact.email}`} />
+                            )}
                             {selectedContact.phone && (
                                 <ContactInfoRow icon="📞" label="Telefon" value={selectedContact.phone} href={`tel:${selectedContact.phone}`} />
                             )}

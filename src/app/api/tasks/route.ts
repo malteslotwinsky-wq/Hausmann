@@ -14,6 +14,13 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const role = session.user.role as string;
+
+    // Clients cannot access tasks API
+    if (role === 'client') {
+        return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const tradeId = searchParams.get('tradeId');
     const projectId = searchParams.get('projectId');
@@ -28,22 +35,66 @@ export async function GET(request: NextRequest) {
     try {
         let tradeIds: string[] | null = null;
 
-        if (tradeId) {
-            tradeIds = [tradeId];
-        } else if (projectId) {
-            const { data: trades } = await supabase
+        // Contractors can only see tasks for their assigned trades
+        if (role === 'contractor') {
+            const { data: assignedTrades } = await supabase
                 .from('trades')
                 .select('id')
-                .eq('project_id', projectId);
+                .eq('contractor_id', session.user.id);
 
-            if (trades && trades.length > 0) {
-                tradeIds = trades.map(t => t.id);
-            } else {
+            const assignedTradeIds = (assignedTrades || []).map(t => t.id);
+
+            if (assignedTradeIds.length === 0) {
                 const empty: PaginatedResponse<never> = {
                     data: [],
                     pagination: { page, limit, total: 0, totalPages: 0 },
                 };
                 return NextResponse.json(empty);
+            }
+
+            if (tradeId) {
+                // Verify the requested trade is assigned to this contractor
+                if (!assignedTradeIds.includes(tradeId)) {
+                    return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
+                }
+                tradeIds = [tradeId];
+            } else if (projectId) {
+                const { data: projectTrades } = await supabase
+                    .from('trades')
+                    .select('id')
+                    .eq('project_id', projectId)
+                    .eq('contractor_id', session.user.id);
+
+                tradeIds = (projectTrades || []).map(t => t.id);
+                if (tradeIds.length === 0) {
+                    const empty: PaginatedResponse<never> = {
+                        data: [],
+                        pagination: { page, limit, total: 0, totalPages: 0 },
+                    };
+                    return NextResponse.json(empty);
+                }
+            } else {
+                tradeIds = assignedTradeIds;
+            }
+        } else {
+            // Architect: use filters as-is
+            if (tradeId) {
+                tradeIds = [tradeId];
+            } else if (projectId) {
+                const { data: trades } = await supabase
+                    .from('trades')
+                    .select('id')
+                    .eq('project_id', projectId);
+
+                if (trades && trades.length > 0) {
+                    tradeIds = trades.map(t => t.id);
+                } else {
+                    const empty: PaginatedResponse<never> = {
+                        data: [],
+                        pagination: { page, limit, total: 0, totalPages: 0 },
+                    };
+                    return NextResponse.json(empty);
+                }
             }
         }
 

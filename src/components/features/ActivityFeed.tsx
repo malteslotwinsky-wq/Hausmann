@@ -7,6 +7,7 @@ import { formatDate, formatTime } from '@/lib/utils';
 interface ActivityFeedProps {
     project: Project;
     role: Role;
+    currentUserId?: string;
 }
 
 interface ActivityItem {
@@ -22,8 +23,8 @@ interface ActivityItem {
     isNew?: boolean;
 }
 
-export function ActivityFeed({ project, role }: ActivityFeedProps) {
-    const activities = generateActivities(project, role);
+export function ActivityFeed({ project, role, currentUserId }: ActivityFeedProps) {
+    const activities = generateActivities(project, role, currentUserId);
 
     return (
         <div className="space-y-4">
@@ -111,14 +112,14 @@ function ActivityCard({ activity, showLine }: { activity: ActivityItem; showLine
     );
 }
 
-function generateActivities(project: Project, role: Role): ActivityItem[] {
+function generateActivities(project: Project, role: Role, currentUserId?: string): ActivityItem[] {
     const activities: ActivityItem[] = [];
     const now = new Date();
 
     project.trades.forEach(trade => {
-        // Skip trades not assigned to contractor (if contractor role)
-        if (role === 'contractor') {
-            // In real app, filter by contractor assignment
+        // Skip trades not assigned to this contractor
+        if (role === 'contractor' && trade.contractorId && trade.contractorId !== currentUserId) {
+            return;
         }
 
         trade.tasks.forEach(task => {

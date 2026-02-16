@@ -26,6 +26,22 @@ export async function PATCH(
     const { id } = await params;
 
     try {
+        // Fetch photo first to check ownership
+        const { data: photo, error: fetchError } = await supabase
+            .from('photos')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !photo) {
+            return NextResponse.json({ error: 'Foto nicht gefunden' }, { status: 404 });
+        }
+
+        // Only the uploader or an architect can update
+        if (role !== 'architect' && photo.uploaded_by !== session.user.id) {
+            return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 });
+        }
+
         const body = await request.json();
         const updates: Record<string, any> = {};
 

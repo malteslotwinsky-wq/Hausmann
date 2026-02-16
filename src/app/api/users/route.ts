@@ -8,12 +8,12 @@ import { createUserSchema, paginationSchema, formatZodError } from '@/lib/valida
 import type { PaginatedResponse } from '@/lib/validations';
 import { apiWriteRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
-// GET users (architect or client, paginated)
+// GET users (architect only, paginated)
 export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
-    if (!session || (session.user.role !== 'architect' && session.user.role !== 'client')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session || session.user.role !== 'architect') {
+        return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);

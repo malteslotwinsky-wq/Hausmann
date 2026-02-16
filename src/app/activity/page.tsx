@@ -78,7 +78,7 @@ function ActivityPageContent() {
     return (
         <AppShell currentPage="activity">
             <div className="max-w-3xl mx-auto p-4">
-                <ActivityFeed project={project} role={role!} />
+                <ActivityFeed project={project} role={role!} currentUserId={session.user.id} />
             </div>
         </AppShell>
     );

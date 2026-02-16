@@ -85,7 +85,9 @@ export async function GET() {
                     dueDate: task.due_date ? new Date(task.due_date) : undefined,
                     createdAt: new Date(task.created_at),
                     updatedAt: new Date(task.updated_at || task.created_at),
-                    photos: (task.photos || []).map((photo: any) => ({
+                    photos: (task.photos || [])
+                        .filter((photo: any) => role !== 'client' || photo.visibility === 'client')
+                        .map((photo: any) => ({
                         id: photo.id,
                         taskId: photo.task_id,
                         fileUrl: photo.file_url,
