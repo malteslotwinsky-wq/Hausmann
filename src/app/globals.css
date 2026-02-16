@@ -1,46 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  /* BauLot – Premium Design System */
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  /* BauLot – Professional Design System */
+  --background: #FAFAFA;
+  --foreground: #111111;
 
-  --primary: #0F172A;
-  --primary-light: #1E293B;
+  --primary: #111111;
+  --primary-light: #1A1A1A;
   --primary-foreground: #FFFFFF;
 
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
 
-  --border: #E2E8F0;
-  --border-subtle: #F1F5F9;
+  --border: #E4E4E7;
+  --border-subtle: #F4F4F5;
 
-  --accent: #059669;
-  --accent-light: #10B981;
+  --accent: #18181B;
+  --accent-light: #27272A;
   --accent-foreground: #FFFFFF;
-  --accent-muted: rgba(5, 150, 105, 0.08);
+  --accent-muted: rgba(24, 24, 27, 0.06);
 
-  --success: #059669;
-  --success-muted: rgba(5, 150, 105, 0.1);
-  --warning: #D97706;
-  --warning-muted: rgba(217, 119, 6, 0.1);
-  --error: #DC2626;
-  --error-muted: rgba(220, 38, 38, 0.1);
-  --info: #2563EB;
-  --info-muted: rgba(37, 99, 235, 0.1);
+  --success: #22C55E;
+  --success-muted: rgba(34, 197, 94, 0.08);
+  --warning: #EAB308;
+  --warning-muted: rgba(234, 179, 8, 0.08);
+  --error: #EF4444;
+  --error-muted: rgba(239, 68, 68, 0.08);
+  --info: #6366F1;
+  --info-muted: rgba(99, 102, 241, 0.07);
 
-  --radius: 0.75rem;
+  --radius: 0.625rem;
 
   --surface: #FFFFFF;
   --surface-elevated: #FFFFFF;
-  --surface-highlight: #F8FAFC;
+  --surface-highlight: #FAFAFA;
 
   /* Layered shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.1);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.05), 0 16px 48px rgba(0, 0, 0, 0.08);
 
   /* Safe Areas for Notched Phones */
   --safe-area-inset-top: env(safe-area-inset-top, 0px);
@@ -51,42 +51,42 @@
 
 /* Dark Mode */
 .dark {
-  --background: #0C1220;
-  --foreground: #E2E8F0;
+  --background: #09090B;
+  --foreground: #FAFAFA;
 
-  --primary: #E2E8F0;
-  --primary-light: #CBD5E1;
-  --primary-foreground: #0C1220;
+  --primary: #FAFAFA;
+  --primary-light: #E4E4E7;
+  --primary-foreground: #09090B;
 
-  --muted: #1A2332;
-  --muted-foreground: #94A3B8;
+  --muted: #18181B;
+  --muted-foreground: #A1A1AA;
 
-  --border: #1E2D3D;
-  --border-subtle: #1A2332;
+  --border: #27272A;
+  --border-subtle: #18181B;
 
-  --accent: #10B981;
-  --accent-light: #34D399;
-  --accent-foreground: #0C1220;
-  --accent-muted: rgba(16, 185, 129, 0.12);
+  --accent: #FAFAFA;
+  --accent-light: #E4E4E7;
+  --accent-foreground: #09090B;
+  --accent-muted: rgba(250, 250, 250, 0.08);
 
-  --success: #34D399;
-  --success-muted: rgba(52, 211, 153, 0.12);
-  --warning: #FBBF24;
-  --warning-muted: rgba(251, 191, 36, 0.12);
+  --success: #4ADE80;
+  --success-muted: rgba(74, 222, 128, 0.1);
+  --warning: #FACC15;
+  --warning-muted: rgba(250, 204, 21, 0.1);
   --error: #F87171;
-  --error-muted: rgba(248, 113, 113, 0.12);
-  --info: #60A5FA;
-  --info-muted: rgba(96, 165, 250, 0.12);
+  --error-muted: rgba(248, 113, 113, 0.1);
+  --info: #818CF8;
+  --info-muted: rgba(129, 140, 248, 0.1);
 
-  --surface: #151F2E;
-  --surface-elevated: #1A2736;
-  --surface-highlight: #1E2D3D;
+  --surface: #111113;
+  --surface-elevated: #18181B;
+  --surface-highlight: #1C1C1F;
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.25);
-  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.3);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.35), 0 16px 48px rgba(0, 0, 0, 0.35);
 }
 
 @theme inline {
@@ -215,10 +215,10 @@ textarea {
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.3);
+    box-shadow: 0 0 0 0 rgba(24, 24, 27, 0.2);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(5, 150, 105, 0);
+    box-shadow: 0 0 0 8px rgba(24, 24, 27, 0);
   }
 }
 

@@ -11,9 +11,9 @@ export type OrganizationTheme = {
 export const defaultTheme: OrganizationTheme = {
     name: 'BauLot', // As per reference image branding
     colors: {
-        primary: '#0F172A', // Slate 900
-        secondary: '#64748B', // Slate 500
-        accent: '#059669', // Emerald 600
+        primary: '#111111', // Zinc 950
+        secondary: '#71717A', // Zinc 500
+        accent: '#18181B', // Zinc 900
     },
 };
 
