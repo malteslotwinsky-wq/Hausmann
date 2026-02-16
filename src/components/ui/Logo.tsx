@@ -15,6 +15,8 @@ interface BauLotIconProps {
 
 /** Standalone icon mark – a building with a construction crane. */
 export function BauLotIcon({ size = 20, className = '' }: BauLotIconProps) {
+    // Thicker strokes for small sizes to maintain visibility
+    const sw = size <= 16 ? '2.5' : '2';
     return (
         <svg
             className={className}
@@ -23,7 +25,7 @@ export function BauLotIcon({ size = 20, className = '' }: BauLotIconProps) {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth={sw}
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
@@ -34,8 +36,8 @@ export function BauLotIcon({ size = 20, className = '' }: BauLotIconProps) {
             <path d="M8.5 10V3" />
             {/* Crane arm */}
             <path d="M4 3h17" />
-            {/* Crane cable */}
-            <path d="M19 3v4" />
+            {/* Crane cable + hook */}
+            <path d="M19 3v5" />
             {/* Ground line */}
             <path d="M1 22h22" />
             {/* Window row 1 */}

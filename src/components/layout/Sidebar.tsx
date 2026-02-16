@@ -31,7 +31,7 @@ export function Sidebar({ currentPage }: SidebarProps) {
             {/* Logo / Brand */}
             <div className="p-5 border-b border-white/[0.06]">
                 <Link href="/" className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-accent rounded-lg flex items-center justify-center shadow-md text-white">
+                    <div className="w-9 h-9 bg-white/[0.12] ring-1 ring-white/[0.15] rounded-lg flex items-center justify-center text-white">
                         <BauLotIcon size={18} />
                     </div>
                     <span className="text-[15px] font-semibold tracking-tight">{defaultTheme.name}</span>
