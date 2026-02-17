@@ -41,7 +41,7 @@ function TasksPageContent() {
         }
 
         fetchProjects();
-    }, [status]);
+    }, [status, selectedProjectId, setSelectedProjectId, showToast]);
 
     const project = projects.find(p => p.id === selectedProjectId) || projects[0] || null;
 
@@ -115,6 +115,51 @@ function TasksPageContent() {
         in_progress: allTasks.filter(t => t.status === 'in_progress').length,
         done: allTasks.filter(t => t.status === 'done').length,
         blocked: allTasks.filter(t => t.status === 'blocked').length,
+    };
+
+    const refetchProjects = async () => {
+        try {
+            const res = await fetch('/api/projects');
+            if (res.ok) {
+                const data: Project[] = await res.json();
+                setProjects(data);
+            }
+        } catch { /* ignore */ }
+    };
+
+    const handleAddComment = async (content: string, visibility: 'internal' | 'client') => {
+        if (!selectedTask) return;
+        try {
+            const res = await fetch('/api/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taskId: selectedTask.id, content, visibility }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Fehler beim Erstellen');
+            }
+            showToast('Kommentar hinzugefügt', 'success');
+            await refetchProjects();
+            // Update selectedTask with new data
+            const updatedProject = projects.find(p => p.id === project?.id);
+            if (updatedProject) {
+                for (const trade of updatedProject.trades) {
+                    const updatedTask = trade.tasks.find(t => t.id === selectedTask.id);
+                    if (updatedTask) {
+                        setSelectedTask({ ...updatedTask, tradeName: trade.name, tradeId: trade.id });
+                        break;
+                    }
+                }
+            }
+        } catch (error: any) {
+            showToast(error.message || 'Fehler beim Kommentieren', 'error');
+        }
+    };
+
+    const handlePhotoUploaded = async () => {
+        showToast('Foto hochgeladen', 'success');
+        await refetchProjects();
     };
 
     const handleUpdateStatus = async (taskId: string, newStatus: TaskStatus) => {
@@ -234,6 +279,8 @@ function TasksPageContent() {
                         isOpen={true}
                         onClose={() => setSelectedTask(null)}
                         onUpdateStatus={(status) => handleUpdateStatus(selectedTask.id, status)}
+                        onAddComment={handleAddComment}
+                        onPhotoUploaded={handlePhotoUploaded}
                         role={role!}
                     />
                 )}

@@ -80,7 +80,7 @@ export async function PATCH(
             .from('tasks')
             .update(updateData)
             .eq('id', taskId)
-            .select()
+            .select('*, photos(*), task_comments(*, users!author_id(name, role))')
             .single();
 
         if (error) {
@@ -100,8 +100,25 @@ export async function PATCH(
             endDate: data.end_date,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
-            photos: [],
-            comments: [],
+            photos: (data.photos || []).map((p: any) => ({
+                id: p.id,
+                taskId: p.task_id,
+                fileUrl: p.file_url,
+                thumbnailUrl: p.thumbnail_url || p.file_url,
+                uploadedBy: p.uploaded_by,
+                uploadedAt: p.created_at,
+                visibility: p.visibility,
+                caption: p.caption,
+            })),
+            comments: (data.task_comments || []).map((c: any) => ({
+                id: c.id,
+                taskId: c.task_id,
+                content: c.content,
+                authorName: c.users?.name || 'Unbekannt',
+                authorRole: c.users?.role || 'contractor',
+                visibility: c.visibility,
+                createdAt: c.created_at,
+            })),
         });
     } catch {
         return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });

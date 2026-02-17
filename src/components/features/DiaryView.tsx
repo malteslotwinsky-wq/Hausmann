@@ -1,9 +1,9 @@
 'use client';
 
-import { Project, Photo, Comment, Task, Trade } from '@/types';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Project, Photo, Comment } from '@/types';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { formatDiaryDate, formatDate, formatTime } from '@/lib/utils';
+import { formatDiaryDate, formatTime } from '@/lib/utils';
 import { exportDiaryPDF } from '@/lib/pdf-export';
 
 interface DiaryViewProps {

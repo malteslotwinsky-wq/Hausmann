@@ -80,7 +80,7 @@ function ProfilePageContent() {
 
             showToast('Profil aktualisiert', 'success');
             setForm(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
-        } catch (error) {
+        } catch {
             showToast('Fehler beim Speichern', 'error');
         }
         setLoading(false);

@@ -15,7 +15,6 @@ import { ToastProvider } from '@/components/ui/Toast';
 import { BauLotIcon } from '@/components/ui/Logo';
 import { calculateProjectProgress, formatDate, getDaysUntil } from '@/lib/utils';
 import { useProjectContext } from '@/lib/ProjectContext';
-import { exportProjectReport } from '@/lib/pdf-export';
 
 // ─── Week calendar helper ────────────────────────────────
 function getWeekDays(): { label: string; date: Date; isToday: boolean }[] {
@@ -72,6 +71,7 @@ function DashboardContent() {
         if (status === 'authenticated') {
             fetchProjects();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
 
     const fetchProjects = async () => {

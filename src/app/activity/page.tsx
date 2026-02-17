@@ -35,7 +35,7 @@ function ActivityPageContent() {
         }
 
         fetchProjects();
-    }, [status]);
+    }, [status, selectedProjectId, setSelectedProjectId]);
 
     const project = projects.find(p => p.id === selectedProjectId) || projects[0] || null;
 

@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
-import { PROJECT_TEMPLATES } from '@/lib/trade-templates';
-import { Role, Project, Trade, PhotoApprovalMode } from '@/types';
+import { Role, Project, PhotoApprovalMode } from '@/types';
 import { InputField } from '@/components/ui/InputField';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
@@ -75,9 +74,11 @@ function AdminPageContent() {
         budget: '',
         canCreateSubtasks: false,
     });
+    const [_autoFilled, _setAutoFilled] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         if (session?.user?.role === 'architect') loadData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session]);
 
     // Lock body scroll when modal is open

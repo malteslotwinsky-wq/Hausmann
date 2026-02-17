@@ -37,6 +37,7 @@ export function PhotoLightbox({ photos, initialIndex, isOpen, onClose }: PhotoLi
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, photos.length]);
 
     if (!isOpen || photos.length === 0) return null;

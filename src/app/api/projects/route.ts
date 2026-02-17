@@ -21,7 +21,7 @@ export async function GET() {
 
     try {
         let query = supabase.from('projects')
-            .select('*, trades(*, tasks(*, photos(*)))')
+            .select('*, trades(*, tasks(*, photos(*), task_comments(*, users!author_id(name, role))))')
             .eq('organization_id', orgId);
 
         // Filter based on role
@@ -97,7 +97,17 @@ export async function GET() {
                         visibility: photo.visibility,
                         caption: photo.caption,
                     })),
-                    comments: [],
+                    comments: (task.task_comments || [])
+                        .filter((c: any) => role !== 'client' || c.visibility === 'client')
+                        .map((c: any) => ({
+                            id: c.id,
+                            taskId: c.task_id,
+                            content: c.content,
+                            authorName: c.users?.name || 'Unbekannt',
+                            authorRole: c.users?.role || 'contractor',
+                            visibility: c.visibility,
+                            createdAt: new Date(c.created_at),
+                        })),
                 }))
             })).sort((a: any, b: any) => a.order - b.order)
         }));

@@ -120,6 +120,15 @@ export const updateTaskSchema = z.object({
     endDate: dateStringSchema.optional().nullable(),
 });
 
+// --- Comments ---
+const commentVisibilitySchema = z.enum(['internal', 'client']);
+
+export const createCommentSchema = z.object({
+    taskId: uuidSchema,
+    content: z.string().min(1, 'Kommentar darf nicht leer sein').max(5000, 'Kommentar zu lang'),
+    visibility: commentVisibilitySchema.optional().default('internal'),
+});
+
 // --- Messages ---
 export const createMessageSchema = z.object({
     recipientId: uuidSchema,

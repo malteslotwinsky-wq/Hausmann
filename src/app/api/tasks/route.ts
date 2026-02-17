@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
         const total = count ?? 0;
 
         // Fetch page
-        let query = supabase.from('tasks').select('*');
+        let query = supabase.from('tasks').select('*, photos(*), task_comments(*, users!author_id(name, role))');
         if (tradeIds) query = query.in('trade_id', tradeIds);
         const { data, error } = await query
             .order('created_at', { ascending: true })
@@ -128,8 +128,25 @@ export async function GET(request: NextRequest) {
             endDate: t.end_date,
             createdAt: t.created_at,
             updatedAt: t.updated_at,
-            photos: [],
-            comments: [],
+            photos: (t.photos || []).map((p: any) => ({
+                id: p.id,
+                taskId: p.task_id,
+                fileUrl: p.file_url,
+                thumbnailUrl: p.thumbnail_url || p.file_url,
+                uploadedBy: p.uploaded_by,
+                uploadedAt: p.created_at,
+                visibility: p.visibility,
+                caption: p.caption,
+            })),
+            comments: (t.task_comments || []).map((c: any) => ({
+                id: c.id,
+                taskId: c.task_id,
+                content: c.content,
+                authorName: c.users?.name || 'Unbekannt',
+                authorRole: c.users?.role || 'contractor',
+                visibility: c.visibility,
+                createdAt: c.created_at,
+            })),
         }));
 
         const response: PaginatedResponse<typeof tasks[number]> = {

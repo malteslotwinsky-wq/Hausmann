@@ -18,7 +18,7 @@ export const defaultTheme: OrganizationTheme = {
 };
 
 // In a real app, this would fetch from the DB based on the hostname or user session
-export async function getOrganizationTheme(orgId?: string): Promise<OrganizationTheme> {
+export async function getOrganizationTheme(_orgId?: string): Promise<OrganizationTheme> {
     // Placeholder for DB lookup
     // const org = await db.organizations.find(orgId)...
     return defaultTheme;

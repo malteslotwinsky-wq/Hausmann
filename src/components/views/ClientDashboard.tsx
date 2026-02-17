@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import { Project, Trade, Photo } from '@/types';
-import { Card, CardContent } from '@/components/ui/Card';
 import { CircularProgress } from '@/components/ui/CircularProgress';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SimpleStatusBadge, StatusBadge } from '@/components/ui/StatusBadge';
@@ -281,7 +280,7 @@ function DiaryPreview({ project }: { project: Project }) {
 }
 
 function PhotoGalleryPreview({
-    project,
+    project: _project,
     allPhotos,
     onPhotoClick,
 }: {

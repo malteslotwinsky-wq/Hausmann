@@ -59,6 +59,7 @@ function ProjectDetailContent() {
             loadProject();
             loadContractors();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, id]);
 
     const loadProject = async () => {
@@ -221,6 +222,7 @@ function ProjectDetailContent() {
             loadProject();
             showToast('Fehler beim Speichern der Reihenfolge', 'error');
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [project]);
 
     if (loading) {

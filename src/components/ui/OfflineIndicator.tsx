@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * Hook to detect online/offline status
@@ -34,20 +34,18 @@ export function OfflineIndicator() {
     const [showReconnected, setShowReconnected] = useState(false);
     const wasOfflineRef = useRef(false);
 
-    const onReconnect = useCallback(() => {
-        setShowReconnected(true);
-        const timer = setTimeout(() => setShowReconnected(false), 3000);
-        return () => clearTimeout(timer);
-    }, []);
-
     useEffect(() => {
         if (!isOnline) {
             wasOfflineRef.current = true;
-        } else if (wasOfflineRef.current) {
-            wasOfflineRef.current = false;
-            return onReconnect();
+            return;
         }
-    }, [isOnline, onReconnect]);
+        if (wasOfflineRef.current) {
+            wasOfflineRef.current = false;
+            setShowReconnected(true); // eslint-disable-line react-hooks/set-state-in-effect -- reacting to online status change
+            const timer = setTimeout(() => setShowReconnected(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isOnline]);
 
     if (isOnline && !showReconnected) return null;
 

@@ -34,6 +34,7 @@ function ContactsPageContent() {
         if (status === 'authenticated') {
             fetchContacts();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, status]);
 
     const fetchContacts = async () => {
@@ -108,7 +109,7 @@ function ContactsPageContent() {
                 });
 
             setContacts(contactList);
-        } catch (error) {
+        } catch {
             showToast('Fehler beim Laden der Kontakte', 'error');
         } finally {
             setLoading(false);

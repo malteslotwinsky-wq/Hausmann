@@ -72,9 +72,9 @@ export async function createUser(
     password: string,
     name: string,
     role: Role,
-    createdBy: string,
-    projectIds?: string[],
-    tradeIds?: string[]
+    _createdBy: string,
+    _projectIds?: string[],
+    _tradeIds?: string[]
 ): Promise<User | null> {
     // Check if email exists
     const existing = await findUserByEmail(email);

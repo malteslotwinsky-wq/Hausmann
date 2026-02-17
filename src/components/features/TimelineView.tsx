@@ -1,7 +1,7 @@
 'use client';
 
 import { Project, Trade } from '@/types';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { calculateTradeProgress, formatDate } from '@/lib/utils';
 
 interface TimelineViewProps {
@@ -140,10 +140,13 @@ export function TimelineView({ project }: TimelineViewProps) {
 function TradeBar({ trade, totalDays, startDate }: { trade: Trade; totalDays: number; startDate: Date }) {
     const progress = calculateTradeProgress(trade);
 
-    // Calculate bar positions (simplified - in real app would use actual dates)
-    const tradeIndex = trade.order - 1;
-    const barStartPercent = (tradeIndex * 15) % 50; // Staggered start
-    const barWidthPercent = 100 - barStartPercent - 10;
+    // Calculate bar positions based on actual trade dates
+    const tradeStart = trade.startDate ? new Date(trade.startDate as unknown as string) : startDate;
+    const tradeEnd = trade.endDate ? new Date(trade.endDate as unknown as string) : new Date(startDate.getTime() + totalDays * 86400000);
+    const startDays = Math.max(0, (tradeStart.getTime() - startDate.getTime()) / 86400000);
+    const endDays = Math.min(totalDays, (tradeEnd.getTime() - startDate.getTime()) / 86400000);
+    const barStartPercent = totalDays > 0 ? (startDays / totalDays) * 100 : 0;
+    const barWidthPercent = totalDays > 0 ? Math.max(3, ((endDays - startDays) / totalDays) * 100) : 100;
 
     // Get color based on status
     const getColor = () => {

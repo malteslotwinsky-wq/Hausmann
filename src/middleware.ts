@@ -26,6 +26,18 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
+    // CSRF protection: validate Origin header for mutating requests
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+        const origin = request.headers.get('origin');
+        const host = request.headers.get('host');
+        if (origin && host && !pathname.startsWith('/api/auth')) {
+            const originHost = new URL(origin).host;
+            if (originHost !== host) {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        }
+    }
+
     // Role-based route protection
     const role = token.role as string;
 

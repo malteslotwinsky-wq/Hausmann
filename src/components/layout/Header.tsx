@@ -31,7 +31,7 @@ export function Header() {
                 })
                 .catch(() => {});
         }
-    }, [session]);
+    }, [session, selectedProjectId, setSelectedProjectId]);
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {

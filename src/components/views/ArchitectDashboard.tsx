@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Project, Trade, Task, TaskStatus } from '@/types';
+import { Project, Trade, TaskStatus } from '@/types';
 import { Card, CardContent } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
@@ -109,7 +109,7 @@ function buildActivity(project: Project): ActivityItem[] {
     return items.slice(0, 5);
 }
 
-export function ArchitectDashboard({ project, userName, onUpdateTaskStatus, onTogglePhotoVisibility }: ArchitectDashboardProps) {
+export function ArchitectDashboard({ project, userName, onUpdateTaskStatus, onTogglePhotoVisibility: _onTogglePhotoVisibility }: ArchitectDashboardProps) {
     const [taskFilter, setTaskFilter] = useState<TaskFilter>('all');
     const router = useRouter();
     const progress = calculateProjectProgress(project);
@@ -397,7 +397,7 @@ export function ArchitectDashboard({ project, userName, onUpdateTaskStatus, onTo
                                 <p className="text-sm text-muted-foreground py-4 text-center">Noch keine Aktivit&auml;ten</p>
                             ) : (
                                 <div className="space-y-0">
-                                    {activity.map((item, idx) => (
+                                    {activity.map((item, _idx) => (
                                         <div key={item.id} className="flex gap-3 py-3 border-b border-border/30 last:border-0">
                                             <div className="mt-0.5 shrink-0">
                                                 {item.type === 'done' && (

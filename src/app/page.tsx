@@ -8,7 +8,7 @@ import { defaultTheme } from '@/lib/branding';
 import { BauLotIcon } from '@/components/ui/Logo';
 
 export default function LandingPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {

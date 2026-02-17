@@ -68,6 +68,7 @@ export function GanttTimeline({
         if (today < projectStartDate || today > projectEndDate) return null;
         const days = Math.ceil((today.getTime() - new Date(projectStartDate).getTime()) / (1000 * 60 * 60 * 24));
         return (days / totalDays) * 100;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectStartDate, projectEndDate, totalDays]);
 
     // Colors for trades

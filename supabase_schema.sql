@@ -81,7 +81,29 @@ CREATE TABLE IF NOT EXISTS public.tasks (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Messages Table
+-- 5. Photos Table
+CREATE TABLE IF NOT EXISTS public.photos (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    task_id UUID NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
+    file_url TEXT NOT NULL,
+    thumbnail_url TEXT,
+    uploaded_by UUID NOT NULL REFERENCES public.users(id),
+    visibility TEXT NOT NULL DEFAULT 'internal' CHECK (visibility IN ('internal', 'client')),
+    caption TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 6. Task Comments Table
+CREATE TABLE IF NOT EXISTS public.task_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    task_id UUID NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES public.users(id),
+    content TEXT NOT NULL,
+    visibility TEXT NOT NULL DEFAULT 'internal' CHECK (visibility IN ('internal', 'client')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 7. Messages Table
 CREATE TABLE IF NOT EXISTS public.messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   sender_id UUID NOT NULL REFERENCES public.users(id),
@@ -91,7 +113,7 @@ CREATE TABLE IF NOT EXISTS public.messages (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 6. Password Reset Tokens
+-- 8. Password Reset Tokens
 CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -115,6 +137,11 @@ CREATE INDEX IF NOT EXISTS idx_trades_contractor_id ON public.trades(contractor_
 CREATE INDEX IF NOT EXISTS idx_trades_status ON public.trades(status);
 CREATE INDEX IF NOT EXISTS idx_tasks_trade_id ON public.tasks(trade_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON public.tasks(status);
+CREATE INDEX IF NOT EXISTS idx_photos_task_id ON public.photos(task_id);
+CREATE INDEX IF NOT EXISTS idx_photos_uploaded_by ON public.photos(uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_photos_visibility ON public.photos(visibility);
+CREATE INDEX IF NOT EXISTS idx_task_comments_task_id ON public.task_comments(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_comments_author_id ON public.task_comments(author_id);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON public.messages(sender_id);
 CREATE INDEX IF NOT EXISTS idx_messages_recipient_id ON public.messages(recipient_id);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON public.password_reset_tokens(token);
@@ -128,6 +155,8 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
 -- Note: The application uses the service_role key for all server-side operations,
@@ -175,6 +204,26 @@ CREATE POLICY "tasks_insert" ON public.tasks
 
 CREATE POLICY "tasks_update" ON public.tasks
   FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- Photos: authenticated users can CRUD (app-level filtering in API)
+CREATE POLICY "photos_select" ON public.photos
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "photos_insert" ON public.photos
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "photos_update" ON public.photos
+  FOR UPDATE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "photos_delete" ON public.photos
+  FOR DELETE USING (auth.role() = 'authenticated');
+
+-- Task Comments: authenticated users can read and insert
+CREATE POLICY "task_comments_select" ON public.task_comments
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "task_comments_insert" ON public.task_comments
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- Messages: only sender or recipient can read
 CREATE POLICY "messages_select" ON public.messages

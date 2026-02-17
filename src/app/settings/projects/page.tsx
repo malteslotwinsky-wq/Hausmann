@@ -17,6 +17,7 @@ function ProjectsPageContent() {
         if (session) {
             fetchProjects();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session]);
 
     const fetchProjects = async () => {

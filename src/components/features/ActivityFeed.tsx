@@ -114,7 +114,7 @@ function ActivityCard({ activity, showLine }: { activity: ActivityItem; showLine
 
 function generateActivities(project: Project, role: Role, currentUserId?: string): ActivityItem[] {
     const activities: ActivityItem[] = [];
-    const now = new Date();
+    const _now = new Date();
 
     project.trades.forEach(trade => {
         // Skip trades not assigned to this contractor
