@@ -33,6 +33,7 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     name: user.name,
                     role: user.role,
+                    organizationId: user.organizationId,
                     projectIds: user.projectIds,
                     assignedTradeIds: user.assignedTradeIds,
                 };
@@ -45,6 +46,7 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.organizationId = user.organizationId;
                 token.projectIds = user.projectIds;
                 token.assignedTradeIds = user.assignedTradeIds;
             }
@@ -55,6 +57,7 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as 'architect' | 'contractor' | 'client';
+                session.user.organizationId = token.organizationId as string | undefined;
                 session.user.projectIds = token.projectIds as string[] | undefined;
                 session.user.assignedTradeIds = token.assignedTradeIds as string[] | undefined;
             }
@@ -67,7 +70,7 @@ export const authOptions: NextAuthOptions = {
     },
     session: {
         strategy: 'jwt',
-        maxAge: 7 * 24 * 60 * 60, // 7 days
+        maxAge: 24 * 60 * 60, // 24 Stunden
     },
     secret: process.env.NEXTAUTH_SECRET,
 };

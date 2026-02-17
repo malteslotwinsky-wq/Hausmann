@@ -25,12 +25,9 @@ export async function findUserByEmail(email: string): Promise<StoredUser | null>
         role: data.role as Role,
         passwordHash: data.password, // Mapped from 'password' column
         avatarUrl: data.avatar_url,
+        organizationId: data.organization_id,
         createdAt: new Date(data.created_at),
-        projectIds: data.project_ids, // Assuming array column or join (Schema said project_ids array?)
-        // Note: Schema definition didn't explicitly add project_ids array column, but seed script didn't use it?
-        // Wait, seed script inserted users WITHOUT project_ids.
-        // We need to fetch relationships if we need them.
-        // For now, let's keep it simple.
+        projectIds: data.project_ids,
     };
 }
 
@@ -74,7 +71,8 @@ export async function createUser(
     role: Role,
     _createdBy: string,
     _projectIds?: string[],
-    _tradeIds?: string[]
+    _tradeIds?: string[],
+    organizationId?: string
 ): Promise<User | null> {
     // Check if email exists
     const existing = await findUserByEmail(email);
@@ -89,7 +87,7 @@ export async function createUser(
             password: passwordHash,
             name,
             role,
-            // project_ids: projectIds // Schema needs update if we want this
+            organization_id: organizationId,
         })
         .select()
         .single();

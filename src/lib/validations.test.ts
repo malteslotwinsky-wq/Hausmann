@@ -167,7 +167,7 @@ describe('createUserSchema', () => {
     it('accepts valid user', () => {
         const result = createUserSchema.safeParse({
             email: 'test@example.com',
-            password: 'secure1234',
+            password: 'Secure1234',
             name: 'Test User',
             role: 'contractor',
         });
@@ -177,7 +177,7 @@ describe('createUserSchema', () => {
     it('rejects invalid email', () => {
         const result = createUserSchema.safeParse({
             email: 'not-an-email',
-            password: 'secure1234',
+            password: 'Secure1234',
             name: 'Test User',
             role: 'contractor',
         });
@@ -197,7 +197,7 @@ describe('createUserSchema', () => {
     it('rejects architect role (only client/contractor via API)', () => {
         const result = createUserSchema.safeParse({
             email: 'test@example.com',
-            password: 'secure1234',
+            password: 'Secure1234',
             name: 'Test User',
             role: 'architect',
         });
@@ -207,7 +207,7 @@ describe('createUserSchema', () => {
     it('accepts optional projectIds and tradeIds', () => {
         const result = createUserSchema.safeParse({
             email: 'test@example.com',
-            password: 'secure1234',
+            password: 'Secure1234',
             name: 'Test User',
             role: 'client',
             projectIds: [validUUID],

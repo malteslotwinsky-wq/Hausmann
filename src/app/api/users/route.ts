@@ -91,7 +91,8 @@ export async function POST(request: NextRequest) {
             role as Role,
             session.user.id,
             projectIds,
-            tradeIds
+            tradeIds,
+            session.user.organizationId
         );
 
         if (!newUser) {

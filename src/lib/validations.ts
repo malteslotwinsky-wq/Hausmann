@@ -5,7 +5,11 @@ const uuidSchema = z.string().uuid('Ungültige ID');
 const roleSchema = z.enum(['architect', 'contractor', 'client'], {
     error: 'Ungültige Rolle. Erlaubt: architect, contractor, client',
 });
-const passwordSchema = z.string().min(8, 'Passwort muss mindestens 8 Zeichen haben');
+const passwordSchema = z.string()
+    .min(8, 'Passwort muss mindestens 8 Zeichen haben')
+    .regex(/[A-Z]/, 'Passwort muss mindestens einen Großbuchstaben enthalten')
+    .regex(/[a-z]/, 'Passwort muss mindestens einen Kleinbuchstaben enthalten')
+    .regex(/[0-9]/, 'Passwort muss mindestens eine Zahl enthalten');
 const dateStringSchema = z.string().refine(
     (val) => !isNaN(Date.parse(val)),
     { message: 'Ungültiges Datumsformat' }

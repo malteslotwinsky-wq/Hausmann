@@ -17,7 +17,7 @@ export async function GET() {
 
     const { user } = session;
     const role = user.role as Role;
-    const orgId = '00000000-0000-0000-0000-000000000001'; // Default Hausmann Org
+    const orgId = user.organizationId || '00000000-0000-0000-0000-000000000001';
 
     try {
         let query = supabase.from('projects')
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { data: input } = parsed;
-        const orgId = '00000000-0000-0000-0000-000000000001';
+        const orgId = session.user.organizationId || '00000000-0000-0000-0000-000000000001';
 
         // Insert project with all new fields
         const { data, error } = await supabase

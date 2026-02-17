@@ -20,6 +20,20 @@ function createRateLimit(prefix: string, requests: number, window: string) {
     });
 }
 
+// In-memory fallback when Redis is unavailable
+const memoryStore = new Map<string, { count: number; resetAt: number }>();
+
+function inMemoryLimit(key: string, maxRequests: number, windowMs: number): { success: boolean } {
+    const now = Date.now();
+    const entry = memoryStore.get(key);
+    if (!entry || now > entry.resetAt) {
+        memoryStore.set(key, { count: 1, resetAt: now + windowMs });
+        return { success: true };
+    }
+    entry.count++;
+    return { success: entry.count <= maxRequests };
+}
+
 // Lazy singletons - only created when keys are available
 let _loginRL: Ratelimit | null | undefined;
 let _apiWriteRL: Ratelimit | null | undefined;
@@ -43,7 +57,7 @@ function getPasswordResetRateLimit() {
 export const loginRateLimit = {
     async limit(key: string) {
         const rl = getLoginRateLimit();
-        if (!rl) return { success: true };
+        if (!rl) return inMemoryLimit(key, 5, 60_000);
         return rl.limit(key);
     },
 };
@@ -59,7 +73,7 @@ export const apiWriteRateLimit = {
 export const passwordResetRateLimit = {
     async limit(key: string) {
         const rl = getPasswordResetRateLimit();
-        if (!rl) return { success: true };
+        if (!rl) return inMemoryLimit(key, 3, 900_000);
         return rl.limit(key);
     },
 };

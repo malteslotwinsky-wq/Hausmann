@@ -1,7 +1,7 @@
 import 'server-only';
 import { Resend } from 'resend';
 
-const FROM_EMAIL = 'BauLot <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'BauLot <onboarding@resend.dev>';
 
 function getResend() {
     const apiKey = process.env.RESEND_API_KEY;

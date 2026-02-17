@@ -23,6 +23,7 @@ export interface User {
   phone?: string;
   company?: string;
   avatarUrl?: string;
+  organizationId?: string;
   assignedTradeIds?: string[];
   projectIds?: string[];
   createdAt: Date;
