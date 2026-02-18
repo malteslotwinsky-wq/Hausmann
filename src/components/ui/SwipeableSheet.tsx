@@ -58,6 +58,12 @@ export function SwipeableSheet({
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
         const target = e.target as HTMLElement;
         const isHandle = target.closest('[data-swipe-handle]');
+
+        // Don't start drag from interactive elements (buttons, inputs, etc.) or footer
+        // These need to receive normal click/tap events
+        const isInteractive = target.closest('button, input, select, textarea, label, a, [data-sheet-footer]');
+        if (isInteractive && !isHandle) return;
+
         const scrollContainer = sheetRef.current?.querySelector('[data-scroll-container]');
         const isAtTop = !scrollContainer || scrollContainer.scrollTop === 0;
 
@@ -154,6 +160,7 @@ export function SwipeableSheet({
                 {/* Sticky Footer */}
                 {footer ? (
                     <div
+                        data-sheet-footer
                         className="flex-shrink-0 bg-background border-t border-border px-6 py-4"
                         style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
                     >
