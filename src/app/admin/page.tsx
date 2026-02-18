@@ -469,9 +469,8 @@ function AdminPageContent() {
                                 <label className="block text-sm font-medium text-foreground mb-2">Foto-Freigabe</label>
                                 <div className="space-y-2">
                                     {[
-                                        { id: 'manual', label: 'Manuell freigeben', desc: 'Jedes Foto einzeln prüfen' },
-                                        { id: 'auto_milestone', label: 'Bei Meilenstein', desc: 'Automatisch bei Phasenabschluss' },
-                                        { id: 'auto_all', label: 'Alle automatisch', desc: 'Sofort für Bauherr sichtbar' },
+                                        { id: 'manual', label: 'Manuell freigeben', desc: 'Jedes Foto einzeln prüfen und freigeben' },
+                                        { id: 'auto', label: 'Automatisch freigeben', desc: 'Alle Fotos sofort für den Bauherrn sichtbar' },
                                     ].map(opt => (
                                         <label key={opt.id} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer tap-active ${projectForm.photoApprovalMode === opt.id ? 'bg-accent/10 border-2 border-accent' : 'bg-muted border-2 border-transparent'}`}>
                                             <input type="radio" name="photoMode" checked={projectForm.photoApprovalMode === opt.id} onChange={() => setProjectForm({ ...projectForm, photoApprovalMode: opt.id as PhotoApprovalMode })} className="w-5 h-5 accent-accent" />

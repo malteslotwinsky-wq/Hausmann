@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         }
 
-        const { email, password, name, role, projectIds, tradeIds } = parsed.data;
+        const { email, password, name, role, projectIds, tradeIds, phone, company } = parsed.data;
 
         const newUser = await createUser(
             email,
@@ -93,7 +93,9 @@ export async function POST(request: NextRequest) {
             session.user.id,
             projectIds,
             tradeIds,
-            session.user.organizationId
+            session.user.organizationId,
+            phone,
+            company
         );
 
         if (!newUser) {

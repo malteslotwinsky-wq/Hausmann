@@ -72,7 +72,9 @@ export async function createUser(
     _createdBy: string,
     projectIds?: string[],
     _tradeIds?: string[],
-    organizationId?: string
+    organizationId?: string,
+    phone?: string,
+    company?: string
 ): Promise<User | null> {
     // Check if email exists
     const existing = await findUserByEmail(email);
@@ -80,16 +82,20 @@ export async function createUser(
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    const insertData: Record<string, unknown> = {
+        email,
+        password: passwordHash,
+        name,
+        role,
+        organization_id: organizationId,
+        project_ids: projectIds || [],
+    };
+    if (phone) insertData.phone = phone;
+    if (company) insertData.company = company;
+
     const { data, error } = await supabase
         .from('users')
-        .insert({
-            email,
-            password: passwordHash,
-            name,
-            role,
-            organization_id: organizationId,
-            project_ids: projectIds || [],
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -103,6 +109,8 @@ export async function createUser(
         email: data.email,
         name: data.name,
         role: data.role as Role,
+        phone: data.phone,
+        company: data.company,
         createdAt: new Date(data.created_at),
         projectIds: data.project_ids,
     };

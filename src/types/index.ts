@@ -12,7 +12,7 @@ export type ProjectStatus = 'active' | 'completed' | 'paused';
 export type TradeStatus = 'pending' | 'active' | 'completed';
 
 // Photo Approval Mode
-export type PhotoApprovalMode = 'manual' | 'auto_milestone' | 'auto_all';
+export type PhotoApprovalMode = 'manual' | 'auto';
 
 // User
 export interface User {

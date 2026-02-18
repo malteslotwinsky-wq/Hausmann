@@ -28,7 +28,7 @@ export async function GET(
 
     const { data: projectData, error } = await supabase
         .from('projects')
-        .select('*, trades(*, tasks(*))')
+        .select('*, trades(*, tasks(*, photos(*), task_comments(*, users!author_id(name, role))))')
         .eq('id', id)
         .single();
 
@@ -86,11 +86,35 @@ export async function GET(
                 id: task.id,
                 tradeId: task.trade_id,
                 title: task.name,
+                description: task.description,
                 status: task.status,
+                blockedReason: task.blocked_reason,
+                dueDate: task.due_date ? new Date(task.due_date) : undefined,
                 createdAt: new Date(task.created_at),
                 updatedAt: new Date(task.updated_at || task.created_at),
-                photos: [],
-                comments: [],
+                photos: (task.photos || [])
+                    .filter((photo: any) => role !== 'client' || photo.visibility === 'client')
+                    .map((photo: any) => ({
+                        id: photo.id,
+                        taskId: photo.task_id,
+                        fileUrl: photo.file_url,
+                        thumbnailUrl: photo.thumbnail_url || photo.file_url,
+                        uploadedBy: photo.uploaded_by,
+                        uploadedAt: new Date(photo.created_at),
+                        visibility: photo.visibility,
+                        caption: photo.caption,
+                    })),
+                comments: (task.task_comments || [])
+                    .filter((c: any) => role !== 'client' || c.visibility === 'client')
+                    .map((c: any) => ({
+                        id: c.id,
+                        taskId: c.task_id,
+                        content: c.content,
+                        authorName: c.users?.name || 'Unbekannt',
+                        authorRole: c.users?.role || 'contractor',
+                        visibility: c.visibility,
+                        createdAt: new Date(c.created_at),
+                    })),
             }))
         })).sort((a: any, b: any) => a.order - b.order)
     };

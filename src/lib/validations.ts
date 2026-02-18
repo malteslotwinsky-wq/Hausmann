@@ -83,6 +83,8 @@ export const createUserSchema = z.object({
     role: z.enum(['client', 'contractor'], {
         error: 'Rolle muss client oder contractor sein',
     }),
+    phone: z.string().max(50).optional(),
+    company: z.string().max(200).optional(),
     projectIds: z.array(uuidSchema).optional(),
     tradeIds: z.array(uuidSchema).optional(),
 });

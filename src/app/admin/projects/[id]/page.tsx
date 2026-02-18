@@ -145,7 +145,7 @@ function ProjectDetailContent() {
             startDate: trade.startDate ? new Date(trade.startDate).toISOString().split('T')[0] : '',
             endDate: trade.endDate ? new Date(trade.endDate).toISOString().split('T')[0] : '',
             budget: trade.budget ? String(trade.budget) : '',
-            canCreateSubtasks: false,
+            canCreateSubtasks: trade.canCreateSubtasks || false,
         });
         setShowTradeModal(true);
     };
