@@ -322,7 +322,7 @@ export function TaskDetailModal({
                     {/* History Tab */}
                     {activeTab === 'history' && (
                         <div className="space-y-3">
-                            {task.updatedAt.getTime() !== task.createdAt.getTime() && (
+                            {String(task.updatedAt) !== String(task.createdAt) && (
                                 <div className="flex items-start gap-3 text-sm">
                                     <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                                         task.status === 'done' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :

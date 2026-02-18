@@ -102,6 +102,7 @@ export async function GET() {
                         .map((c: any) => ({
                             id: c.id,
                             taskId: c.task_id,
+                            authorId: c.author_id,
                             content: c.content,
                             authorName: c.users?.name || 'Unbekannt',
                             authorRole: c.users?.role || 'contractor',

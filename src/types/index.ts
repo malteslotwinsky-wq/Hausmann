@@ -8,8 +8,8 @@ export type Visibility = 'internal' | 'client';
 
 // Status
 export type TaskStatus = 'pending' | 'in_progress' | 'done' | 'blocked';
-export type ProjectStatus = 'active' | 'completed' | 'paused';
-export type TradeStatus = 'pending' | 'active' | 'completed';
+export type ProjectStatus = 'active' | 'completed' | 'paused' | 'archived';
+export type TradeStatus = 'pending' | 'in_progress' | 'done' | 'delayed' | 'blocked';
 
 // Photo Approval Mode
 export type PhotoApprovalMode = 'manual' | 'auto';

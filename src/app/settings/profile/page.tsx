@@ -78,7 +78,10 @@ function ProfilePageContent() {
                 }),
             });
 
-            if (!res.ok) throw new Error('Fehler beim Speichern');
+            if (!res.ok) {
+                const data = await res.json().catch(() => null);
+                throw new Error(data?.error || 'Fehler beim Speichern');
+            }
 
             // Update session with saved name
             await update({
@@ -91,8 +94,8 @@ function ProfilePageContent() {
 
             showToast('Profil aktualisiert', 'success');
             setForm(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
-        } catch {
-            showToast('Fehler beim Speichern', 'error');
+        } catch (error: any) {
+            showToast(error.message || 'Fehler beim Speichern', 'error');
         }
         setLoading(false);
     };

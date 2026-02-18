@@ -72,7 +72,7 @@ export async function POST(
                 start_date: input.startDate || null,
                 end_date: input.endDate || null,
                 predecessor_trade_id: input.predecessorTradeId || null,
-                budget: input.budget || null,
+                budget: input.budget ?? null,
                 can_create_subtasks: input.canCreateSubtasks,
                 order: nextOrder,
                 status: 'pending'

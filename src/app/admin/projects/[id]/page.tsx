@@ -40,6 +40,8 @@ function ProjectDetailContent() {
     const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
     const [expandedTrade, setExpandedTrade] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
+    const [addingTaskForTrade, setAddingTaskForTrade] = useState<string | null>(null);
+    const [newTaskName, setNewTaskName] = useState('');
 
     // Trade Form
     const [tradeForm, setTradeForm] = useState({
@@ -179,6 +181,30 @@ function ProjectDetailContent() {
             showToast(e.message || 'Fehler', 'error');
         }
         setLoading(false);
+    };
+
+    const handleAddTask = async (tradeId: string) => {
+        if (!newTaskName.trim()) {
+            showToast('Aufgabenname erforderlich', 'error');
+            return;
+        }
+        try {
+            const res = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tradeId, name: newTaskName }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Fehler beim Erstellen');
+            }
+            showToast('Aufgabe erstellt', 'success');
+            setAddingTaskForTrade(null);
+            setNewTaskName('');
+            loadProject();
+        } catch (e: any) {
+            showToast(e.message || 'Fehler', 'error');
+        }
     };
 
     // Handle bulk import of multiple trades from a project template
@@ -522,7 +548,7 @@ function ProjectDetailContent() {
                                                         <a href={`tel:${trade.phone}`} className="text-accent">{trade.phone}</a>
                                                     </div>
                                                 )}
-                                                {trade.budget && (
+                                                {trade.budget != null && trade.budget > 0 && (
                                                     <div>
                                                         <p className="text-muted-foreground text-xs">Budget</p>
                                                         <p className="text-foreground">{trade.budget.toLocaleString('de-DE')} €</p>
@@ -534,8 +560,55 @@ function ProjectDetailContent() {
                                                 </div>
                                             </div>
 
+                                            {/* Tasks list */}
+                                            {trade.tasks && trade.tasks.length > 0 && (
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-muted-foreground">Aufgaben:</p>
+                                                    {trade.tasks.map(task => (
+                                                        <div key={task.id} className="flex items-center gap-2 text-sm py-1 px-2 bg-muted/50 rounded-lg">
+                                                            <span className={
+                                                                task.status === 'done' ? 'text-green-500' :
+                                                                task.status === 'in_progress' ? 'text-blue-500' :
+                                                                task.status === 'blocked' ? 'text-orange-500' :
+                                                                'text-muted-foreground'
+                                                            }>
+                                                                {task.status === 'done' ? '✓' : task.status === 'in_progress' ? '→' : task.status === 'blocked' ? '⚠' : '○'}
+                                                            </span>
+                                                            <span className="text-foreground truncate">{task.title}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Inline add task */}
+                                            {addingTaskForTrade === trade.id ? (
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={newTaskName}
+                                                        onChange={e => setNewTaskName(e.target.value)}
+                                                        placeholder="Aufgabenname..."
+                                                        className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm focus:border-accent outline-none"
+                                                        autoFocus
+                                                        onKeyDown={e => { if (e.key === 'Enter') handleAddTask(trade.id); if (e.key === 'Escape') { setAddingTaskForTrade(null); setNewTaskName(''); } }}
+                                                    />
+                                                    <button onClick={() => handleAddTask(trade.id)} className="px-3 py-2 bg-accent text-accent-foreground rounded-lg text-sm tap-active">
+                                                        ✓
+                                                    </button>
+                                                    <button onClick={() => { setAddingTaskForTrade(null); setNewTaskName(''); }} className="px-3 py-2 bg-muted text-muted-foreground rounded-lg text-sm tap-active">
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ) : null}
+
                                             <div className="flex gap-2 pt-2">
                                                 <CalendarIconButton event={tradeCalendarEvent} size="sm" />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setAddingTaskForTrade(trade.id); setNewTaskName(''); }}
+                                                    className="text-sm text-accent hover:text-accent/80 tap-active py-2 rounded-lg hover:bg-accent/10"
+                                                >
+                                                    + Aufgabe
+                                                </button>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); openEditTrade(trade); }}
                                                     className="flex-1 text-sm text-muted-foreground hover:text-foreground tap-active py-2 rounded-lg hover:bg-muted"

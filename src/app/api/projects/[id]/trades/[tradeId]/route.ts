@@ -52,7 +52,7 @@ export async function PATCH(
         if (input.contactPerson !== undefined) updateData.contact_person = input.contactPerson;
         if (input.phone !== undefined) updateData.phone = input.phone;
         if (input.description !== undefined) updateData.description = input.description;
-        if (input.contractorId !== undefined) updateData.contractor_id = input.contractorId;
+        if (input.contractorId !== undefined) updateData.contractor_id = input.contractorId ?? null;
         if (input.startDate !== undefined) updateData.start_date = input.startDate;
         if (input.endDate !== undefined) updateData.end_date = input.endDate;
         if (input.budget !== undefined) updateData.budget = input.budget;

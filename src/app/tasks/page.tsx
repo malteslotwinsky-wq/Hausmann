@@ -5,7 +5,9 @@ import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TaskDetailModal } from '@/components/modals/TaskDetailModal';
-import { Project, Task, TaskStatus, Role } from '@/types';
+import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
+import { InputField } from '@/components/ui/InputField';
+import { Project, Task, TaskStatus, Trade, Role } from '@/types';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { useProjectContext } from '@/lib/ProjectContext';
 import { useRealtimeSubscription } from '@/lib/realtime';
@@ -18,6 +20,9 @@ function TasksPageContent() {
     const [selectedTask, setSelectedTask] = useState<(Task & { tradeName: string }) | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showCreateTask, setShowCreateTask] = useState(false);
+    const [creating, setCreating] = useState(false);
+    const [newTask, setNewTask] = useState({ tradeId: '', name: '', description: '', dueDate: '' });
 
     const role = session?.user?.role as Role | undefined;
 
@@ -96,11 +101,11 @@ function TasksPageContent() {
         );
     }
 
-    // Gather tasks
+    // Gather tasks (contractors only see tasks from their assigned trades)
     const allTasks: (Task & { tradeName: string; tradeId: string })[] = [];
     project.trades.forEach(trade => {
-        if (role === 'contractor' && session.user.assignedTradeIds) {
-            if (!session.user.assignedTradeIds.includes(trade.id)) return;
+        if (role === 'contractor' && trade.contractorId !== session.user.id) {
+            return;
         }
         trade.tasks.forEach(task => {
             allTasks.push({ ...task, tradeName: trade.name, tradeId: trade.id });
@@ -140,15 +145,20 @@ function TasksPageContent() {
                 throw new Error(data.error || 'Fehler beim Erstellen');
             }
             showToast('Kommentar hinzugefügt', 'success');
-            await refetchProjects();
-            // Update selectedTask with new data
-            const updatedProject = projects.find(p => p.id === project?.id);
-            if (updatedProject) {
-                for (const trade of updatedProject.trades) {
-                    const updatedTask = trade.tasks.find(t => t.id === selectedTask.id);
-                    if (updatedTask) {
-                        setSelectedTask({ ...updatedTask, tradeName: trade.name, tradeId: trade.id });
-                        break;
+            // Refetch and update selectedTask from fresh data
+            const refetchRes = await fetch('/api/projects');
+            if (refetchRes.ok) {
+                const freshProjects: Project[] = await refetchRes.json();
+                setProjects(freshProjects);
+                // Find updated task in fresh data
+                const freshProject = freshProjects.find(p => p.id === project?.id);
+                if (freshProject) {
+                    for (const trade of freshProject.trades) {
+                        const updatedTask = trade.tasks.find(t => t.id === selectedTask.id);
+                        if (updatedTask) {
+                            setSelectedTask({ ...updatedTask, tradeName: trade.name, tradeId: trade.id });
+                            break;
+                        }
                     }
                 }
             }
@@ -189,6 +199,46 @@ function TasksPageContent() {
         } catch (error: any) {
             showToast(error.message || 'Fehler beim Aktualisieren', 'error');
         }
+    };
+
+    // Trades available for task creation
+    const availableTrades: Trade[] = project.trades.filter(trade => {
+        if (role === 'architect') return true;
+        if (role === 'contractor') return trade.contractorId === session.user.id && trade.canCreateSubtasks;
+        return false;
+    });
+
+    const canCreateTasks = availableTrades.length > 0;
+
+    const handleCreateTask = async () => {
+        if (!newTask.name.trim() || !newTask.tradeId) {
+            showToast('Name und Gewerk sind erforderlich', 'error');
+            return;
+        }
+        setCreating(true);
+        try {
+            const res = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tradeId: newTask.tradeId,
+                    name: newTask.name,
+                    description: newTask.description || undefined,
+                    dueDate: newTask.dueDate || undefined,
+                }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Fehler beim Erstellen');
+            }
+            showToast('Aufgabe erstellt', 'success');
+            setShowCreateTask(false);
+            setNewTask({ tradeId: '', name: '', description: '', dueDate: '' });
+            await refetchProjects();
+        } catch (error: any) {
+            showToast(error.message || 'Fehler beim Erstellen', 'error');
+        }
+        setCreating(false);
     };
 
     const filterConfig = [
@@ -271,6 +321,73 @@ function TasksPageContent() {
                         ))
                     )}
                 </div>
+
+                {/* FAB - Create Task */}
+                {canCreateTasks && (
+                    <button
+                        onClick={() => {
+                            if (availableTrades.length === 1) {
+                                setNewTask(prev => ({ ...prev, tradeId: availableTrades[0].id }));
+                            }
+                            setShowCreateTask(true);
+                        }}
+                        className="fixed bottom-24 right-4 z-20 w-14 h-14 bg-accent text-accent-foreground rounded-full shadow-lg flex items-center justify-center tap-active hover:opacity-90 transition-opacity"
+                        aria-label="Neue Aufgabe"
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                    </button>
+                )}
+
+                {/* Create Task Sheet */}
+                <SwipeableSheet
+                    isOpen={showCreateTask}
+                    onClose={() => setShowCreateTask(false)}
+                    title="Neue Aufgabe"
+                    footer={
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowCreateTask(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">
+                                Abbrechen
+                            </button>
+                            <button onClick={handleCreateTask} disabled={creating} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
+                                {creating ? 'Erstellen...' : 'Aufgabe erstellen'}
+                            </button>
+                        </div>
+                    }
+                >
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">Gewerk *</label>
+                            <select
+                                value={newTask.tradeId}
+                                onChange={e => setNewTask({ ...newTask, tradeId: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent outline-none text-base"
+                            >
+                                <option value="">— Gewerk wählen —</option>
+                                {availableTrades.map(t => (
+                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <InputField
+                            label="Aufgabe *"
+                            value={newTask.name}
+                            onChange={v => setNewTask({ ...newTask, name: v })}
+                            placeholder="z.B. Steckdosen setzen"
+                        />
+                        <InputField
+                            label="Beschreibung"
+                            value={newTask.description}
+                            onChange={v => setNewTask({ ...newTask, description: v })}
+                            placeholder="Optionale Details..."
+                        />
+                        <InputField
+                            label="Fällig am"
+                            type="date"
+                            value={newTask.dueDate}
+                            onChange={v => setNewTask({ ...newTask, dueDate: v })}
+                        />
+                    </div>
+                </SwipeableSheet>
 
                 {/* Task Detail Modal */}
                 {selectedTask && (

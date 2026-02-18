@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
             .map((c: any) => ({
                 id: c.id,
                 taskId: c.task_id,
+                authorId: c.author_id,
                 content: c.content,
                 authorName: c.users?.name || 'Unbekannt',
                 authorRole: c.users?.role || 'contractor',
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             id: data.id,
             taskId: data.task_id,
+            authorId: data.author_id,
             content: data.content,
             authorName: data.users?.name || 'Unbekannt',
             authorRole: data.users?.role || 'contractor',

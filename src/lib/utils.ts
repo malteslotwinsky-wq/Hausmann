@@ -102,42 +102,50 @@ export function isVisibleToRole(visibility: Visibility, role: Role): boolean {
 }
 
 /**
+ * Ensure a value is a Date object (handles ISO strings from JSON)
+ */
+function toDate(date: Date | string): Date {
+    if (date instanceof Date) return date;
+    return new Date(date);
+}
+
+/**
  * Format date for display (German locale)
  */
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string): string {
     return new Intl.DateTimeFormat('de-DE', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
-    }).format(date);
+    }).format(toDate(date));
 }
 
 /**
  * Format date for diary (German locale, short)
  */
-export function formatDiaryDate(date: Date): string {
+export function formatDiaryDate(date: Date | string): string {
     return new Intl.DateTimeFormat('de-DE', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-    }).format(date);
+    }).format(toDate(date));
 }
 
 /**
  * Format time
  */
-export function formatTime(date: Date): string {
+export function formatTime(date: Date | string): string {
     return new Intl.DateTimeFormat('de-DE', {
         hour: '2-digit',
         minute: '2-digit',
-    }).format(date);
+    }).format(toDate(date));
 }
 
 /**
  * Get days until target date
  */
-export function getDaysUntil(targetDate: Date): number {
+export function getDaysUntil(targetDate: Date | string): number {
     const now = new Date();
-    const diff = targetDate.getTime() - now.getTime();
+    const diff = toDate(targetDate).getTime() - now.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
