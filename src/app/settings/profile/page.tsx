@@ -88,7 +88,7 @@ function ProfilePageContent() {
 
     return (
         <AppShell currentPage="dashboard">
-            <div className="min-h-screen bg-background pb-32">
+            <div className="min-h-screen bg-background">
                 {/* Header */}
                 <header className="sticky top-14 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <div className="flex items-center gap-3">
@@ -111,7 +111,7 @@ function ProfilePageContent() {
                         <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-accent-foreground font-bold text-4xl mb-4">
                             {form.name.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <button className="text-accent font-medium tap-active">
+                        <button className="text-accent font-medium tap-active px-4 py-2 rounded-lg hover:bg-accent/10 transition-colors">
                             Foto ändern
                         </button>
                     </div>
@@ -179,14 +179,16 @@ function ProfilePageContent() {
                         </div>
                     </section>
 
-                    {/* Save Button */}
-                    <button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="w-full btn-mobile btn-mobile-accent tap-active disabled:opacity-50"
-                    >
-                        {loading ? 'Speichern...' : 'Änderungen speichern'}
-                    </button>
+                    {/* Save Button - sticky above bottom nav */}
+                    <div className="sticky bottom-0 -mx-4 px-4 py-4 bg-background/90 backdrop-blur-md border-t border-border safe-area-bottom">
+                        <button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="w-full btn-mobile btn-mobile-accent tap-active disabled:opacity-50"
+                        >
+                            {loading ? 'Speichern...' : 'Änderungen speichern'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </AppShell>

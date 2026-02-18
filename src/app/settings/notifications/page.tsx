@@ -159,14 +159,16 @@ function NotificationsPageContent() {
                         </div>
                     </div>
 
-                    {/* Save Button */}
-                    <button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="w-full btn-mobile btn-mobile-accent tap-active disabled:opacity-50"
-                    >
-                        {loading ? 'Speichern...' : 'Änderungen speichern'}
-                    </button>
+                    {/* Save Button - sticky above bottom nav */}
+                    <div className="sticky bottom-0 -mx-4 px-4 py-4 bg-background/90 backdrop-blur-md border-t border-border safe-area-bottom">
+                        <button
+                            onClick={handleSave}
+                            disabled={loading}
+                            className="w-full btn-mobile btn-mobile-accent tap-active disabled:opacity-50"
+                        >
+                            {loading ? 'Speichern...' : 'Änderungen speichern'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </AppShell>

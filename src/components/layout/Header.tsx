@@ -215,7 +215,7 @@ export function Header() {
 
                         {/* Search Results Dropdown */}
                         {showSearchResults && searchQuery.length >= 2 && (
-                            <div className="absolute right-0 sm:left-0 top-full mt-1 w-72 sm:w-80 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
+                            <div className="fixed left-2 right-2 sm:absolute sm:left-0 sm:right-auto top-14 sm:top-full mt-0 sm:mt-1 sm:w-80 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
                                 {searchResults.length > 0 ? (
                                     <div className="py-1 max-h-80 overflow-y-auto overscroll-contain">
                                         {searchResults.map((result, i) => (
@@ -251,7 +251,8 @@ export function Header() {
                                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-sm max-w-[180px]"
                             >
                                 <BauLotIcon size={14} className="text-muted-foreground shrink-0" />
-                                <span className="truncate text-foreground font-medium">{currentProject?.name || 'Projekt'}</span>
+                                <span className="truncate text-foreground font-medium hidden sm:inline">{currentProject?.name || 'Projekt'}</span>
+                                <span className="text-foreground font-medium sm:hidden">Projekt</span>
                                 {projects.length > 1 && (
                                     <svg className="text-muted-foreground shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="6 9 12 15 18 9" />
@@ -260,7 +261,7 @@ export function Header() {
                             </button>
 
                             {showProjectDropdown && projects.length > 1 && (
-                                <div className="absolute right-0 top-full mt-1 w-64 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
+                                <div className="fixed left-2 right-2 sm:absolute sm:left-auto sm:right-0 top-14 sm:top-full mt-0 sm:mt-1 sm:w-64 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
                                     <div className="py-1">
                                         {projects.map(p => (
                                             <button

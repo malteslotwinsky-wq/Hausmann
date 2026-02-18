@@ -152,13 +152,15 @@ export function SwipeableSheet({
                 </div>
 
                 {/* Sticky Footer */}
-                {footer && (
+                {footer ? (
                     <div
                         className="flex-shrink-0 bg-background border-t border-border px-6 py-4"
                         style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
                     >
                         {footer}
                     </div>
+                ) : (
+                    <div style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
                 )}
             </div>
         </>

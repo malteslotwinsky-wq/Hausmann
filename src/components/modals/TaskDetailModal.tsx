@@ -144,13 +144,13 @@ export function TaskDetailModal({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-100 dark:border-gray-800 px-5">
+                <div className="flex border-b border-gray-100 dark:border-gray-800 px-2 sm:px-5 overflow-x-auto no-scrollbar">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`
-                flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
+                flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0
                 ${activeTab === tab.id
                                     ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
                                     : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'

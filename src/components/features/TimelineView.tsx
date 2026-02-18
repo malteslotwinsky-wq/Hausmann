@@ -24,26 +24,26 @@ export function TimelineView({ project }: TimelineViewProps) {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900">Projekt-Timeline</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Projekt-Timeline</h2>
                     <p className="text-sm text-gray-500">{project.name}</p>
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right">
                     <p className="text-sm text-gray-500">Zeitraum</p>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                         {formatDate(startDate)} – {formatDate(endDate)}
                     </p>
                 </div>
             </div>
 
-            {/* Timeline Container */}
+            {/* Timeline Container - scrollable on mobile */}
             <Card>
-                <CardContent className="py-6 overflow-x-auto">
-                    <div className="min-w-[600px]">
+                <CardContent className="py-6 overflow-x-auto -mx-2 px-2">
+                    <div className="min-w-[500px] sm:min-w-[600px]">
                         {/* Month Headers */}
                         <div className="flex mb-2 border-b border-gray-200 pb-2">
-                            <div className="w-40 flex-shrink-0" />
+                            <div className="w-28 sm:w-40 flex-shrink-0" />
                             <div className="flex-1 flex">
                                 {months.map((month, idx) => (
                                     <div
@@ -59,7 +59,7 @@ export function TimelineView({ project }: TimelineViewProps) {
 
                         {/* Today Marker */}
                         <div className="relative flex mb-4">
-                            <div className="w-40 flex-shrink-0" />
+                            <div className="w-28 sm:w-40 flex-shrink-0" />
                             <div className="flex-1 relative h-6">
                                 {progressPercent > 0 && progressPercent < 100 && (
                                     <div
@@ -159,7 +159,7 @@ function TradeBar({ trade, totalDays, startDate }: { trade: Trade; totalDays: nu
     return (
         <div className="flex items-center">
             {/* Trade Name */}
-            <div className="w-40 flex-shrink-0 pr-4">
+            <div className="w-28 sm:w-40 flex-shrink-0 pr-3 sm:pr-4">
                 <span className="text-sm font-medium text-gray-900 truncate block">{trade.name}</span>
                 {trade.contractorName && (
                     <span className="text-xs text-gray-500 truncate block">{trade.contractorName}</span>

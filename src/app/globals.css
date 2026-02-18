@@ -140,17 +140,19 @@ body {
 }
 
 /* ============================================
-   TOUCH TARGETS (44px minimum)
+   TOUCH TARGETS (44px minimum for standalone elements)
    ============================================ */
 
-button,
-a,
-[role="button"],
-input,
+/* Only standalone interactive elements, not inline ones */
+button:not([class*="text-["]):not([class*="inline"]),
+[role="button"] {
+  min-height: 44px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([class*="hidden"]),
 select,
 textarea {
   min-height: 44px;
-  min-width: 44px;
 }
 
 /* ============================================
@@ -181,6 +183,12 @@ textarea {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Scroll fade hint for horizontal scrollable areas */
+.scroll-fade-right {
+  mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
 }
 
 /* ============================================

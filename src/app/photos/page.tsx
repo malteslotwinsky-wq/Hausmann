@@ -135,7 +135,7 @@ function PhotosPageContent() {
 
     return (
         <AppShell currentPage="photos">
-            <div className="min-h-screen bg-background pb-32">
+            <div className="min-h-screen bg-background">
                 {/* Header */}
                 <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Fotos</h1>
@@ -202,7 +202,7 @@ function PhotosPageContent() {
                 )}
 
                 {/* Photo Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2 p-1 sm:p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 p-3 sm:p-4">
                     {visiblePhotos.map((photo, index) => (
                         <div
                             key={photo.id}
@@ -272,7 +272,7 @@ function PhotosPageContent() {
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploading}
-                            className="fixed bottom-24 right-6 w-14 h-14 bg-accent text-accent-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-accent/90 transition-colors z-30 disabled:opacity-50"
+                            className="fixed bottom-28 lg:bottom-8 right-4 sm:right-6 w-14 h-14 bg-accent text-accent-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-accent/90 transition-colors z-30 disabled:opacity-50"
                             aria-label="Foto hochladen"
                         >
                             {uploading ? (

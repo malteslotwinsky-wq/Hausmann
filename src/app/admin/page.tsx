@@ -267,7 +267,7 @@ function AdminPageContent() {
 
     return (
         <AppShell currentPage="admin">
-            <div className="min-h-screen bg-background pb-32 safe-area-bottom">
+            <div className="min-h-screen bg-background">
                 {/* Header */}
                 <header className="sticky top-0 z-30 bg-surface border-b border-border px-4 py-4">
                     <h1 className="text-headline text-foreground">Verwaltung</h1>
@@ -285,7 +285,7 @@ function AdminPageContent() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium tap-active transition-all flex-shrink-0 ${activeTab === tab.id ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}
+                                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium tap-active transition-all flex-shrink-0 ${activeTab === tab.id ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}
                             >
                                 <span>{tab.label}</span>
                                 <span className={`text-xs px-1.5 rounded ${activeTab === tab.id ? 'bg-white/20' : 'bg-border'}`}>{tab.count}</span>
