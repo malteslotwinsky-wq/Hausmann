@@ -24,11 +24,7 @@ export function useRealtimeSubscription({
     const channelRef = useRef<RealtimeChannel | null>(null);
 
     useEffect(() => {
-        if (!enabled) return;
-
-        // Skip if supabase is not properly configured
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        if (!url) return;
+        if (!enabled || !supabaseClient) return;
 
         try {
             const channelName = `realtime-${table}-${filter || 'all'}-${Date.now()}`;
@@ -56,7 +52,7 @@ export function useRealtimeSubscription({
         }
 
         return () => {
-            if (channelRef.current) {
+            if (channelRef.current && supabaseClient) {
                 try {
                     supabaseClient.removeChannel(channelRef.current);
                 } catch {

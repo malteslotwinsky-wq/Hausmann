@@ -33,6 +33,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# debug/verification scripts
+verify-*.mjs
+verify-*.js
+generate-status-pdf.mjs
+
 # env files (can opt-in for committing if needed)
 .env*
 

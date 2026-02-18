@@ -65,7 +65,7 @@ export const loginRateLimit = {
 export const apiWriteRateLimit = {
     async limit(key: string) {
         const rl = getApiWriteRateLimit();
-        if (!rl) return { success: true };
+        if (!rl) return inMemoryLimit(key, 30, 60_000);
         return rl.limit(key);
     },
 };

@@ -1,32 +1,46 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Role, Project } from '@/types';
 import { ProfileDropdown } from '@/components/ui/ProfileDropdown';
 import { BauLotIcon } from '@/components/ui/Logo';
 import { useProjectContext } from '@/lib/ProjectContext';
 
+interface SearchResult {
+    type: 'project' | 'trade' | 'task';
+    label: string;
+    subtitle: string;
+    href: string;
+    projectId: string;
+}
+
 export function Header() {
     const { data: session } = useSession();
     const pathname = usePathname();
+    const router = useRouter();
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const [showProjectDropdown, setShowProjectDropdown] = useState(false);
-    const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const { selectedProjectId, setSelectedProjectId } = useProjectContext();
     const projectDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Search state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSearchResults, setShowSearchResults] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (session) {
             fetch('/api/projects')
                 .then(res => res.ok ? res.json() : [])
                 .then((data: Project[]) => {
-                    const list = data.map(p => ({ id: p.id, name: p.name }));
-                    setProjects(list);
-                    if (!selectedProjectId && list.length > 0) {
-                        setSelectedProjectId(list[0].id);
+                    setProjects(data);
+                    if (!selectedProjectId && data.length > 0) {
+                        setSelectedProjectId(data[0].id);
                     }
                 })
                 .catch(() => {});
@@ -38,12 +52,85 @@ export function Header() {
             if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target as Node)) {
                 setShowProjectDropdown(false);
             }
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+                setShowSearchResults(false);
+            }
         }
-        if (showProjectDropdown) {
-            document.addEventListener('mousedown', handleClick);
-            return () => document.removeEventListener('mousedown', handleClick);
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    // Keyboard shortcut: Cmd/Ctrl+K to focus search
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+            if (e.key === 'Escape') {
+                setShowSearchResults(false);
+                searchInputRef.current?.blur();
+            }
         }
-    }, [showProjectDropdown]);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Build search results
+    const searchResults = useMemo((): SearchResult[] => {
+        const q = searchQuery.trim().toLowerCase();
+        if (q.length < 2) return [];
+
+        const results: SearchResult[] = [];
+
+        for (const project of projects) {
+            // Search projects
+            if (project.name.toLowerCase().includes(q) || project.address?.toLowerCase().includes(q)) {
+                results.push({
+                    type: 'project',
+                    label: project.name,
+                    subtitle: project.address || 'Projekt',
+                    href: '/dashboard',
+                    projectId: project.id,
+                });
+            }
+
+            // Search trades
+            for (const trade of project.trades || []) {
+                if (trade.name.toLowerCase().includes(q) || trade.companyName?.toLowerCase().includes(q)) {
+                    results.push({
+                        type: 'trade',
+                        label: trade.name,
+                        subtitle: `${project.name}${trade.companyName ? ` · ${trade.companyName}` : ''}`,
+                        href: '/dashboard',
+                        projectId: project.id,
+                    });
+                }
+
+                // Search tasks
+                for (const task of trade.tasks || []) {
+                    if (task.title.toLowerCase().includes(q) || task.description?.toLowerCase().includes(q)) {
+                        results.push({
+                            type: 'task',
+                            label: task.title,
+                            subtitle: `${trade.name} · ${project.name}`,
+                            href: '/tasks',
+                            projectId: project.id,
+                        });
+                    }
+                }
+            }
+        }
+
+        return results.slice(0, 8);
+    }, [searchQuery, projects]);
+
+    const handleResultClick = useCallback((result: SearchResult) => {
+        setSelectedProjectId(result.projectId);
+        setSearchQuery('');
+        setShowSearchResults(false);
+        router.push(result.href);
+    }, [setSelectedProjectId, router]);
 
     if (!session) return null;
 
@@ -70,6 +157,18 @@ export function Header() {
 
     const currentProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
+    const typeIcons: Record<string, string> = {
+        project: 'P',
+        trade: 'G',
+        task: 'A',
+    };
+
+    const typeColors: Record<string, string> = {
+        project: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+        trade: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+        task: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    };
+
     return (
         <header className="sticky top-0 z-40 bg-surface/70 backdrop-blur-xl border-b border-border h-14 lg:ml-56 transition-colors duration-200">
             <div className="h-full px-4 lg:px-6 flex items-center justify-between">
@@ -87,8 +186,63 @@ export function Header() {
                     </span>
                 </div>
 
-                {/* Right: Project Switcher + User Actions */}
+                {/* Right: Search + Project Switcher + User Actions */}
                 <div className="flex items-center gap-1.5 sm:gap-3">
+                    {/* Search */}
+                    <div className="relative" ref={searchRef}>
+                        <div className="relative">
+                            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setShowSearchResults(true);
+                                }}
+                                onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
+                                placeholder="Suchen..."
+                                aria-label="Projekte, Gewerke und Aufgaben durchsuchen"
+                                className="w-28 sm:w-44 lg:w-56 pl-8 pr-8 py-1.5 rounded-lg bg-muted border border-transparent focus:border-accent focus:ring-1 focus:ring-accent/20 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
+                            />
+                            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] text-muted-foreground bg-surface border border-border rounded font-mono">
+                                ⌘K
+                            </kbd>
+                        </div>
+
+                        {/* Search Results Dropdown */}
+                        {showSearchResults && searchQuery.length >= 2 && (
+                            <div className="absolute right-0 sm:left-0 top-full mt-1 w-72 sm:w-80 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
+                                {searchResults.length > 0 ? (
+                                    <div className="py-1 max-h-80 overflow-y-auto overscroll-contain">
+                                        {searchResults.map((result, i) => (
+                                            <button
+                                                key={`${result.type}-${result.label}-${i}`}
+                                                onClick={() => handleResultClick(result)}
+                                                className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted transition-colors"
+                                            >
+                                                <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${typeColors[result.type]}`}>
+                                                    {typeIcons[result.type]}
+                                                </span>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-foreground truncate">{result.label}</p>
+                                                    <p className="text-[11px] text-muted-foreground truncate">{result.subtitle}</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="px-4 py-6 text-center">
+                                        <p className="text-sm text-muted-foreground">Keine Ergebnisse</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Project Switcher */}
                     {projects.length > 0 && (
                         <div className="relative" ref={projectDropdownRef}>

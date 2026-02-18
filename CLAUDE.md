@@ -189,24 +189,33 @@ NEXTAUTH_URL=                    # App-URL (z.B. http://localhost:3000)
 28. **Tests:** Vitest + @testing-library eingerichtet, 78 Tests (validations, utils, trade-templates)
 29. **CI/CD:** GitHub Actions Pipeline (Lint, TypeCheck, Test, Build) in `.github/workflows/ci.yml`
 
+### Phase 5 - Production Launch (2026-02-18)
+30. **Tests repariert:** Vitest Config (testTimeout, hookTimeout, pool: forks), server-only Mock, tsconfig excludes
+31. **Rate Limiting Fix:** `apiWriteRateLimit` nutzt jetzt `inMemoryLimit` Fallback statt `{ success: true }`
+32. **Supabase Client Fix:** Kein Fake-Client mehr (`placeholder.supabase.co` entfernt), `null` bei fehlenden Env-Vars
+33. **Suchfunktion:** Header-Suche durchsucht Projekte, Gewerke und Aufgaben (Cmd+K Shortcut)
+34. **Turbopack Root:** `process.cwd()` als Root konfiguriert
+35. **Housekeeping:** Debug-Scripts in `.gitignore`, `branding.ts` vereinfacht, `SelectField` committed
+36. **`getOrganizationTheme`:** Vereinfacht (synchron, kein Placeholder-Kommentar mehr)
+
 ## Offene Punkte / TODO
 ### Kritisch
-- [ ] Fotos/Kommentare kommen immer leer vom API zurück (keine separaten Tabellen/Queries)
-- [ ] Foto-Upload nicht implementiert (kein File-Input, kein Supabase Storage)
-- [ ] CSRF-Schutz fehlt (mutating requests ohne Token)
-- [ ] Rate Limiting fehlt (Brute-Force auf Login möglich)
+- [x] ~~Fotos/Kommentare kommen immer leer vom API zurück~~ (Phase 4: Photos + Comments API)
+- [x] ~~Foto-Upload nicht implementiert~~ (Phase 4: Supabase Storage)
+- [x] ~~CSRF-Schutz fehlt~~ (Origin-Header-Validierung in Middleware)
+- [x] ~~Rate Limiting fehlt~~ (Upstash Redis + In-Memory-Fallback)
 
 ### Wichtig
-- [ ] PDF-Export ist nur Platzhalter (`alert()`)
-- [ ] Keine Echtzeit-Updates (kein WebSocket/Polling)
+- [x] ~~PDF-Export ist nur Platzhalter~~ (Phase 4: jspdf)
+- [x] ~~Keine Echtzeit-Updates~~ (Phase 4: Supabase Realtime)
 - [ ] Timeline nutzt fiktive Positionierungslogik
 - [ ] TaskDetailModal Verlaufs-Tab ist hardcoded
-- [ ] Passwort-vergessen ist nur `alert()` Platzhalter (E-Mail-Provider nötig)
-- [ ] Alle Seiten nutzen `projects[0]` (kein Multi-Projekt-Selektor)
+- [ ] Passwort-vergessen benötigt E-Mail-Provider (Resend konfigurieren)
+- [x] ~~Alle Seiten nutzen `projects[0]`~~ (Phase 4: Multi-Projekt-Selektor)
 - [ ] Kein Error-Tracking (Sentry o.ä.)
 
 ### Nice-to-have
-- [ ] Kein Suchfeld funktional (nur UI)
+- [x] ~~Kein Suchfeld funktional~~ (Phase 5: Header-Suche mit Cmd+K)
 - [ ] Kein Loading-State bei API-Calls (teilweise)
 - [ ] Kein Service Worker / PWA Support
 - [ ] Hard-coded Organization ID verhindert Multi-Tenancy

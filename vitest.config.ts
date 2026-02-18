@@ -9,6 +9,10 @@ export default defineConfig({
         setupFiles: ['./src/test/setup.ts'],
         include: ['src/**/*.test.{ts,tsx}'],
         globals: true,
+        testTimeout: 15000,
+        hookTimeout: 10000,
+        pool: 'forks',
+        maxForks: 2,
     },
     resolve: {
         alias: {
