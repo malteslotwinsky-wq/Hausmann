@@ -112,7 +112,7 @@ export function TaskDetailModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Aufgabe: ${task.title}`}>
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Aufgabe: ${task.title}`}>
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"

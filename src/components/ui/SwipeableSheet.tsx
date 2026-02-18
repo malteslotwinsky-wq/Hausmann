@@ -117,7 +117,7 @@ export function SwipeableSheet({
         <>
             {/* Backdrop */}
             <div
-                className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'animate-fade-in'}`}
+                className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'animate-fade-in'}`}
                 onClick={handleClose}
                 aria-hidden="true"
             />
@@ -128,7 +128,7 @@ export function SwipeableSheet({
                 role="dialog"
                 aria-modal="true"
                 aria-label={title || 'Bottom Sheet'}
-                className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-2xl flex flex-col"
+                className="fixed inset-x-0 bottom-0 z-[60] bg-background rounded-t-2xl flex flex-col"
                 style={sheetStyle}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
