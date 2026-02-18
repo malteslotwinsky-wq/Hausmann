@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
         const { data, error } = await supabase
             .from('users')
-            .select('id, email, name, role, phone, company, avatar_url, created_at')
+            .select('id, email, name, role, phone, company, avatar_url, project_ids, created_at')
             .order('created_at', { ascending: true })
             .range(offset, offset + limit - 1);
 
@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
             phone: u.phone,
             company: u.company,
             avatarUrl: u.avatar_url,
+            projectIds: u.project_ids,
             createdAt: u.created_at,
         }));
 

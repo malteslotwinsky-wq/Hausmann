@@ -70,7 +70,7 @@ export async function createUser(
     name: string,
     role: Role,
     _createdBy: string,
-    _projectIds?: string[],
+    projectIds?: string[],
     _tradeIds?: string[],
     organizationId?: string
 ): Promise<User | null> {
@@ -88,6 +88,7 @@ export async function createUser(
             name,
             role,
             organization_id: organizationId,
+            project_ids: projectIds || [],
         })
         .select()
         .single();
@@ -103,6 +104,7 @@ export async function createUser(
         name: data.name,
         role: data.role as Role,
         createdAt: new Date(data.created_at),
+        projectIds: data.project_ids,
     };
 }
 

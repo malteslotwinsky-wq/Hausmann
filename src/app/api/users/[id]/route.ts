@@ -98,7 +98,7 @@ export async function PUT(
             .from('users')
             .update(updateData)
             .eq('id', id)
-            .select('id, email, name, role, phone, company, avatar_url, created_at')
+            .select('id, email, name, role, phone, company, avatar_url, project_ids, created_at')
             .single();
 
         if (error) {
@@ -114,6 +114,7 @@ export async function PUT(
             phone: data.phone,
             company: data.company,
             avatarUrl: data.avatar_url,
+            projectIds: data.project_ids,
             createdAt: data.created_at,
         });
     } catch {

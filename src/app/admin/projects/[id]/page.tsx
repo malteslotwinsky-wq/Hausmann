@@ -37,6 +37,7 @@ function ProjectDetailContent() {
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [showBulkImport, setShowBulkImport] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<TradeTemplate | null>(null);
+    const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
     const [expandedTrade, setExpandedTrade] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
 
@@ -95,6 +96,7 @@ function ProjectDetailContent() {
     };
 
     const openTradeModal = (template?: TradeTemplate) => {
+        setEditingTrade(null);
         setSelectedTemplate(template || null);
 
         // Calculate next available start date
@@ -130,6 +132,24 @@ function ProjectDetailContent() {
         setShowTradeModal(true);
     };
 
+    const openEditTrade = (trade: Trade) => {
+        setEditingTrade(trade);
+        setSelectedTemplate(null);
+        setTradeForm({
+            name: trade.name || '',
+            companyName: trade.companyName || '',
+            contactPerson: trade.contactPerson || '',
+            phone: trade.phone || '',
+            description: trade.description || '',
+            contractorId: trade.contractorId || '',
+            startDate: trade.startDate ? new Date(trade.startDate).toISOString().split('T')[0] : '',
+            endDate: trade.endDate ? new Date(trade.endDate).toISOString().split('T')[0] : '',
+            budget: trade.budget ? String(trade.budget) : '',
+            canCreateSubtasks: false,
+        });
+        setShowTradeModal(true);
+    };
+
     const handleSaveTrade = async () => {
         if (!tradeForm.name || !project) {
             showToast('Gewerk-Name erforderlich', 'error');
@@ -137,8 +157,13 @@ function ProjectDetailContent() {
         }
         setLoading(true);
         try {
-            const res = await fetch(`/api/projects/${project.id}/trades`, {
-                method: 'POST',
+            const url = editingTrade
+                ? `/api/projects/${project.id}/trades/${editingTrade.id}`
+                : `/api/projects/${project.id}/trades`;
+            const method = editingTrade ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...tradeForm,
@@ -146,8 +171,9 @@ function ProjectDetailContent() {
                 }),
             });
             if (!res.ok) throw new Error((await res.json()).error);
-            showToast('Gewerk angelegt', 'success');
+            showToast(editingTrade ? 'Gewerk aktualisiert' : 'Gewerk angelegt', 'success');
             setShowTradeModal(false);
+            setEditingTrade(null);
             loadProject();
         } catch (e: any) {
             showToast(e.message || 'Fehler', 'error');
@@ -161,6 +187,8 @@ function ProjectDetailContent() {
         if (!template || !project) return;
 
         setLoading(true);
+        let successCount = 0;
+        let errorCount = 0;
         try {
             let currentDate = new Date(project.startDate);
 
@@ -171,7 +199,7 @@ function ProjectDetailContent() {
                 const endDate = new Date(currentDate);
                 endDate.setDate(endDate.getDate() + tradeTemplate.typicalDurationDays);
 
-                await fetch(`/api/projects/${project.id}/trades`, {
+                const res = await fetch(`/api/projects/${project.id}/trades`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -182,12 +210,22 @@ function ProjectDetailContent() {
                     }),
                 });
 
+                if (res.ok) {
+                    successCount++;
+                } else {
+                    errorCount++;
+                }
+
                 // Next trade starts after this one ends
                 currentDate = new Date(endDate);
                 currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            showToast(`${template.tradeIds.length} Gewerke importiert`, 'success');
+            if (errorCount > 0) {
+                showToast(`${successCount} importiert, ${errorCount} fehlgeschlagen`, 'error');
+            } else {
+                showToast(`${successCount} Gewerke importiert`, 'success');
+            }
             setShowBulkImport(false);
             loadProject();
         } catch (e: any) {
@@ -498,7 +536,10 @@ function ProjectDetailContent() {
 
                                             <div className="flex gap-2 pt-2">
                                                 <CalendarIconButton event={tradeCalendarEvent} size="sm" />
-                                                <button className="flex-1 text-sm text-muted-foreground hover:text-foreground tap-active py-2 rounded-lg hover:bg-muted">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); openEditTrade(trade); }}
+                                                    className="flex-1 text-sm text-muted-foreground hover:text-foreground tap-active py-2 rounded-lg hover:bg-muted"
+                                                >
                                                     ✏️ Bearbeiten
                                                 </button>
                                             </div>
@@ -566,14 +607,14 @@ function ProjectDetailContent() {
             <SwipeableSheet
                 isOpen={showTradeModal}
                 onClose={() => setShowTradeModal(false)}
-                title={selectedTemplate ? `${selectedTemplate.icon} ${selectedTemplate.name}` : 'Neues Gewerk'}
+                title={editingTrade ? `✏️ ${editingTrade.name} bearbeiten` : selectedTemplate ? `${selectedTemplate.icon} ${selectedTemplate.name}` : 'Neues Gewerk'}
                 footer={
                     <div className="flex gap-3">
-                        <button onClick={() => setShowTradeModal(false)} className="flex-1 btn-mobile btn-mobile-secondary tap-active">
+                        <button onClick={() => { setShowTradeModal(false); setEditingTrade(null); }} className="flex-1 btn-mobile btn-mobile-secondary tap-active">
                             Abbrechen
                         </button>
                         <button onClick={handleSaveTrade} disabled={loading} className="flex-1 btn-mobile btn-mobile-accent tap-active disabled:opacity-50">
-                            {loading ? 'Speichern...' : 'Gewerk anlegen ✓'}
+                            {loading ? 'Speichern...' : editingTrade ? 'Speichern ✓' : 'Gewerk anlegen ✓'}
                         </button>
                     </div>
                 }

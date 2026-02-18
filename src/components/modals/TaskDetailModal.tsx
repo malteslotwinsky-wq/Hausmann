@@ -37,10 +37,17 @@ export function TaskDetailModal({
 
     if (!isOpen) return null;
 
+    const visibleComments = role === 'client'
+        ? task.comments.filter(c => c.visibility === 'client')
+        : task.comments;
+    const visiblePhotos = role === 'client'
+        ? task.photos.filter(p => p.visibility === 'client')
+        : task.photos;
+
     const tabs = [
         { id: 'info', label: 'Info', icon: 'ℹ️' },
-        { id: 'photos', label: `Fotos (${task.photos.length})`, icon: '📷' },
-        { id: 'comments', label: `Kommentare (${task.comments.length})`, icon: '💬' },
+        { id: 'photos', label: `Fotos (${visiblePhotos.length})`, icon: '📷' },
+        { id: 'comments', label: `Kommentare (${visibleComments.length})`, icon: '💬' },
         { id: 'history', label: 'Verlauf', icon: '📜' },
     ] as const;
 
@@ -237,7 +244,7 @@ export function TaskDetailModal({
                     {/* Photos Tab */}
                     {activeTab === 'photos' && (
                         <div>
-                            {task.photos.length === 0 ? (
+                            {visiblePhotos.length === 0 ? (
                                 <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
                                         <svg className="text-gray-400" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -253,7 +260,7 @@ export function TaskDetailModal({
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                    {task.photos.map((photo) => (
+                                    {visiblePhotos.map((photo) => (
                                         <PhotoThumbnail key={photo.id} photo={photo} role={role} />
                                     ))}
                                 </div>
@@ -265,7 +272,7 @@ export function TaskDetailModal({
                     {activeTab === 'comments' && (
                         <div className="space-y-4">
                             {/* Existing Comments */}
-                            {task.comments.length === 0 ? (
+                            {visibleComments.length === 0 ? (
                                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
                                         <svg className="text-gray-400" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -276,11 +283,9 @@ export function TaskDetailModal({
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {task.comments
-                                        .filter(c => role !== 'client' || c.visibility === 'client')
-                                        .map((comment) => (
-                                            <CommentItem key={comment.id} comment={comment} role={role} />
-                                        ))}
+                                    {visibleComments.map((comment) => (
+                                        <CommentItem key={comment.id} comment={comment} role={role} />
+                                    ))}
                                 </div>
                             )}
 
@@ -335,19 +340,19 @@ export function TaskDetailModal({
                                     </div>
                                 </div>
                             )}
-                            {task.photos.length > 0 && (
+                            {visiblePhotos.length > 0 && (
                                 <div className="flex items-start gap-3 text-sm">
                                     <span className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 shrink-0">📷</span>
                                     <div>
-                                        <p className="text-gray-900 dark:text-gray-100">{task.photos.length} Foto{task.photos.length > 1 ? 's' : ''} hochgeladen</p>
+                                        <p className="text-gray-900 dark:text-gray-100">{visiblePhotos.length} Foto{visiblePhotos.length > 1 ? 's' : ''} hochgeladen</p>
                                     </div>
                                 </div>
                             )}
-                            {task.comments.length > 0 && (
+                            {visibleComments.length > 0 && (
                                 <div className="flex items-start gap-3 text-sm">
                                     <span className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 shrink-0">💬</span>
                                     <div>
-                                        <p className="text-gray-900 dark:text-gray-100">{task.comments.length} Kommentar{task.comments.length > 1 ? 'e' : ''}</p>
+                                        <p className="text-gray-900 dark:text-gray-100">{visibleComments.length} Kommentar{visibleComments.length > 1 ? 'e' : ''}</p>
                                     </div>
                                 </div>
                             )}

@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { AppShell } from '@/components/layout/AppShell';
 import { PhotoLightbox } from '@/components/modals/PhotoLightbox';
-import { Project, Photo, Role } from '@/types';
+import { SwipeableSheet } from '@/components/ui/SwipeableSheet';
+import { Project, Photo, Role, Task } from '@/types';
 import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { useProjectContext } from '@/lib/ProjectContext';
 import { useRealtimeSubscription } from '@/lib/realtime';
@@ -19,6 +20,9 @@ function PhotosPageContent() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [showUploadSheet, setShowUploadSheet] = useState(false);
+    const [selectedTaskId, setSelectedTaskId] = useState<string>('');
+    const [uploadVisibility, setUploadVisibility] = useState<'internal' | 'client'>('internal');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -59,25 +63,38 @@ function PhotosPageContent() {
         enabled: status === 'authenticated',
     });
 
-    const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length === 0 || !project) return;
+    // Collect all tasks from the project for the task selector
+    const allTasks: (Task & { tradeName: string })[] = [];
+    if (project) {
+        project.trades.forEach(trade => {
+            trade.tasks.forEach(task => {
+                allTasks.push({ ...task, tradeName: trade.name });
+            });
+        });
+    }
 
-        // Find first task to attach to (or prompt user)
-        const firstTrade = project.trades[0];
-        const firstTask = firstTrade?.tasks[0];
-        if (!firstTask) {
+    const openUploadSheet = () => {
+        if (!project || allTasks.length === 0) {
             showToast('Erstellen Sie zuerst eine Aufgabe', 'error');
             return;
         }
+        setSelectedTaskId(allTasks[0].id);
+        setUploadVisibility('internal');
+        setShowUploadSheet(true);
+    };
+
+    const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0 || !project || !selectedTaskId) return;
 
         setUploading(true);
+        setShowUploadSheet(false);
         try {
             for (const file of Array.from(files)) {
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('taskId', firstTask.id);
-                formData.append('visibility', 'internal');
+                formData.append('taskId', selectedTaskId);
+                formData.append('visibility', uploadVisibility);
 
                 const res = await fetch('/api/photos', { method: 'POST', body: formData });
                 if (!res.ok) {
@@ -187,7 +204,7 @@ function PhotosPageContent() {
                         </p>
                         {role !== 'client' && filter === 'all' && (
                             <button
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={openUploadSheet}
                                 className="mt-3 text-sm text-accent font-medium hover:underline"
                             >
                                 Erstes Foto hochladen
@@ -270,7 +287,7 @@ function PhotosPageContent() {
                             onChange={handleUploadPhoto}
                         />
                         <button
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={openUploadSheet}
                             disabled={uploading}
                             className="fixed bottom-28 lg:bottom-8 right-4 sm:right-6 w-14 h-14 bg-accent text-accent-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-accent/90 transition-colors z-30 disabled:opacity-50"
                             aria-label="Foto hochladen"
@@ -286,6 +303,56 @@ function PhotosPageContent() {
                         </button>
                     </>
                 )}
+
+                {/* Upload Sheet - task & visibility selection */}
+                <SwipeableSheet
+                    isOpen={showUploadSheet}
+                    onClose={() => setShowUploadSheet(false)}
+                    title="Foto hochladen"
+                    footer={
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full btn-mobile btn-mobile-accent tap-active"
+                        >
+                            Foto(s) auswählen
+                        </button>
+                    }
+                >
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">Aufgabe zuordnen</label>
+                            <select
+                                value={selectedTaskId}
+                                onChange={e => setSelectedTaskId(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-border bg-surface focus:border-accent outline-none text-base"
+                            >
+                                {allTasks.map(task => (
+                                    <option key={task.id} value={task.id}>
+                                        {task.tradeName} — {task.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">Sichtbarkeit</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => setUploadVisibility('internal')}
+                                    className={`py-3 rounded-xl text-sm font-medium tap-active ${uploadVisibility === 'internal' ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}
+                                >
+                                    🔒 Intern
+                                </button>
+                                <button
+                                    onClick={() => setUploadVisibility('client')}
+                                    className={`py-3 rounded-xl text-sm font-medium tap-active ${uploadVisibility === 'client' ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'}`}
+                                >
+                                    👁 Öffentlich
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </SwipeableSheet>
 
                 {/* Lightbox */}
                 <PhotoLightbox

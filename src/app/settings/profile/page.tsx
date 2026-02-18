@@ -38,8 +38,8 @@ function ProfilePageContent() {
     if (status === 'loading' || !session) return null;
 
     const handleSave = async () => {
-        if (!form.name || !form.email) {
-            showToast('Name und E-Mail sind erforderlich', 'error');
+        if (!form.name) {
+            showToast('Name ist erforderlich', 'error');
             return;
         }
 
@@ -68,13 +68,12 @@ function ProfilePageContent() {
 
             if (!res.ok) throw new Error('Fehler beim Speichern');
 
-            // Update session
+            // Update session with saved name
             await update({
                 ...session,
                 user: {
                     ...session.user,
                     name: form.name,
-                    email: form.email,
                 },
             });
 
@@ -127,13 +126,16 @@ function ProfilePageContent() {
                                 onChange={(v) => setForm({ ...form, name: v })}
                                 placeholder="Max Mustermann"
                             />
-                            <InputField
-                                label="E-Mail"
-                                type="email"
-                                value={form.email}
-                                onChange={(v) => setForm({ ...form, email: v })}
-                                placeholder="max@beispiel.de"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-2">E-Mail</label>
+                                <input
+                                    type="email"
+                                    value={form.email}
+                                    readOnly
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-muted text-muted-foreground cursor-not-allowed text-base"
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">E-Mail kann nur von der Bauleitung geändert werden</p>
+                            </div>
                             <InputField
                                 label="Telefon"
                                 type="tel"
