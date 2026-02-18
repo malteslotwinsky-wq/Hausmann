@@ -163,8 +163,20 @@ function DashboardContent() {
         }
     };
 
-    const handleTogglePhotoVisibility = (photoId: string) => {
+    const handleTogglePhotoVisibility = async (photoId: string) => {
         if (!selectedProject) return;
+
+        // Find current visibility
+        let currentVisibility = 'internal';
+        selectedProject.trades.forEach(trade => {
+            trade.tasks.forEach(task => {
+                const photo = task.photos.find(p => p.id === photoId);
+                if (photo) currentVisibility = photo.visibility;
+            });
+        });
+        const newVisibility = currentVisibility === 'client' ? 'internal' : 'client';
+
+        // Optimistic update
         setSelectedProject(prev => prev ? {
             ...prev,
             trades: prev.trades.map(trade => ({
@@ -173,12 +185,40 @@ function DashboardContent() {
                     ...task,
                     photos: task.photos.map(photo =>
                         photo.id === photoId
-                            ? { ...photo, visibility: photo.visibility === 'client' ? 'internal' : 'client' }
+                            ? { ...photo, visibility: newVisibility as 'internal' | 'client' }
                             : photo
                     ),
                 })),
             })),
         } : null);
+
+        // Persist to API
+        try {
+            const res = await fetch(`/api/photos/${photoId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ visibility: newVisibility }),
+            });
+            if (!res.ok) {
+                // Revert on failure
+                setSelectedProject(prev => prev ? {
+                    ...prev,
+                    trades: prev.trades.map(trade => ({
+                        ...trade,
+                        tasks: trade.tasks.map(task => ({
+                            ...task,
+                            photos: task.photos.map(photo =>
+                                photo.id === photoId
+                                    ? { ...photo, visibility: currentVisibility as 'internal' | 'client' }
+                                    : photo
+                            ),
+                        })),
+                    })),
+                } : null);
+            }
+        } catch {
+            // Silently revert
+        }
     };
 
     const handleReportProblem = async (taskId: string, reason: string) => {

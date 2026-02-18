@@ -25,13 +25,25 @@ function ProfilePageContent() {
 
     useEffect(() => {
         if (session?.user) {
+            // Set name/email from session immediately
             setForm(prev => ({
                 ...prev,
                 name: session.user.name || '',
                 email: session.user.email || '',
-                phone: (session.user as any).phone || '',
-                company: (session.user as any).company || '',
             }));
+            // Fetch full user data from API (session doesn't carry phone/company)
+            fetch(`/api/users/${session.user.id}`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data) {
+                        setForm(prev => ({
+                            ...prev,
+                            phone: data.phone || '',
+                            company: data.company || '',
+                        }));
+                    }
+                })
+                .catch(() => {});
         }
     }, [session]);
 

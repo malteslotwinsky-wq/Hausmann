@@ -6,6 +6,57 @@ import bcrypt from 'bcryptjs';
 import { updateUserSchema, uuidParamSchema, formatZodError } from '@/lib/validations';
 import { apiWriteRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
+// GET single user (own profile or architect can view any)
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const idCheck = uuidParamSchema.safeParse(id);
+    if (!idCheck.success) {
+        return NextResponse.json({ error: 'Ungültige Benutzer-ID' }, { status: 400 });
+    }
+
+    const isOwnProfile = session.user.id === id;
+    const isArchitect = session.user.role === 'architect';
+
+    if (!isOwnProfile && !isArchitect) {
+        return NextResponse.json({ error: 'Zugriff verweigert' }, { status: 403 });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, email, name, role, phone, company, avatar_url, project_ids, created_at')
+            .eq('id', id)
+            .single();
+
+        if (error || !data) {
+            return NextResponse.json({ error: 'Benutzer nicht gefunden' }, { status: 404 });
+        }
+
+        return NextResponse.json({
+            id: data.id,
+            email: data.email,
+            name: data.name,
+            role: data.role,
+            phone: data.phone,
+            company: data.company,
+            avatarUrl: data.avatar_url,
+            projectIds: data.project_ids,
+            createdAt: data.created_at,
+        });
+    } catch {
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
+    }
+}
+
 // PUT update user (architect can update any, users can update own profile)
 export async function PUT(
     request: NextRequest,
